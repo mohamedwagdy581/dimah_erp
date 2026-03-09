@@ -1,11 +1,14 @@
 import 'package:equatable/equatable.dart';
 import '../../domain/models/employee_document.dart';
+import '../../../employees/domain/models/employee_lookup.dart';
 
 class EmployeeDocsState extends Equatable {
   const EmployeeDocsState({
-    required this.items,
-    required this.total,
+    required this.employees,
+    required this.docsMap,
+    required this.expandedEmployeeIds,
     required this.loading,
+    required this.total,
     required this.page,
     required this.pageSize,
     required this.search,
@@ -15,9 +18,11 @@ class EmployeeDocsState extends Equatable {
     this.error,
   });
 
-  final List<EmployeeDocument> items;
-  final int total;
+  final List<EmployeeLookup> employees;
+  final Map<String, List<EmployeeDocument>> docsMap;
+  final Set<String> expandedEmployeeIds;
   final bool loading;
+  final int total;
   final int page;
   final int pageSize;
   final String search;
@@ -37,9 +42,11 @@ class EmployeeDocsState extends Equatable {
   bool get canNext => page + 1 < totalPages;
 
   EmployeeDocsState copyWith({
-    List<EmployeeDocument>? items,
-    int? total,
+    List<EmployeeLookup>? employees,
+    Map<String, List<EmployeeDocument>>? docsMap,
+    Set<String>? expandedEmployeeIds,
     bool? loading,
+    int? total,
     int? page,
     int? pageSize,
     String? search,
@@ -50,9 +57,11 @@ class EmployeeDocsState extends Equatable {
     bool clearError = false,
   }) {
     return EmployeeDocsState(
-      items: items ?? this.items,
-      total: total ?? this.total,
+      employees: employees ?? this.employees,
+      docsMap: docsMap ?? this.docsMap,
+      expandedEmployeeIds: expandedEmployeeIds ?? this.expandedEmployeeIds,
       loading: loading ?? this.loading,
+      total: total ?? this.total,
       page: page ?? this.page,
       pageSize: pageSize ?? this.pageSize,
       search: search ?? this.search,
@@ -64,9 +73,11 @@ class EmployeeDocsState extends Equatable {
   }
 
   static const initial = EmployeeDocsState(
-    items: [],
-    total: 0,
+    employees: [],
+    docsMap: {},
+    expandedEmployeeIds: {},
     loading: false,
+    total: 0,
     page: 0,
     pageSize: 10,
     search: '',
@@ -78,15 +89,17 @@ class EmployeeDocsState extends Equatable {
 
   @override
   List<Object?> get props => [
-    items,
-    total,
-    loading,
-    page,
-    pageSize,
-    search,
-    docType,
-    sortBy,
-    ascending,
-    error,
-  ];
+        employees,
+        docsMap,
+        expandedEmployeeIds,
+        loading,
+        total,
+        page,
+        pageSize,
+        search,
+        docType,
+        sortBy,
+        ascending,
+        error,
+      ];
 }

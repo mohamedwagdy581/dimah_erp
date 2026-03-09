@@ -8,6 +8,7 @@ class ApprovalsTable extends StatelessWidget {
     required this.items,
     required this.onApprove,
     required this.onReject,
+    required this.actorRole,
     this.showActions = true,
     this.onViewDetails,
   });
@@ -15,6 +16,7 @@ class ApprovalsTable extends StatelessWidget {
   final List<ApprovalRequest> items;
   final ValueChanged<String>? onApprove;
   final ValueChanged<String>? onReject;
+  final String actorRole;
   final bool showActions;
   final ValueChanged<ApprovalRequest>? onViewDetails;
 
@@ -50,6 +52,8 @@ class ApprovalsTable extends StatelessWidget {
                 rows: items.map((r) {
                   final isPending = r.status == 'pending';
                   final isApproved = r.status == 'approved';
+                  final canAct = isPending &&
+                      (r.currentApproverRole ?? '').trim() == actorRole;
                   return DataRow(
                     cells: [
                       DataCell(Text(r.employeeName)),
@@ -69,7 +73,7 @@ class ApprovalsTable extends StatelessWidget {
                       ),
                       if (showActions)
                         DataCell(
-                          isPending
+                          canAct
                               ? Row(
                                   children: [
                                     TextButton(
@@ -90,21 +94,29 @@ class ApprovalsTable extends StatelessWidget {
                               : Row(
                                   children: [
                                     Icon(
-                                      isApproved
+                                      isPending
+                                          ? Icons.pending_actions
+                                          : isApproved
                                           ? Icons.check_circle
                                           : Icons.cancel,
                                       size: 18,
-                                      color: isApproved
+                                      color: isPending
+                                          ? Colors.orange
+                                          : isApproved
                                           ? Colors.green
                                           : Colors.red,
                                     ),
                                     const SizedBox(width: 6),
                                     Text(
-                                      isApproved
+                                      isPending
+                                          ? _pendingWithLabel(t, r)
+                                          : isApproved
                                           ? t.processedApproved
                                           : t.processedRejected,
                                       style: TextStyle(
-                                        color: isApproved
+                                        color: isPending
+                                            ? Colors.orange
+                                            : isApproved
                                             ? Colors.green
                                             : Colors.red,
                                         fontWeight: FontWeight.w600,

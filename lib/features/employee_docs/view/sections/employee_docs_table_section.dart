@@ -31,7 +31,7 @@ class EmployeeDocsTableSection extends StatelessWidget {
                 Text(state.error!, style: const TextStyle(color: Colors.red)),
               ],
               const SizedBox(height: 12),
-              Expanded(child: EmployeeDocsTable(items: state.items)),
+              const Expanded(child: EmployeeDocsTable()),
               const SizedBox(height: 12),
               EmployeeDocsPaginationBar(
                 page: state.page,
@@ -91,9 +91,9 @@ class _Header extends StatelessWidget {
               onChanged: (v) => cubit.docTypeChanged(v),
               items: [
                 DropdownMenuItem(value: null, child: Text(t.allTypes)),
-                DropdownMenuItem(value: 'contract', child: Text(t.contract)),
-                DropdownMenuItem(value: 'id', child: Text(t.id)),
+                const DropdownMenuItem(value: 'id_card', child: Text('ID Card')),
                 DropdownMenuItem(value: 'passport', child: Text(t.passport)),
+                DropdownMenuItem(value: 'contract', child: Text(t.contract)),
                 DropdownMenuItem(value: 'other', child: Text(t.other)),
               ],
             ),

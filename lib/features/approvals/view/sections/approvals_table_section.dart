@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../../core/session/session_cubit.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/models/approval_request.dart';
 import '../cubit/approvals_cubit.dart';
@@ -20,6 +21,12 @@ class ApprovalsTableSection extends StatelessWidget {
     return BlocBuilder<ApprovalsCubit, ApprovalsState>(
       builder: (context, state) {
         final cubit = context.read<ApprovalsCubit>();
+        final session = context.read<SessionCubit>().state;
+        final actorRole = session is SessionReady
+            ? (session.user.role == 'direct_manager'
+                  ? 'manager'
+                  : session.user.role)
+            : '';
 
         return Padding(
           padding: const EdgeInsets.all(16),
@@ -41,6 +48,7 @@ class ApprovalsTableSection extends StatelessWidget {
                   onReject: readOnly
                       ? null
                       : (id) => _reject(context, id, cubit),
+                  actorRole: actorRole,
                   showActions: !readOnly,
                   onViewDetails: (req) => _showDetails(context, req),
                 ),

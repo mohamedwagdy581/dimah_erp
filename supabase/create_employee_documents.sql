@@ -14,3 +14,108 @@ create index if not exists idx_employee_docs_tenant
 
 create index if not exists idx_employee_docs_employee
   on public.employee_documents (employee_id);
+
+alter table public.employee_documents enable row level security;
+
+do $policy$
+begin
+  if not exists (
+    select 1
+    from pg_policies
+    where schemaname = 'public'
+      and tablename = 'employee_documents'
+      and policyname = 'employee_documents_select_tenant'
+  ) then
+    create policy employee_documents_select_tenant
+      on public.employee_documents
+      for select
+      to authenticated
+      using (
+        tenant_id = (
+          select u.tenant_id
+          from public.users u
+          where u.id = auth.uid()
+        )
+      );
+  end if;
+end
+$policy$;
+
+do $policy$
+begin
+  if not exists (
+    select 1
+    from pg_policies
+    where schemaname = 'public'
+      and tablename = 'employee_documents'
+      and policyname = 'employee_documents_insert_tenant'
+  ) then
+    create policy employee_documents_insert_tenant
+      on public.employee_documents
+      for insert
+      to authenticated
+      with check (
+        tenant_id = (
+          select u.tenant_id
+          from public.users u
+          where u.id = auth.uid()
+        )
+      );
+  end if;
+end
+$policy$;
+
+do $policy$
+begin
+  if not exists (
+    select 1
+    from pg_policies
+    where schemaname = 'public'
+      and tablename = 'employee_documents'
+      and policyname = 'employee_documents_update_tenant'
+  ) then
+    create policy employee_documents_update_tenant
+      on public.employee_documents
+      for update
+      to authenticated
+      using (
+        tenant_id = (
+          select u.tenant_id
+          from public.users u
+          where u.id = auth.uid()
+        )
+      )
+      with check (
+        tenant_id = (
+          select u.tenant_id
+          from public.users u
+          where u.id = auth.uid()
+        )
+      );
+  end if;
+end
+$policy$;
+
+do $policy$
+begin
+  if not exists (
+    select 1
+    from pg_policies
+    where schemaname = 'public'
+      and tablename = 'employee_documents'
+      and policyname = 'employee_documents_delete_tenant'
+  ) then
+    create policy employee_documents_delete_tenant
+      on public.employee_documents
+      for delete
+      to authenticated
+      using (
+        tenant_id = (
+          select u.tenant_id
+          from public.users u
+          where u.id = auth.uid()
+        )
+      );
+  end if;
+end
+$policy$;

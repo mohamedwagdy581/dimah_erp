@@ -30,6 +30,7 @@ class EmployeeDocsRepoImpl implements EmployeeDocsRepo {
     required int page,
     required int pageSize,
     String? search,
+    String? employeeId,
     String? docType,
     String sortBy = 'created_at',
     bool ascending = false,
@@ -47,6 +48,10 @@ class EmployeeDocsRepoImpl implements EmployeeDocsRepo {
         )
         .eq('tenant_id', tenantId);
 
+    if (employeeId != null && employeeId.isNotEmpty) {
+      listQ = listQ.eq('employee_id', employeeId);
+    }
+
     if (docType != null && docType.trim().isNotEmpty) {
       listQ = listQ.eq('doc_type', docType);
     }
@@ -56,9 +61,10 @@ class EmployeeDocsRepoImpl implements EmployeeDocsRepo {
       listQ = listQ.or('employee.full_name.ilike.%$escaped%');
     }
 
-    listQ = listQ.order(sortBy, ascending: ascending).range(from, to);
+    final listRes = await listQ
+        .order(sortBy, ascending: ascending)
+        .range(from, to);
 
-    final listRes = await listQ;
     final items = (listRes as List)
         .map((e) => EmployeeDocument.fromMap(e as Map<String, dynamic>))
         .toList();
@@ -67,6 +73,10 @@ class EmployeeDocsRepoImpl implements EmployeeDocsRepo {
         .from('employee_documents')
         .select('id')
         .eq('tenant_id', tenantId);
+
+    if (employeeId != null && employeeId.isNotEmpty) {
+      countQ = countQ.eq('employee_id', employeeId);
+    }
 
     if (docType != null && docType.trim().isNotEmpty) {
       countQ = countQ.eq('doc_type', docType);
@@ -78,9 +88,9 @@ class EmployeeDocsRepoImpl implements EmployeeDocsRepo {
     }
 
     final countRes = await countQ;
-    final total = (countRes as List).length;
+    final totalCount = (countRes as List).length;
 
-    return (items: items, total: total);
+    return (items: items, total: totalCount);
   }
 
   @override

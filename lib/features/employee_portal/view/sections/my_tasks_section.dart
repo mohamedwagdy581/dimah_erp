@@ -36,7 +36,9 @@ class _MyTasksSectionState extends State<MyTasksSection> {
           return const Center(child: CircularProgressIndicator());
         }
         if (snapshot.hasError) {
-          return Center(child: Text(t.failedToLoadTasks(snapshot.error.toString())));
+          return Center(
+            child: Text(t.failedToLoadTasks(snapshot.error.toString())),
+          );
         }
         final items = snapshot.data ?? const [];
         if (items.isEmpty) {
@@ -45,12 +47,13 @@ class _MyTasksSectionState extends State<MyTasksSection> {
         return ListView.separated(
           padding: const EdgeInsets.all(12),
           itemCount: items.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 8),
+          separatorBuilder: (_, _) => const SizedBox(height: 8),
           itemBuilder: (context, index) {
             final task = items[index];
             final status = (task['status'] ?? 'todo').toString();
             final progress = (task['progress'] as num?)?.toInt() ?? 0;
             return Card(
+              key: ValueKey(task['id']),
               child: Padding(
                 padding: const EdgeInsets.all(12),
                 child: Column(
@@ -64,7 +67,10 @@ class _MyTasksSectionState extends State<MyTasksSection> {
                       ),
                     ),
                     const SizedBox(height: 6),
-                    if ((task['description'] ?? '').toString().trim().isNotEmpty)
+                    if ((task['description'] ?? '')
+                        .toString()
+                        .trim()
+                        .isNotEmpty)
                       Text(task['description'].toString()),
                     const SizedBox(height: 8),
                     Row(
@@ -113,7 +119,8 @@ class _MyTasksSectionState extends State<MyTasksSection> {
                       max: 100,
                       divisions: 20,
                       label: '$progress%',
-                      onChanged: (v) => _updateTask(
+                      onChanged: (_) {},
+                      onChangeEnd: (v) => _updateTask(
                         id: task['id'].toString(),
                         status: v >= 100 ? 'done' : status,
                         progress: v.round(),
@@ -141,10 +148,12 @@ class _MyTasksSectionState extends State<MyTasksSection> {
     final tenantId = me['tenant_id'].toString();
     final res = await client
         .from('employee_tasks')
-        .select('id, title, description, status, progress, due_date, updated_at')
+        .select(
+          'id, title, description, status, progress, due_date, updated_at, created_at',
+        )
         .eq('tenant_id', tenantId)
         .eq('employee_id', widget.employeeId)
-        .order('updated_at', ascending: false)
+        .order('created_at', ascending: false)
         .limit(60);
     return (res as List).cast<Map<String, dynamic>>();
   }
@@ -154,17 +163,82 @@ class _MyTasksSectionState extends State<MyTasksSection> {
     required String status,
     required int progress,
   }) async {
+    final client = Supabase.instance.client;
+    final existing = await client
+        .from('employee_tasks')
+        .select('status, progress')
+        .eq('id', id)
+        .maybeSingle();
+
+    final oldStatus = (existing?['status'] ?? 'todo').toString();
+    final oldProgress = (existing?['progress'] as num?)?.toInt() ?? 0;
     final clamped = progress.clamp(0, 100).toInt();
     final adjustedStatus = clamped >= 100 ? 'done' : status;
-    await Supabase.instance.client
-        .from('employee_tasks')
-        .update({
-          'status': adjustedStatus,
-          'progress': clamped,
-          'updated_at': DateTime.now().toIso8601String(),
-        })
-        .eq('id', id);
+    final payload = <String, dynamic>{
+      'status': adjustedStatus,
+      'progress': clamped,
+      'updated_at': DateTime.now().toIso8601String(),
+    };
+    if (oldStatus != 'done' && adjustedStatus == 'done') {
+      payload['completed_at'] = DateTime.now().toIso8601String();
+    } else if (oldStatus == 'done' && adjustedStatus != 'done') {
+      payload['completed_at'] = null;
+    }
+    if (oldStatus == 'todo' && adjustedStatus != 'todo') {
+      payload['assignee_received_at'] = DateTime.now().toIso8601String();
+    }
+    if (oldStatus != 'in_progress' && adjustedStatus == 'in_progress') {
+      payload['assignee_started_at'] = DateTime.now().toIso8601String();
+    }
+
+    await client.from('employee_tasks').update(payload).eq('id', id);
+
+    await _appendTaskEvent(
+      taskId: id,
+      oldStatus: oldStatus,
+      newStatus: adjustedStatus,
+      oldProgress: oldProgress,
+      newProgress: clamped,
+    );
     if (!mounted) return;
     await _reload();
+  }
+
+  Future<void> _appendTaskEvent({
+    required String taskId,
+    required String oldStatus,
+    required String newStatus,
+    required int oldProgress,
+    required int newProgress,
+  }) async {
+    try {
+      final client = Supabase.instance.client;
+      final uid = client.auth.currentUser?.id;
+      if (uid == null) return;
+      final me = await client
+          .from('users')
+          .select('tenant_id')
+          .eq('id', uid)
+          .single();
+      String eventType = 'progress_updated';
+      if (oldStatus != newStatus) {
+        eventType = 'status_changed';
+      } else if (oldProgress != newProgress) {
+        eventType = 'progress_updated';
+      }
+      await client.from('employee_task_events').insert({
+        'tenant_id': me['tenant_id'].toString(),
+        'task_id': taskId,
+        'event_type': eventType,
+        'event_note': null,
+        'event_payload': {
+          'old_status': oldStatus,
+          'new_status': newStatus,
+          'old_progress': oldProgress,
+          'new_progress': newProgress,
+        },
+        'created_by_user_id': uid,
+      });
+    } catch (_) {}
   }
 }

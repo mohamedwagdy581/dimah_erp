@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../core/ui/app_assets.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -56,6 +57,8 @@ class _SplashPageState extends State<SplashPage>
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final logoPath = isDark ? AppAssets.darkLogo : AppAssets.fullLogo;
     return Scaffold(
       body: Center(
         child: FadeTransition(
@@ -68,9 +71,14 @@ class _SplashPageState extends State<SplashPage>
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Image.asset(
-                    'assets/images/fullLogo.png',
+                    logoPath,
                     height: 110,
                     fit: BoxFit.contain,
+                    errorBuilder: (_, __, ___) => Image.asset(
+                      AppAssets.fullLogo,
+                      height: 110,
+                      fit: BoxFit.contain,
+                    ),
                   ),
                   const SizedBox(height: 18),
                   const Text(

@@ -8,6 +8,10 @@ class LeavesRepoImpl implements LeavesRepo {
   LeavesRepoImpl(this._client);
   final SupabaseClient _client;
 
+  bool _isManagerRole(String role) =>
+      role.trim().toLowerCase() == 'manager' ||
+      role.trim().toLowerCase() == 'direct_manager';
+
   Future<String> _tenantId() async {
     final uid = _client.auth.currentUser?.id;
     if (uid == null) throw Exception('Not authenticated');
@@ -43,11 +47,56 @@ class LeavesRepoImpl implements LeavesRepo {
   }) async {
     final row = await _client
         .from('employees')
-        .select('manager_id')
+        .select('manager_id, department_id')
         .eq('tenant_id', tenantId)
         .eq('id', employeeId)
         .maybeSingle();
-    return row?['manager_id']?.toString();
+    final directManager = row?['manager_id']?.toString();
+    if (directManager != null && directManager.isNotEmpty) return directManager;
+    final departmentId = row?['department_id']?.toString();
+    if (departmentId == null || departmentId.isEmpty) return null;
+    final dept = await _client
+        .from('departments')
+        .select('manager_id')
+        .eq('tenant_id', tenantId)
+        .eq('id', departmentId)
+        .maybeSingle();
+    return dept?['manager_id']?.toString();
+  }
+
+  Future<List<String>> _subordinateEmployeeIds({
+    required String tenantId,
+    required String managerEmployeeId,
+  }) async {
+    final directRes = await _client
+        .from('employees')
+        .select('id')
+        .eq('tenant_id', tenantId)
+        .eq('manager_id', managerEmployeeId);
+    final directIds = (directRes as List).map((e) => e['id'].toString()).toList();
+
+    final managedDepartmentsRes = await _client
+        .from('departments')
+        .select('id')
+        .eq('tenant_id', tenantId)
+        .eq('manager_id', managerEmployeeId);
+    final managedDepartmentIds = (managedDepartmentsRes as List)
+        .map((e) => e['id'].toString())
+        .toList();
+
+    final deptIds = <String>[];
+    if (managedDepartmentIds.isNotEmpty) {
+      final deptRes = await _client
+          .from('employees')
+          .select('id')
+          .eq('tenant_id', tenantId)
+          .inFilter('department_id', managedDepartmentIds);
+      deptIds.addAll((deptRes as List).map((e) => e['id'].toString()));
+    }
+
+    final all = {...directIds, ...deptIds};
+    all.remove(managerEmployeeId);
+    return all.toList();
   }
 
   String _toDateOnly(DateTime d) =>
@@ -73,6 +122,7 @@ class LeavesRepoImpl implements LeavesRepo {
     bool ascending = false,
   }) async {
     final tenantId = await _tenantId();
+    final actor = await _currentUserIdentity();
     final from = page * pageSize;
     final to = from + pageSize - 1;
     final s = search?.trim();
@@ -84,6 +134,20 @@ class LeavesRepoImpl implements LeavesRepo {
           'employee:employees(full_name)',
         )
         .eq('tenant_id', tenantId);
+
+    if ((employeeId == null || employeeId.trim().isEmpty) &&
+        _isManagerRole(actor.role) &&
+        actor.employeeId != null &&
+        actor.employeeId!.isNotEmpty) {
+      final subordinateIds = await _subordinateEmployeeIds(
+        tenantId: tenantId,
+        managerEmployeeId: actor.employeeId!,
+      );
+      if (subordinateIds.isEmpty) {
+        return (items: const <LeaveRequest>[], total: 0);
+      }
+      listQ = listQ.inFilter('employee_id', subordinateIds);
+    }
 
     if (status != null && status.trim().isNotEmpty) {
       listQ = listQ.eq('status', status);
@@ -121,6 +185,20 @@ class LeavesRepoImpl implements LeavesRepo {
         .from('leave_requests')
         .select('id')
         .eq('tenant_id', tenantId);
+
+    if ((employeeId == null || employeeId.trim().isEmpty) &&
+        _isManagerRole(actor.role) &&
+        actor.employeeId != null &&
+        actor.employeeId!.isNotEmpty) {
+      final subordinateIds = await _subordinateEmployeeIds(
+        tenantId: tenantId,
+        managerEmployeeId: actor.employeeId!,
+      );
+      if (subordinateIds.isEmpty) {
+        return (items: items, total: 0);
+      }
+      countQ = countQ.inFilter('employee_id', subordinateIds);
+    }
 
     if (status != null && status.trim().isNotEmpty) {
       countQ = countQ.eq('status', status);
@@ -225,7 +303,7 @@ class LeavesRepoImpl implements LeavesRepo {
     String currentApproverRole;
     if (requesterRole == 'hr') {
       currentApproverRole = 'admin';
-    } else if (requesterRole == 'manager') {
+    } else if (_isManagerRole(requesterRole)) {
       currentApproverRole = 'hr';
     } else {
       final managerId = await _employeeManagerId(
@@ -359,7 +437,7 @@ class LeavesRepoImpl implements LeavesRepo {
       String currentApproverRole;
       if (requesterRole == 'hr') {
         currentApproverRole = 'admin';
-      } else if (requesterRole == 'manager') {
+      } else if (_isManagerRole(requesterRole)) {
         currentApproverRole = 'hr';
       } else {
         final managerId = await _employeeManagerId(
@@ -386,7 +464,7 @@ class LeavesRepoImpl implements LeavesRepo {
       String currentApproverRole;
       if (requesterRole == 'hr') {
         currentApproverRole = 'admin';
-      } else if (requesterRole == 'manager') {
+      } else if (_isManagerRole(requesterRole)) {
         currentApproverRole = 'hr';
       } else {
         final managerId = await _employeeManagerId(

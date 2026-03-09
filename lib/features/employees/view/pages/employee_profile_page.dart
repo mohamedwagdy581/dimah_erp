@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:convert';
@@ -10,6 +12,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/di/app_di.dart';
+import '../../../../core/reporting/report_layout.dart';
 import '../../../../core/session/session_cubit.dart';
 import '../../../../core/utils/safe_file_picker.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -194,10 +197,7 @@ class _EmployeeProfilePageState extends State<EmployeeProfilePage> {
                   _kv(t.housingAllowance, _money(p.housingAllowance)),
                   _kv(t.transportAllowance, _money(p.transportAllowance)),
                   _kv(t.otherAllowance, _money(p.otherAllowance)),
-                  _kv(
-                    t.totalCompensation,
-                    _money(_totalCompensation(p)),
-                  ),
+                  _kv(t.totalCompensation, _money(_totalCompensation(p))),
                   const SizedBox(height: 10),
                   Text(
                     t.compensationHistory,
@@ -426,9 +426,9 @@ class _EmployeeProfilePageState extends State<EmployeeProfilePage> {
     await file.saveTo(saveLocation.path);
 
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(t.htmlSavedTo(saveLocation.path))),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(t.htmlSavedTo(saveLocation.path))));
   }
 
   String _buildEmployeeReportHtml(
@@ -446,38 +446,32 @@ class _EmployeeProfilePageState extends State<EmployeeProfilePage> {
     }
 
     String tableRows(List<(String, String?)> rows) {
-      return rows
-          .map(
-            (r) {
-              final value = (r.$2 ?? '').trim().isEmpty ? '-' : r.$2!.trim();
-              final valueIsArabic = _isMostlyArabic(value);
-              final valueAlign = isArabic
-                  ? (valueIsArabic ? 'right' : 'left')
-                  : 'left';
-              return isArabic
-                  ? '<tr><td style="text-align:$valueAlign;direction:${valueIsArabic ? 'rtl' : 'ltr'}">${esc(value)}</td><th style="text-align:right;direction:rtl">${esc(r.$1)}</th></tr>'
-                  : '<tr><th>${esc(r.$1)}</th><td>${esc(value)}</td></tr>';
-            },
-          )
-          .join();
+      return rows.map((r) {
+        final value = (r.$2 ?? '').trim().isEmpty ? '-' : r.$2!.trim();
+        final valueIsArabic = ReportLayout.isMostlyArabic(value);
+        final valueAlign = isArabic
+            ? (valueIsArabic ? 'right' : 'left')
+            : 'left';
+        return isArabic
+            ? '<tr><td style="text-align:$valueAlign;direction:${ReportLayout.htmlDirectionFor(valueIsArabic)}">${esc(value)}</td><th style="text-align:right;direction:rtl">${esc(r.$1)}</th></tr>'
+            : '<tr><th>${esc(r.$1)}</th><td>${esc(value)}</td></tr>';
+      }).join();
     }
 
     String historyHeader(List<String> headers) {
-      final ordered = isArabic ? headers.reversed.toList() : headers;
+      final ordered = ReportLayout.orderedByLocale(headers, isArabic: isArabic);
       return '<tr>${ordered.map((h) => '<th style="text-align:${isArabic ? 'right' : 'left'};direction:${isArabic ? 'rtl' : 'ltr'}">${esc(h)}</th>').join()}</tr>';
     }
 
     String historyRows(List<List<String>> rows) {
-      return rows
-          .map((row) {
-            final ordered = isArabic ? row.reversed.toList() : row;
-            return '<tr>${ordered.map((v) {
-              final isAr = _isMostlyArabic(v);
-              final align = isArabic ? (isAr ? 'right' : 'left') : 'left';
-              return '<td style="text-align:$align;direction:${isAr ? 'rtl' : 'ltr'}">${esc(v)}</td>';
-            }).join()}</tr>';
-          })
-          .join();
+      return rows.map((row) {
+        final ordered = ReportLayout.orderedByLocale(row, isArabic: isArabic);
+        return '<tr>${ordered.map((v) {
+          final isAr = ReportLayout.isMostlyArabic(v);
+          final align = ReportLayout.htmlAlignFor(pageIsArabic: isArabic, value: v);
+          return '<td style="text-align:$align;direction:${ReportLayout.htmlDirectionFor(isAr)}">${esc(v)}</td>';
+        }).join()}</tr>';
+      }).join();
     }
 
     final compHistoryRowsData = p.compensationHistory
@@ -515,12 +509,7 @@ class _EmployeeProfilePageState extends State<EmployeeProfilePage> {
 
     final docsRowsData = p.documents
         .map(
-          (d) => [
-            d.docType,
-            _date(d.issuedAt),
-            _date(d.expiresAt),
-            d.fileUrl,
-          ],
+          (d) => [d.docType, _date(d.issuedAt), _date(d.expiresAt), d.fileUrl],
         )
         .toList();
 
@@ -542,64 +531,17 @@ th,td{border:1px solid #e5e7eb;padding:8px;font-size:13px}
 th{background:#f3f4f6;width:240px}
 </style></head><body>
 <h1>${esc(t.employeeFullReport)}</h1><div class="meta">${esc(t.reportGenerated(DateTime.now().toIso8601String()))}</div>
-<div class="card"><h2>${esc(t.basicInfo)}</h2><table>${tableRows([
-      (t.employeeId, p.id),
-      (t.fullName, p.fullName),
-      (t.email, p.email),
-      (t.phone, p.phone),
-      (t.status, p.status),
-      (t.department, p.departmentName),
-      (t.menuJobTitles, p.jobTitleName),
-      (t.hireDate, _date(p.hireDate)),
-    ])}</table></div>
-<div class="card"><h2>${esc(t.personal)}</h2><table>${tableRows([
-      (t.nationalId, p.nationalId),
-      (t.dateOfBirth, _date(p.dateOfBirth)),
-      (t.gender, p.gender),
-      (t.nationality, p.nationality),
-      (t.maritalStatus, p.maritalStatus),
-      (t.address, p.address),
-      (t.city, p.city),
-      (t.country, p.country),
-      (t.passportNo, p.passportNo),
-      (t.passportExpiry, _date(p.passportExpiry)),
-      (t.residencyIssueDate, _date(p.residencyIssueDate)),
-      (t.residencyExpiryDate, _date(p.residencyExpiryDate)),
-      (t.insuranceStartDate, _date(p.insuranceStartDate)),
-      (t.insuranceExpiryDate, _date(p.insuranceExpiryDate)),
-      (t.insuranceProvider, p.insuranceProvider),
-      (t.insurancePolicyNo, p.insurancePolicyNo),
-      (t.educationLevel, p.educationLevel),
-      (t.major, p.major),
-      (t.university, p.university),
-    ])}</table></div>
-<div class="card"><h2>${esc(t.financial)}</h2><table>${tableRows([
-      (t.paymentMethod, p.paymentMethod),
-      (t.bankName, p.bankName),
-      (t.iban, p.iban),
-      (t.accountNumber, p.accountNumber),
-    ])}</table></div>
-<div class="card"><h2>${esc(t.stepCompensation)}</h2><table>${tableRows([
-      (t.basicSalary, _money(p.basicSalary)),
-      (t.housingAllowance, _money(p.housingAllowance)),
-      (t.transportAllowance, _money(p.transportAllowance)),
-      (t.otherAllowance, _money(p.otherAllowance)),
-      (t.totalCompensation, _money(_totalCompensation(p))),
-    ])}</table></div>
+<div class="card"><h2>${esc(t.basicInfo)}</h2><table>${tableRows([(t.employeeId, p.id), (t.fullName, p.fullName), (t.email, p.email), (t.phone, p.phone), (t.status, p.status), (t.department, p.departmentName), (t.menuJobTitles, p.jobTitleName), (t.hireDate, _date(p.hireDate))])}</table></div>
+<div class="card"><h2>${esc(t.personal)}</h2><table>${tableRows([(t.nationalId, p.nationalId), (t.dateOfBirth, _date(p.dateOfBirth)), (t.gender, p.gender), (t.nationality, p.nationality), (t.maritalStatus, p.maritalStatus), (t.address, p.address), (t.city, p.city), (t.country, p.country), (t.passportNo, p.passportNo), (t.passportExpiry, _date(p.passportExpiry)), (t.residencyIssueDate, _date(p.residencyIssueDate)), (t.residencyExpiryDate, _date(p.residencyExpiryDate)), (t.insuranceStartDate, _date(p.insuranceStartDate)), (t.insuranceExpiryDate, _date(p.insuranceExpiryDate)), (t.insuranceProvider, p.insuranceProvider), (t.insurancePolicyNo, p.insurancePolicyNo), (t.educationLevel, p.educationLevel), (t.major, p.major), (t.university, p.university)])}</table></div>
+<div class="card"><h2>${esc(t.financial)}</h2><table>${tableRows([(t.paymentMethod, p.paymentMethod), (t.bankName, p.bankName), (t.iban, p.iban), (t.accountNumber, p.accountNumber)])}</table></div>
+<div class="card"><h2>${esc(t.stepCompensation)}</h2><table>${tableRows([(t.basicSalary, _money(p.basicSalary)), (t.housingAllowance, _money(p.housingAllowance)), (t.transportAllowance, _money(p.transportAllowance)), (t.otherAllowance, _money(p.otherAllowance)), (t.totalCompensation, _money(_totalCompensation(p)))])}</table></div>
 <div class="card"><h2>${esc(t.compensationHistory)}</h2><table>${historyHeader([t.effectiveDate, t.basic, t.housing, t.transport, t.other, t.total])}$compHistoryRows</table></div>
-<div class="card"><h2>${esc(t.contract)}</h2><table>${tableRows([
-      (t.type, p.contractType),
-      (t.startDate, _date(p.contractStart)),
-      (t.endDate, _date(p.contractEnd)),
-      (t.probationMonths, p.probationMonths?.toString()),
-      (t.contractFileUrl, p.contractFileUrl),
-    ])}</table></div>
+<div class="card"><h2>${esc(t.contract)}</h2><table>${tableRows([(t.type, p.contractType), (t.startDate, _date(p.contractStart)), (t.endDate, _date(p.contractEnd)), (t.probationMonths, p.probationMonths?.toString()), (t.contractFileUrl, p.contractFileUrl)])}</table></div>
 <div class="card"><h2>${esc(t.contractHistory)}</h2><table>${historyHeader([t.type, t.start, t.end, t.probationMonths, t.file])}$contractHistoryRows</table></div>
 <div class="card"><h2>${esc(t.documents)}</h2><table>${historyHeader([t.type, t.issued, t.expires, t.urlLabel])}$docsRows</table></div>
 </body></html>
 ''';
   }
-
 
   Future<void> _downloadFullReportPdf(EmployeeProfileDetails p) async {
     final t = AppLocalizations.of(context)!;
@@ -646,10 +588,7 @@ th{background:#f3f4f6;width:240px}
 
     final pdf = pw.Document(
       theme: (baseFont != null)
-          ? pw.ThemeData.withFont(
-              base: baseFont,
-              bold: boldFont ?? baseFont,
-            )
+          ? pw.ThemeData.withFont(base: baseFont, bold: boldFont ?? baseFont)
           : null,
     );
 
@@ -657,54 +596,43 @@ th{background:#f3f4f6;width:240px}
       return pw.Table(
         border: pw.TableBorder.all(color: PdfColors.grey300),
         columnWidths: isArabic
-            ? const {
-                0: pw.FlexColumnWidth(),
-                1: pw.FixedColumnWidth(170),
-              }
-            : const {
-                0: pw.FixedColumnWidth(170),
-                1: pw.FlexColumnWidth(),
-              },
-        children: rows
-            .map(
-              (r) {
-                final label = pw.Padding(
-                  padding: const pw.EdgeInsets.all(6),
-                  child: pw.Text(
-                    r.$1,
-                    style: pw.TextStyle(
-                      fontWeight: pw.FontWeight.bold,
-                      fontSize: 10,
-                    ),
-                    textDirection: _isMostlyArabic(r.$1)
-                        ? pw.TextDirection.rtl
-                        : pw.TextDirection.ltr,
-                    textAlign: isArabic ? pw.TextAlign.right : pw.TextAlign.left,
-                  ),
-                );
-                final value = pw.Padding(
-                  padding: const pw.EdgeInsets.all(6),
-                  child: pw.Text(
-                    r.$2 == null || r.$2!.trim().isEmpty ? '-' : r.$2!,
-                    textDirection: _isMostlyArabic(r.$2 ?? '')
-                        ? pw.TextDirection.rtl
-                        : pw.TextDirection.ltr,
-                    textAlign: isArabic ? pw.TextAlign.right : pw.TextAlign.left,
-                  ),
-                );
-                return pw.TableRow(
-                  children: isArabic ? [value, label] : [label, value],
-                );
-              },
-            )
-            .toList(),
+            ? const {0: pw.FlexColumnWidth(), 1: pw.FixedColumnWidth(170)}
+            : const {0: pw.FixedColumnWidth(170), 1: pw.FlexColumnWidth()},
+        children: rows.map((r) {
+          final label = pw.Padding(
+            padding: const pw.EdgeInsets.all(6),
+            child: pw.Text(
+              r.$1,
+              style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10),
+              textDirection: _isMostlyArabic(r.$1)
+                  ? pw.TextDirection.rtl
+                  : pw.TextDirection.ltr,
+              textAlign: isArabic ? pw.TextAlign.right : pw.TextAlign.left,
+            ),
+          );
+          final value = pw.Padding(
+            padding: const pw.EdgeInsets.all(6),
+            child: pw.Text(
+              r.$2 == null || r.$2!.trim().isEmpty ? '-' : r.$2!,
+              textDirection: _isMostlyArabic(r.$2 ?? '')
+                  ? pw.TextDirection.rtl
+                  : pw.TextDirection.ltr,
+              textAlign: isArabic ? pw.TextAlign.right : pw.TextAlign.left,
+            ),
+          );
+          return pw.TableRow(
+            children: isArabic ? [value, label] : [label, value],
+          );
+        }).toList(),
       );
     }
 
     pw.Widget sectionTitle(String t) => pw.Padding(
       padding: const pw.EdgeInsets.only(bottom: 6, top: 10),
       child: pw.Align(
-        alignment: isArabic ? pw.Alignment.centerRight : pw.Alignment.centerLeft,
+        alignment: isArabic
+            ? pw.Alignment.centerRight
+            : pw.Alignment.centerLeft,
         child: pw.Text(
           t,
           style: pw.TextStyle(fontSize: 13, fontWeight: pw.FontWeight.bold),
@@ -721,18 +649,27 @@ th{background:#f3f4f6;width:240px}
     }) {
       if (rows.isEmpty) {
         return pw.Align(
-          alignment: isArabic ? pw.Alignment.centerRight : pw.Alignment.centerLeft,
+          alignment: isArabic
+              ? pw.Alignment.centerRight
+              : pw.Alignment.centerLeft,
           child: pw.Text(
             emptyText,
             style: const pw.TextStyle(fontSize: 10),
-            textDirection: isArabic ? pw.TextDirection.rtl : pw.TextDirection.ltr,
+            textDirection: isArabic
+                ? pw.TextDirection.rtl
+                : pw.TextDirection.ltr,
             textAlign: isArabic ? pw.TextAlign.right : pw.TextAlign.left,
           ),
         );
       }
-      final orderedHeaders = isArabic ? headers.reversed.toList() : headers;
+      final orderedHeaders = ReportLayout.orderedByLocale(
+        headers,
+        isArabic: isArabic,
+      );
       final orderedRows = isArabic
-          ? rows.map((r) => r.reversed.toList()).toList()
+          ? rows
+                .map((r) => ReportLayout.orderedByLocale(r, isArabic: true))
+                .toList()
           : rows;
 
       return pw.Table(
@@ -750,8 +687,12 @@ th{background:#f3f4f6;width:240px}
                         fontWeight: pw.FontWeight.bold,
                         fontSize: 9,
                       ),
-                      textDirection: isArabic ? pw.TextDirection.rtl : pw.TextDirection.ltr,
-                      textAlign: isArabic ? pw.TextAlign.right : pw.TextAlign.left,
+                      textDirection: isArabic
+                          ? pw.TextDirection.rtl
+                          : pw.TextDirection.ltr,
+                      textAlign: isArabic
+                          ? pw.TextAlign.right
+                          : pw.TextAlign.left,
                     ),
                   ),
                 )
@@ -759,22 +700,22 @@ th{background:#f3f4f6;width:240px}
           ),
           ...orderedRows.map(
             (row) => pw.TableRow(
-              children: row
-                  .map(
-                    (cell) {
-                      final ar = _isMostlyArabic(cell);
-                      return pw.Padding(
-                        padding: const pw.EdgeInsets.all(6),
-                        child: pw.Text(
-                          cell,
-                          style: const pw.TextStyle(fontSize: 9),
-                          textDirection: ar ? pw.TextDirection.rtl : pw.TextDirection.ltr,
-                          textAlign: isArabic ? pw.TextAlign.right : pw.TextAlign.left,
-                        ),
-                      );
-                    },
-                  )
-                  .toList(),
+              children: row.map((cell) {
+                final ar = ReportLayout.isMostlyArabic(cell);
+                return pw.Padding(
+                  padding: const pw.EdgeInsets.all(6),
+                  child: pw.Text(
+                    cell,
+                    style: const pw.TextStyle(fontSize: 9),
+                    textDirection: ar
+                        ? pw.TextDirection.rtl
+                        : pw.TextDirection.ltr,
+                    textAlign: isArabic
+                        ? pw.TextAlign.right
+                        : pw.TextAlign.left,
+                  ),
+                );
+              }).toList(),
             ),
           ),
         ],
@@ -786,20 +727,28 @@ th{background:#f3f4f6;width:240px}
         margin: const pw.EdgeInsets.all(20),
         build: (_) => [
           pw.Align(
-            alignment: isArabic ? pw.Alignment.centerRight : pw.Alignment.centerLeft,
+            alignment: isArabic
+                ? pw.Alignment.centerRight
+                : pw.Alignment.centerLeft,
             child: pw.Text(
               t.employeeFullReport,
               style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold),
-              textDirection: isArabic ? pw.TextDirection.rtl : pw.TextDirection.ltr,
+              textDirection: isArabic
+                  ? pw.TextDirection.rtl
+                  : pw.TextDirection.ltr,
               textAlign: isArabic ? pw.TextAlign.right : pw.TextAlign.left,
             ),
           ),
           pw.SizedBox(height: 4),
           pw.Align(
-            alignment: isArabic ? pw.Alignment.centerRight : pw.Alignment.centerLeft,
+            alignment: isArabic
+                ? pw.Alignment.centerRight
+                : pw.Alignment.centerLeft,
             child: pw.Text(
               t.reportGenerated(DateTime.now().toIso8601String()),
-              textDirection: isArabic ? pw.TextDirection.rtl : pw.TextDirection.ltr,
+              textDirection: isArabic
+                  ? pw.TextDirection.rtl
+                  : pw.TextDirection.ltr,
               textAlign: isArabic ? pw.TextAlign.right : pw.TextAlign.left,
             ),
           ),
@@ -853,7 +802,14 @@ th{background:#f3f4f6;width:240px}
           ]),
           sectionTitle(t.compensationHistory),
           historyTable(
-            headers: [t.effectiveDate, t.basic, t.housing, t.transport, t.other, t.total],
+            headers: [
+              t.effectiveDate,
+              t.basic,
+              t.housing,
+              t.transport,
+              t.other,
+              t.total,
+            ],
             rows: p.compensationHistory
                 .map(
                   (c) => [
@@ -921,7 +877,11 @@ th{background:#f3f4f6;width:240px}
 
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(AppLocalizations.of(context)!.pdfSavedTo(saveLocation.path))),
+      SnackBar(
+        content: Text(
+          AppLocalizations.of(context)!.pdfSavedTo(saveLocation.path),
+        ),
+      ),
     );
   }
 
@@ -979,25 +939,13 @@ th{background:#f3f4f6;width:240px}
                   ),
                 ),
                 const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    text,
-                    textAlign: TextAlign.left,
-                  ),
-                ),
+                Expanded(child: Text(text, textAlign: TextAlign.left)),
               ],
       ),
     );
   }
 
-  bool _isMostlyArabic(String value) {
-    if (value.trim().isEmpty) return false;
-    final arabic = RegExp(r'[\u0600-\u06FF]');
-    final latin = RegExp(r'[A-Za-z]');
-    final a = arabic.allMatches(value).length;
-    final l = latin.allMatches(value).length;
-    return a > 0 && a >= l;
-  }
+  bool _isMostlyArabic(String value) => ReportLayout.isMostlyArabic(value);
 }
 
 class _SectionCard extends StatelessWidget {
@@ -1040,7 +988,8 @@ class _EmployeeProfileEditDialog extends StatefulWidget {
       _EmployeeProfileEditDialogState();
 }
 
-class _EmployeeProfileEditDialogState extends State<_EmployeeProfileEditDialog> {
+class _EmployeeProfileEditDialogState
+    extends State<_EmployeeProfileEditDialog> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _fullName;
   late final TextEditingController _email;
@@ -1217,7 +1166,8 @@ class _EmployeeProfileEditDialogState extends State<_EmployeeProfileEditDialog> 
                             child: Text(AppLocalizations.of(context)!.inactive),
                           ),
                         ],
-                        onChanged: (v) => setState(() => _status = v ?? 'active'),
+                        onChanged: (v) =>
+                            setState(() => _status = v ?? 'active'),
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -1225,12 +1175,24 @@ class _EmployeeProfileEditDialogState extends State<_EmployeeProfileEditDialog> 
                       child: DropdownButtonFormField<String>(
                         initialValue: _paymentMethod,
                         decoration: InputDecoration(
-                          labelText: AppLocalizations.of(context)!.paymentMethod,
+                          labelText: AppLocalizations.of(
+                            context,
+                          )!.paymentMethod,
                           border: const OutlineInputBorder(),
                         ),
                         items: [
-                          DropdownMenuItem(value: 'bank', child: Text(AppLocalizations.of(context)!.paymentMethodBank)),
-                          DropdownMenuItem(value: 'cash', child: Text(AppLocalizations.of(context)!.paymentMethodCash)),
+                          DropdownMenuItem(
+                            value: 'bank',
+                            child: Text(
+                              AppLocalizations.of(context)!.paymentMethodBank,
+                            ),
+                          ),
+                          DropdownMenuItem(
+                            value: 'cash',
+                            child: Text(
+                              AppLocalizations.of(context)!.paymentMethodCash,
+                            ),
+                          ),
                         ],
                         onChanged: (v) =>
                             setState(() => _paymentMethod = v ?? 'bank'),
@@ -1241,21 +1203,36 @@ class _EmployeeProfileEditDialogState extends State<_EmployeeProfileEditDialog> 
                 const SizedBox(height: 10),
                 _field(_nationality, AppLocalizations.of(context)!.nationality),
                 const SizedBox(height: 10),
-                _field(_maritalStatus, AppLocalizations.of(context)!.maritalStatus),
+                _field(
+                  _maritalStatus,
+                  AppLocalizations.of(context)!.maritalStatus,
+                ),
                 const SizedBox(height: 10),
                 _field(_address, AppLocalizations.of(context)!.address),
                 const SizedBox(height: 10),
                 Row(
                   children: [
-                    Expanded(child: _field(_city, AppLocalizations.of(context)!.city)),
+                    Expanded(
+                      child: _field(_city, AppLocalizations.of(context)!.city),
+                    ),
                     const SizedBox(width: 10),
-                    Expanded(child: _field(_country, AppLocalizations.of(context)!.country)),
+                    Expanded(
+                      child: _field(
+                        _country,
+                        AppLocalizations.of(context)!.country,
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 10),
                 Row(
                   children: [
-                    Expanded(child: _field(_passportNo, AppLocalizations.of(context)!.passportNo)),
+                    Expanded(
+                      child: _field(
+                        _passportNo,
+                        AppLocalizations.of(context)!.passportNo,
+                      ),
+                    ),
                     const SizedBox(width: 10),
                     Expanded(
                       child: OutlinedButton.icon(
@@ -1329,17 +1306,37 @@ class _EmployeeProfileEditDialogState extends State<_EmployeeProfileEditDialog> 
                 const SizedBox(height: 10),
                 Row(
                   children: [
-                    Expanded(child: _field(_insuranceProvider, AppLocalizations.of(context)!.insuranceProvider)),
+                    Expanded(
+                      child: _field(
+                        _insuranceProvider,
+                        AppLocalizations.of(context)!.insuranceProvider,
+                      ),
+                    ),
                     const SizedBox(width: 10),
-                    Expanded(child: _field(_insurancePolicyNo, AppLocalizations.of(context)!.insurancePolicyNo)),
+                    Expanded(
+                      child: _field(
+                        _insurancePolicyNo,
+                        AppLocalizations.of(context)!.insurancePolicyNo,
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 10),
                 Row(
                   children: [
-                    Expanded(child: _field(_educationLevel, AppLocalizations.of(context)!.educationLevel)),
+                    Expanded(
+                      child: _field(
+                        _educationLevel,
+                        AppLocalizations.of(context)!.educationLevel,
+                      ),
+                    ),
                     const SizedBox(width: 10),
-                    Expanded(child: _field(_major, AppLocalizations.of(context)!.major)),
+                    Expanded(
+                      child: _field(
+                        _major,
+                        AppLocalizations.of(context)!.major,
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 10),
@@ -1347,18 +1344,32 @@ class _EmployeeProfileEditDialogState extends State<_EmployeeProfileEditDialog> 
                 const SizedBox(height: 10),
                 Row(
                   children: [
-                    Expanded(child: _field(_bankName, AppLocalizations.of(context)!.bankName)),
+                    Expanded(
+                      child: _field(
+                        _bankName,
+                        AppLocalizations.of(context)!.bankName,
+                      ),
+                    ),
                     const SizedBox(width: 10),
-                    Expanded(child: _field(_iban, AppLocalizations.of(context)!.iban),
+                    Expanded(
+                      child: _field(_iban, AppLocalizations.of(context)!.iban),
                     ),
                   ],
                 ),
                 const SizedBox(height: 10),
-                _field(_accountNumber, AppLocalizations.of(context)!.accountNumber),
+                _field(
+                  _accountNumber,
+                  AppLocalizations.of(context)!.accountNumber,
+                ),
                 const SizedBox(height: 10),
                 Row(
                   children: [
-                    Expanded(child: _field(_contractType, AppLocalizations.of(context)!.contractType)),
+                    Expanded(
+                      child: _field(
+                        _contractType,
+                        AppLocalizations.of(context)!.contractType,
+                      ),
+                    ),
                     const SizedBox(width: 10),
                     Expanded(
                       child: _field(
@@ -1398,7 +1409,10 @@ class _EmployeeProfileEditDialogState extends State<_EmployeeProfileEditDialog> 
                   ],
                 ),
                 const SizedBox(height: 10),
-                _field(_contractFileUrl, AppLocalizations.of(context)!.contractFileUrl),
+                _field(
+                  _contractFileUrl,
+                  AppLocalizations.of(context)!.contractFileUrl,
+                ),
               ],
             ),
           ),
@@ -1406,13 +1420,18 @@ class _EmployeeProfileEditDialogState extends State<_EmployeeProfileEditDialog> 
       ),
       actions: [
         TextButton(
-          onPressed:
-              (_saving || _pickingPhoto) ? null : () => Navigator.pop(context, false),
+          onPressed: (_saving || _pickingPhoto)
+              ? null
+              : () => Navigator.pop(context, false),
           child: Text(AppLocalizations.of(context)!.cancel),
         ),
         ElevatedButton(
           onPressed: (_saving || _pickingPhoto) ? null : _save,
-          child: Text(_saving ? AppLocalizations.of(context)!.saving : AppLocalizations.of(context)!.save),
+          child: Text(
+            _saving
+                ? AppLocalizations.of(context)!.saving
+                : AppLocalizations.of(context)!.save,
+          ),
         ),
       ],
     );
@@ -1522,10 +1541,7 @@ class _EmployeeProfileEditDialogState extends State<_EmployeeProfileEditDialog> 
     final file = await SafeFilePicker.openSingle(
       context: context,
       acceptedTypeGroups: const [
-        XTypeGroup(
-          label: 'Images',
-          extensions: ['png', 'jpg', 'jpeg', 'webp'],
-        ),
+        XTypeGroup(label: 'Images', extensions: ['png', 'jpg', 'jpeg', 'webp']),
       ],
     );
     if (file == null) return;
@@ -1550,10 +1566,10 @@ class _EmployeeProfileEditDialogState extends State<_EmployeeProfileEditDialog> 
           ? widget.profile.fullName
           : _fullName.text.trim();
       final employeeSlug = _slugify(displayName);
-      final employeeFolder = '${employeeSlug}_${widget.profile.id.substring(0, 8)}';
+      final employeeFolder =
+          '${employeeSlug}_${widget.profile.id.substring(0, 8)}';
       final fileName = '$employeeSlug.$ext';
-      final path =
-          '$tenantId/$employeeFolder/$fileName';
+      final path = '$tenantId/$employeeFolder/$fileName';
 
       await client.storage
           .from('employee_photos')
@@ -1564,20 +1580,30 @@ class _EmployeeProfileEditDialogState extends State<_EmployeeProfileEditDialog> 
           )
           .timeout(const Duration(minutes: 2));
 
-      final publicUrl = client.storage.from('employee_photos').getPublicUrl(path);
+      final publicUrl = client.storage
+          .from('employee_photos')
+          .getPublicUrl(path);
       _photoUrl.text = publicUrl;
       if (!mounted) return;
       setState(() {});
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.photoUploadedSuccessfully)),
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context)!.photoUploadedSuccessfully,
+          ),
+        ),
       );
     } catch (e, st) {
       debugPrint('PHOTO_UPLOAD_ERROR: $e');
       debugPrint('PHOTO_UPLOAD_STACK: $st');
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.photoUploadFailed(e.toString()))));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context)!.photoUploadFailed(e.toString()),
+          ),
+        ),
+      );
     } finally {
       if (mounted) setState(() => _pickingPhoto = false);
     }
@@ -1586,7 +1612,11 @@ class _EmployeeProfileEditDialogState extends State<_EmployeeProfileEditDialog> 
   Future<String> _fetchTenantId(SupabaseClient client) async {
     final uid = client.auth.currentUser?.id;
     if (uid == null) throw Exception('Not authenticated');
-    final me = await client.from('users').select('tenant_id').eq('id', uid).single();
+    final me = await client
+        .from('users')
+        .select('tenant_id')
+        .eq('id', uid)
+        .single();
     return me['tenant_id'].toString();
   }
 
@@ -1647,9 +1677,11 @@ class _EmployeeProfileEditDialogState extends State<_EmployeeProfileEditDialog> 
     } catch (e) {
       if (!mounted) return;
       setState(() => _saving = false);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.saveFailed(e.toString()))));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.saveFailed(e.toString())),
+        ),
+      );
     }
   }
 
@@ -1715,9 +1747,8 @@ class _AddContractVersionDialogState extends State<_AddContractVersionDialog> {
                   labelText: t.contractType,
                   border: const OutlineInputBorder(),
                 ),
-                validator: (v) => (v ?? '').trim().isEmpty
-                    ? t.contractTypeRequired
-                    : null,
+                validator: (v) =>
+                    (v ?? '').trim().isEmpty ? t.contractTypeRequired : null,
               ),
               const SizedBox(height: 10),
               Row(
@@ -1736,7 +1767,9 @@ class _AddContractVersionDialogState extends State<_AddContractVersionDialog> {
                     child: OutlinedButton.icon(
                       onPressed: _pickEndDate,
                       icon: const Icon(Icons.event_busy),
-                      label: Text(_endDate == null ? t.endDate : _fmt(_endDate)),
+                      label: Text(
+                        _endDate == null ? t.endDate : _fmt(_endDate),
+                      ),
                     ),
                   ),
                 ],
@@ -1801,7 +1834,9 @@ class _AddContractVersionDialogState extends State<_AddContractVersionDialog> {
     if (!(_formKey.currentState?.validate() ?? false)) return;
     if (_startDate == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.startDateRequired)),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.startDateRequired),
+        ),
       );
       return;
     }
@@ -1820,9 +1855,11 @@ class _AddContractVersionDialogState extends State<_AddContractVersionDialog> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _saving = false);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.saveFailed(e.toString()))));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.saveFailed(e.toString())),
+        ),
+      );
     }
   }
 
@@ -1908,9 +1945,7 @@ class _AddCompensationVersionDialogState
                 onPressed: _pickEffectiveDate,
                 icon: const Icon(Icons.event),
                 label: Text(
-                  _effectiveAt == null
-                      ? t.effectiveDate
-                      : _fmt(_effectiveAt),
+                  _effectiveAt == null ? t.effectiveDate : _fmt(_effectiveAt),
                 ),
               ),
               const SizedBox(height: 10),
@@ -1947,8 +1982,10 @@ class _AddCompensationVersionDialogState
         border: const OutlineInputBorder(),
       ),
       validator: (v) {
-        if ((v ?? '').trim().isEmpty) return AppLocalizations.of(context)!.fieldRequired(label);
-        if (double.tryParse(v!.trim()) == null) return AppLocalizations.of(context)!.invalidNumber;
+        if ((v ?? '').trim().isEmpty)
+          return AppLocalizations.of(context)!.fieldRequired(label);
+        if (double.tryParse(v!.trim()) == null)
+          return AppLocalizations.of(context)!.invalidNumber;
         return null;
       },
     );
@@ -1983,9 +2020,11 @@ class _AddCompensationVersionDialogState
     } catch (e) {
       if (!mounted) return;
       setState(() => _saving = false);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.saveFailed(e.toString()))));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.saveFailed(e.toString())),
+        ),
+      );
     }
   }
 

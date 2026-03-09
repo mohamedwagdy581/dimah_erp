@@ -440,7 +440,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get openProfile => 'فتح الملف';
 
   @override
-  String get noEmployeesFound => 'لا يوجد موظفون.';
+  String get noEmployeesFound => 'لم يتم العثور على موظفين.';
 
   @override
   String totalWithValue(int total) {
@@ -1022,7 +1022,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get open => 'فتح';
 
   @override
-  String get documents => 'المستندات';
+  String get documents => 'وثائق';
 
   @override
   String get noDocumentsUploaded => 'لا توجد مستندات مرفوعة';
@@ -1328,6 +1328,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get fileUrlRequired => 'رابط الملف مطلوب';
 
   @override
+  String get fileRequired => 'الملف مطلوب';
+
+  @override
   String get uploading => 'جارٍ الرفع...';
 
   @override
@@ -1354,8 +1357,145 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get employeeDocsStorageUnauthorized =>
+      'مستودع مستندات الموظفين غير مهيأ بعد. شغّل SQL الخاص بـ employee_docs أولًا.';
+
+  @override
   String get notAuthenticated => 'غير مسجل الدخول';
 
   @override
   String get level => 'المستوى';
+
+  @override
+  String get checkInCoverage => 'نسبة تسجيل الحضور';
+
+  @override
+  String get approvalLoad => 'عبء الموافقات';
+
+  @override
+  String get teamMembers => 'أعضاء الفريق';
+
+  @override
+  String get openTasks => 'المهام المفتوحة';
+
+  @override
+  String get overdueTasks => 'المهام المتأخرة';
+
+  @override
+  String get completionRate => 'نسبة الإنجاز';
+
+  @override
+  String get dueSoonTasks => 'المهام المستحقة قريبًا (7 أيام)';
+
+  @override
+  String get noDueSoonTasks => 'لا توجد مهام مستحقة خلال 7 أيام قادمة.';
+
+  @override
+  String get topPerformers => 'أفضل 5 أداء';
+
+  @override
+  String get needsAttention => 'بحاجة إلى متابعة';
+
+  @override
+  String get noTeamDataYet => 'لا توجد بيانات فريق بعد.';
+
+  @override
+  String get taskTimeline => 'سجل المهام';
+
+  @override
+  String get assignedToEmployeeAt => 'وقت إرسال المهمة للموظف';
+
+  @override
+  String get employeeReceivedAt => 'وقت استلام الموظف للمهمة';
+
+  @override
+  String get employeeStartedAt => 'وقت بدء الموظف في تنفيذ المهمة';
+
+  @override
+  String get lastUpdateAt => 'آخر تحديث';
+
+  @override
+  String get updatesTimeline => 'سجل التحديثات';
+
+  @override
+  String get taskEventAssigned => 'تم الإسناد';
+
+  @override
+  String get taskEventStatusChanged => 'تم تغيير الحالة';
+
+  @override
+  String get taskEventProgressUpdated => 'تم تحديث نسبة الإنجاز';
+
+  @override
+  String get estimateHours => 'الساعات التقديرية';
+
+  @override
+  String get priority => 'الأولوية';
+
+  @override
+  String get priorityLow => 'منخفضة';
+
+  @override
+  String get priorityMedium => 'متوسطة';
+
+  @override
+  String get priorityHigh => 'مرتفعة';
+
+  @override
+  String get taskWeight => 'وزن المهمة';
+
+  @override
+  String get invalidEstimateHours =>
+      'من فضلك أدخل قيمة صحيحة للساعات التقديرية.';
+
+  @override
+  String get taskType => 'نوع المهمة';
+
+  @override
+  String get taskTypeGeneral => 'عام';
+
+  @override
+  String get taskTypeTransfer => 'تحويل';
+
+  @override
+  String get taskTypeReport => 'تقرير';
+
+  @override
+  String get taskTypeTax => 'ضريبة';
+
+  @override
+  String get taskTypePayroll => 'رواتب';
+
+  @override
+  String get taskTypeReconciliation => 'تسوية';
+
+  @override
+  String get taskTypeRecruitment => 'توظيف';
+
+  @override
+  String get taskTypeEmployeeDocs => 'مستندات موظف';
+
+  @override
+  String get uploadNewDocument => 'رفع وثيقة جديدة';
+
+  @override
+  String get idCard => 'بطاقة الهوية';
+
+  @override
+  String get graduationCert => 'شهادة التخرج';
+
+  @override
+  String get nationalAddress => 'العنوان الوطني';
+
+  @override
+  String get bankIbanCertificate => 'شهادة الآيبان البنكي';
+
+  @override
+  String get salaryCertificate => 'شهادة الأجور';
+
+  @override
+  String get uploadFile => 'رفع ملف';
+
+  @override
+  String get noFileSelected => 'لم يتم اختيار ملف';
 }

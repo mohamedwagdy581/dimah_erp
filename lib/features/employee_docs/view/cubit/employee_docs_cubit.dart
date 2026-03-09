@@ -1,7 +1,11 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/di/app_di.dart';
 import '../../../../core/utils/app_error.dart';
+import '../../../employees/domain/models/employee.dart';
+import '../../../employees/domain/models/employee_lookup.dart';
+import '../../domain/models/employee_document.dart';
 import '../../domain/repos/employee_docs_repo.dart';
 import 'employee_docs_state.dart';
 
@@ -28,32 +32,65 @@ class EmployeeDocsCubit extends Cubit<EmployeeDocsState> {
         ),
       );
 
-      final result = await _repo.fetchDocs(
+      final result = await AppDI.employeesRepo.fetchEmployees(
         page: resetPage ? 0 : state.page,
         pageSize: state.pageSize,
         search: state.search.trim().isEmpty ? null : state.search.trim(),
-        docType: state.docType,
-        sortBy: state.sortBy,
-        ascending: state.ascending,
+        sortBy: 'full_name', // Default sort for employee list
+        ascending: true,
       );
+
+      final employeeLookups = result.items.map((e) => e.toLookup()).toList();
 
       if (isClosed) return;
       emit(
         state.copyWith(
           loading: false,
-          items: result.items,
+          employees: employeeLookups,
           total: result.total,
         ),
       );
-    } catch (e) {
-      if (AppError.isTransient(e)) {
-        if (isClosed) return;
-        emit(state.copyWith(loading: false));
-        return;
+      
+      // Reload docs for currently expanded employees if any
+      for (final id in state.expandedEmployeeIds) {
+        _loadEmployeeDocs(id);
       }
+    } catch (e) {
       if (isClosed) return;
       emit(state.copyWith(loading: false, error: AppError.message(e)));
     }
+  }
+
+  Future<void> _loadEmployeeDocs(String employeeId) async {
+    try {
+      final result = await _repo.fetchDocs(
+        page: 0,
+        pageSize: 100,
+        employeeId: employeeId,
+        docType: state.docType,
+        sortBy: state.sortBy,
+        ascending: state.ascending,
+      );
+      
+      if (isClosed) return;
+      final newDocsMap = Map<String, List<EmployeeDocument>>.from(state.docsMap);
+      newDocsMap[employeeId] = result.items;
+      
+      emit(state.copyWith(docsMap: newDocsMap));
+    } catch (e) {
+      // Fail silently for individual employee doc loading
+    }
+  }
+
+  void toggleExpansion(String employeeId) {
+    final newExpanded = Set<String>.from(state.expandedEmployeeIds);
+    if (newExpanded.contains(employeeId)) {
+      newExpanded.remove(employeeId);
+    } else {
+      newExpanded.add(employeeId);
+      _loadEmployeeDocs(employeeId);
+    }
+    emit(state.copyWith(expandedEmployeeIds: newExpanded));
   }
 
   void searchChanged(String v) {
@@ -76,7 +113,7 @@ class EmployeeDocsCubit extends Cubit<EmployeeDocsState> {
     } else {
       emit(state.copyWith(sortBy: sortBy, ascending: sortBy == 'created_at'));
     }
-    await load(resetPage: true);
+    await load();
   }
 
   Future<void> setPageSize(int v) async {
@@ -110,6 +147,10 @@ class EmployeeDocsCubit extends Cubit<EmployeeDocsState> {
       issuedAt: issuedAt,
       expiresAt: expiresAt,
     );
-    await load(resetPage: true);
+    await _loadEmployeeDocs(employeeId);
   }
+}
+
+extension on Employee {
+  EmployeeLookup toLookup() => EmployeeLookup(id: id, fullName: fullName);
 }

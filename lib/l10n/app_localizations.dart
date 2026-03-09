@@ -2642,6 +2642,12 @@ abstract class AppLocalizations {
   /// **'File URL is required'**
   String get fileUrlRequired;
 
+  /// No description provided for @fileRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'File is required'**
+  String get fileRequired;
+
   /// No description provided for @uploading.
   ///
   /// In en, this message translates to:
@@ -2690,6 +2696,12 @@ abstract class AppLocalizations {
   /// **'File upload failed: {error}'**
   String fileUploadFailed(Object error);
 
+  /// No description provided for @employeeDocsStorageUnauthorized.
+  ///
+  /// In en, this message translates to:
+  /// **'Employee documents storage is not configured yet. Run the employee docs bucket SQL first.'**
+  String get employeeDocsStorageUnauthorized;
+
   /// No description provided for @notAuthenticated.
   ///
   /// In en, this message translates to:
@@ -2701,6 +2713,270 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Level'**
   String get level;
+
+  /// No description provided for @checkInCoverage.
+  ///
+  /// In en, this message translates to:
+  /// **'Check-in Coverage'**
+  String get checkInCoverage;
+
+  /// No description provided for @approvalLoad.
+  ///
+  /// In en, this message translates to:
+  /// **'Approval Load'**
+  String get approvalLoad;
+
+  /// No description provided for @teamMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'Team Members'**
+  String get teamMembers;
+
+  /// No description provided for @openTasks.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Tasks'**
+  String get openTasks;
+
+  /// No description provided for @overdueTasks.
+  ///
+  /// In en, this message translates to:
+  /// **'Overdue Tasks'**
+  String get overdueTasks;
+
+  /// No description provided for @completionRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Completion Rate'**
+  String get completionRate;
+
+  /// No description provided for @dueSoonTasks.
+  ///
+  /// In en, this message translates to:
+  /// **'Due Soon (7 days)'**
+  String get dueSoonTasks;
+
+  /// No description provided for @noDueSoonTasks.
+  ///
+  /// In en, this message translates to:
+  /// **'No tasks due in the next 7 days.'**
+  String get noDueSoonTasks;
+
+  /// No description provided for @topPerformers.
+  ///
+  /// In en, this message translates to:
+  /// **'Top 5 Performers'**
+  String get topPerformers;
+
+  /// No description provided for @needsAttention.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs Attention'**
+  String get needsAttention;
+
+  /// No description provided for @noTeamDataYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No team data yet.'**
+  String get noTeamDataYet;
+
+  /// No description provided for @taskTimeline.
+  ///
+  /// In en, this message translates to:
+  /// **'Task Timeline'**
+  String get taskTimeline;
+
+  /// No description provided for @assignedToEmployeeAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Assigned to employee at'**
+  String get assignedToEmployeeAt;
+
+  /// No description provided for @employeeReceivedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Employee received task at'**
+  String get employeeReceivedAt;
+
+  /// No description provided for @employeeStartedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Employee started task at'**
+  String get employeeStartedAt;
+
+  /// No description provided for @lastUpdateAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Last update at'**
+  String get lastUpdateAt;
+
+  /// No description provided for @updatesTimeline.
+  ///
+  /// In en, this message translates to:
+  /// **'Updates Timeline'**
+  String get updatesTimeline;
+
+  /// No description provided for @taskEventAssigned.
+  ///
+  /// In en, this message translates to:
+  /// **'Assigned'**
+  String get taskEventAssigned;
+
+  /// No description provided for @taskEventStatusChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'Status changed'**
+  String get taskEventStatusChanged;
+
+  /// No description provided for @taskEventProgressUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Progress updated'**
+  String get taskEventProgressUpdated;
+
+  /// No description provided for @estimateHours.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated Hours'**
+  String get estimateHours;
+
+  /// No description provided for @priority.
+  ///
+  /// In en, this message translates to:
+  /// **'Priority'**
+  String get priority;
+
+  /// No description provided for @priorityLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Low'**
+  String get priorityLow;
+
+  /// No description provided for @priorityMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get priorityMedium;
+
+  /// No description provided for @priorityHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'High'**
+  String get priorityHigh;
+
+  /// No description provided for @taskWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Task Weight'**
+  String get taskWeight;
+
+  /// No description provided for @invalidEstimateHours.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid estimated hours value.'**
+  String get invalidEstimateHours;
+
+  /// No description provided for @taskType.
+  ///
+  /// In en, this message translates to:
+  /// **'Task Type'**
+  String get taskType;
+
+  /// No description provided for @taskTypeGeneral.
+  ///
+  /// In en, this message translates to:
+  /// **'General'**
+  String get taskTypeGeneral;
+
+  /// No description provided for @taskTypeTransfer.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer'**
+  String get taskTypeTransfer;
+
+  /// No description provided for @taskTypeReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Report'**
+  String get taskTypeReport;
+
+  /// No description provided for @taskTypeTax.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax'**
+  String get taskTypeTax;
+
+  /// No description provided for @taskTypePayroll.
+  ///
+  /// In en, this message translates to:
+  /// **'Payroll'**
+  String get taskTypePayroll;
+
+  /// No description provided for @taskTypeReconciliation.
+  ///
+  /// In en, this message translates to:
+  /// **'Reconciliation'**
+  String get taskTypeReconciliation;
+
+  /// No description provided for @taskTypeRecruitment.
+  ///
+  /// In en, this message translates to:
+  /// **'Recruitment'**
+  String get taskTypeRecruitment;
+
+  /// No description provided for @taskTypeEmployeeDocs.
+  ///
+  /// In en, this message translates to:
+  /// **'Employee Documents'**
+  String get taskTypeEmployeeDocs;
+
+  /// No description provided for @uploadNewDocument.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload New Document'**
+  String get uploadNewDocument;
+
+  /// No description provided for @idCard.
+  ///
+  /// In en, this message translates to:
+  /// **'ID Card'**
+  String get idCard;
+
+  /// No description provided for @graduationCert.
+  ///
+  /// In en, this message translates to:
+  /// **'Graduation Certificate'**
+  String get graduationCert;
+
+  /// No description provided for @nationalAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'National Address'**
+  String get nationalAddress;
+
+  /// No description provided for @bankIbanCertificate.
+  ///
+  /// In en, this message translates to:
+  /// **'Bank IBAN Certificate'**
+  String get bankIbanCertificate;
+
+  /// No description provided for @salaryCertificate.
+  ///
+  /// In en, this message translates to:
+  /// **'Salary Certificate'**
+  String get salaryCertificate;
+
+  /// No description provided for @uploadFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload File'**
+  String get uploadFile;
+
+  /// No description provided for @noFileSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'No file selected'**
+  String get noFileSelected;
 }
 
 class _AppLocalizationsDelegate

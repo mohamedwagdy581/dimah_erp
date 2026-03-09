@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/utils/app_error.dart';
@@ -162,9 +163,10 @@ class JobTitlesCubit extends Cubit<JobTitlesState> {
         sortBy: 'name',
         ascending: true,
       );
-      print('[JobTitles] dept=$departmentId items=${res.items.length}');
-      print(res.items.map((e) => e.name).toList());
-
+      if (kDebugMode) {
+        print('[JobTitles] dept=$departmentId items=${res.items.length}');
+        print(res.items.map((e) => e.name).toList());
+      }
       if (isClosed) return;
       emit(state.copyWith(loading: false, items: res.items, total: res.total));
     } catch (e) {

@@ -1,4 +1,4 @@
-class AppAssets {
+﻿class AppAssets {
   static const fullLogo = 'assets/images/fullLogo.png';
-  // ضيف أي صور تانية هنا
+  static const darkLogo = 'assets/images/dimah_dark.png';
 }

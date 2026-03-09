@@ -36,6 +36,8 @@ class _LoginFormSectionState extends State<LoginFormSection> {
     final loading = context.select<AuthBloc, bool>(
       (b) => b.state is AuthLoading,
     );
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final logoPath = isDark ? AppAssets.darkLogo : AppAssets.fullLogo;
 
     return Card(
       child: Padding(
@@ -43,7 +45,12 @@ class _LoginFormSectionState extends State<LoginFormSection> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Image.asset(AppAssets.fullLogo, height: 60),
+            Image.asset(
+              logoPath,
+              height: 60,
+              errorBuilder: (_, _, _) =>
+                  Image.asset(AppAssets.fullLogo, height: 60),
+            ),
             const SizedBox(height: 12),
             const Text(
               'تسجيل الدخول',

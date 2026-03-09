@@ -143,7 +143,9 @@ class ApprovalsRepoImpl implements ApprovalsRepo {
       final used = _toDouble(row['annual_used']);
       final next = used + daysDelta;
       if (next < 0) {
-        throw Exception('Cannot rollback annual leave: used balance is too low.');
+        throw Exception(
+          'Cannot rollback annual leave: used balance is too low.',
+        );
       }
       if (daysDelta > 0 && next > entitlement) {
         throw Exception('Insufficient annual leave balance for approval.');
@@ -165,7 +167,9 @@ class ApprovalsRepoImpl implements ApprovalsRepo {
       final used = _toDouble(row['other_used']);
       final next = used + daysDelta;
       if (next < 0) {
-        throw Exception('Cannot rollback other leave: used balance is too low.');
+        throw Exception(
+          'Cannot rollback other leave: used balance is too low.',
+        );
       }
       if (daysDelta > 0 && next > entitlement) {
         throw Exception('Insufficient other leave balance for approval.');
@@ -200,7 +204,9 @@ class ApprovalsRepoImpl implements ApprovalsRepo {
         .select('id')
         .eq('tenant_id', tenantId)
         .eq('manager_id', managerEmployeeId);
-    final directIds = (directRes as List).map((e) => e['id'].toString()).toList();
+    final directIds = (directRes as List)
+        .map((e) => e['id'].toString())
+        .toList();
 
     final managedDepartmentsRes = await _client
         .from('departments')
@@ -431,7 +437,9 @@ class ApprovalsRepoImpl implements ApprovalsRepo {
       try {
         leave = await _client
             .from('leave_requests')
-            .select('employee_id, type, start_date, end_date, leave_year, status')
+            .select(
+              'employee_id, type, start_date, end_date, leave_year, status',
+            )
             .eq('tenant_id', tenantId)
             .eq('id', payload['leave_id'].toString())
             .maybeSingle();
@@ -536,7 +544,9 @@ class ApprovalsRepoImpl implements ApprovalsRepo {
       try {
         leave = await _client
             .from('leave_requests')
-            .select('employee_id, type, start_date, end_date, leave_year, status')
+            .select(
+              'employee_id, type, start_date, end_date, leave_year, status',
+            )
             .eq('tenant_id', tenantId)
             .eq('id', payload['leave_id'].toString())
             .maybeSingle();

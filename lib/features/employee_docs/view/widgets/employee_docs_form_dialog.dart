@@ -10,7 +10,9 @@ import '../../../employees/domain/models/employee_lookup.dart';
 import '../cubit/employee_docs_cubit.dart';
 
 class EmployeeDocsFormDialog extends StatefulWidget {
-  const EmployeeDocsFormDialog({super.key});
+  const EmployeeDocsFormDialog({super.key, this.initialEmployeeId});
+
+  final String? initialEmployeeId;
 
   @override
   State<EmployeeDocsFormDialog> createState() => _EmployeeDocsFormDialogState();
@@ -18,9 +20,8 @@ class EmployeeDocsFormDialog extends StatefulWidget {
 
 class _EmployeeDocsFormDialogState extends State<EmployeeDocsFormDialog> {
   final _formKey = GlobalKey<FormState>();
-  final _fileUrl = TextEditingController();
   final _search = TextEditingController();
-  final _docType = TextEditingController(text: 'contract');
+  final _docType = TextEditingController(text: 'id_card');
 
   List<EmployeeLookup> _employees = const [];
   List<EmployeeLookup> _filtered = const [];
@@ -29,16 +30,26 @@ class _EmployeeDocsFormDialogState extends State<EmployeeDocsFormDialog> {
   DateTime? _expiresAt;
   bool _uploading = false;
   bool _saving = false;
+  String _uploadedFileUrl = '';
+
+  String get _selectedFileName {
+    final raw = _uploadedFileUrl.trim();
+    if (raw.isEmpty) return '';
+    final uri = Uri.tryParse(raw);
+    if (uri == null) return raw;
+    final segment = uri.pathSegments.isEmpty ? raw : uri.pathSegments.last;
+    return segment.isEmpty ? raw : segment;
+  }
 
   @override
   void initState() {
     super.initState();
+    _employeeId = widget.initialEmployeeId;
     _loadEmployees();
   }
 
   @override
   void dispose() {
-    _fileUrl.dispose();
     _search.dispose();
     _docType.dispose();
     super.dispose();
@@ -98,19 +109,21 @@ class _EmployeeDocsFormDialogState extends State<EmployeeDocsFormDialog> {
     setState(() => _saving = true);
     try {
       await context.read<EmployeeDocsCubit>().create(
-        employeeId: _employeeId!,
-        docType: _docType.text.trim(),
-        fileUrl: _fileUrl.text.trim(),
-        issuedAt: _issuedAt,
-        expiresAt: _expiresAt,
-      );
+            employeeId: _employeeId!,
+            docType: _docType.text.trim(),
+            fileUrl: _uploadedFileUrl.trim(),
+            issuedAt: _issuedAt,
+            expiresAt: _expiresAt,
+          );
       if (!mounted) return;
       Navigator.pop(context, true);
     } catch (e) {
+      print('EMPLOYEE_DOC_SAVE_ERROR: $e');
+      print('EMPLOYEE_DOC_SAVE_STACK: ${StackTrace.current}');
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(t.saveFailed(e.toString()))));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(t.saveFailed(e.toString()))),
+      );
       setState(() => _saving = false);
     }
   }
@@ -118,130 +131,206 @@ class _EmployeeDocsFormDialogState extends State<EmployeeDocsFormDialog> {
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context)!;
+
+    final docTypes = [
+      {'value': 'id_card', 'label': t.idCard},
+      {'value': 'passport', 'label': t.passport},
+      {'value': 'cv', 'label': 'CV'},
+      {'value': 'graduation_cert', 'label': t.graduationCert},
+      {'value': 'national_address', 'label': t.nationalAddress},
+      {'value': 'bank_iban_certificate', 'label': t.bankIbanCertificate},
+      {'value': 'salary_certificate', 'label': t.salaryCertificate},
+      {'value': 'contract', 'label': t.contract},
+      {'value': 'other', 'label': t.other},
+    ];
+
     return AlertDialog(
       title: Text(t.addDocument),
       content: SizedBox(
         width: 460,
         child: Form(
           key: _formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: _search,
-                decoration: InputDecoration(
-                  labelText: t.searchEmployeeHint,
-                  border: const OutlineInputBorder(),
-                  prefixIcon: const Icon(Icons.search),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (widget.initialEmployeeId == null) ...[
+                  TextField(
+                    controller: _search,
+                    decoration: InputDecoration(
+                      labelText: t.searchEmployeeHint,
+                      border: const OutlineInputBorder(),
+                      prefixIcon: const Icon(Icons.search),
+                    ),
+                    onChanged: _filter,
+                  ),
+                  const SizedBox(height: 12),
+                  DropdownButtonFormField<String>(
+                    initialValue: _employeeId,
+                    items: _filtered
+                        .map(
+                          (e) => DropdownMenuItem(
+                            value: e.id,
+                            child: Text(e.fullName),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (v) => setState(() => _employeeId = v),
+                    decoration: InputDecoration(
+                      labelText: t.employee,
+                      border: const OutlineInputBorder(),
+                    ),
+                    validator: (v) {
+                      if (v == null || v.trim().isEmpty) {
+                        return t.employeeRequired;
+                      }
+                      return null;
+                    },
+                  ),
+                ] else
+                  ListTile(
+                    title: Text(t.employee),
+                    subtitle: Text(_employees.firstWhere((e) => e.id == _employeeId, orElse: () => EmployeeLookup(id: '', fullName: '')).fullName),
+                    tileColor: Colors.grey[100],
+                  ),
+                const SizedBox(height: 12),
+                DropdownButtonFormField<String>(
+                  initialValue: _docType.text,
+                  items: docTypes
+                      .map(
+                        (type) => DropdownMenuItem(
+                          value: type['value'],
+                          child: Text(type['label']!),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (v) {
+                    if (v != null) _docType.text = v;
+                  },
+                  decoration: InputDecoration(
+                    labelText: t.documentType,
+                    border: const OutlineInputBorder(),
+                  ),
                 ),
-                onChanged: _filter,
-              ),
-              const SizedBox(height: 12),
-              DropdownButtonFormField<String>(
-                initialValue: _employeeId,
-                items: _filtered
-                    .map(
-                      (e) => DropdownMenuItem(
-                        value: e.id,
-                        child: Text(e.fullName),
+                const SizedBox(height: 12),
+                FormField<String>(
+                  initialValue: _uploadedFileUrl,
+                  validator: (_) {
+                    if (_uploadedFileUrl.trim().isEmpty) {
+                      return t.fileRequired;
+                    }
+                    return null;
+                  },
+                  builder: (field) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 14,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: field.hasError
+                                  ? Theme.of(context).colorScheme.error
+                                  : Theme.of(context).dividerColor,
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.attach_file),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  _selectedFileName.isEmpty
+                                      ? t.noFileSelected
+                                      : _selectedFileName,
+                                  style: TextStyle(
+                                    color: _selectedFileName.isEmpty
+                                        ? Theme.of(context).hintColor
+                                        : null,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (field.errorText != null) ...[
+                          const SizedBox(height: 6),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            child: Text(
+                              field.errorText!,
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.error,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    );
+                  },
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: (_uploading || _saving) ? null : _pickFile,
+                        icon: const Icon(Icons.attach_file),
+                        label: Text(_uploading ? t.uploading : t.uploadFile),
                       ),
-                    )
-                    .toList(),
-                onChanged: (v) => setState(() => _employeeId = v),
-                decoration: InputDecoration(
-                  labelText: t.employee,
-                  border: const OutlineInputBorder(),
+                    ),
+                  ],
                 ),
-                validator: (v) {
-                  if (v == null || v.trim().isEmpty) {
-                    return t.employeeRequired;
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: _docType,
-                decoration: InputDecoration(
-                  labelText: t.documentType,
-                  border: const OutlineInputBorder(),
-                ),
-                validator: (v) {
-                  if ((v ?? '').trim().isEmpty) {
-                    return t.documentTypeRequired;
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: _fileUrl,
-                decoration: InputDecoration(
-                  labelText: t.fileUrl,
-                  border: const OutlineInputBorder(),
-                ),
-                validator: (v) {
-                  if ((v ?? '').trim().isEmpty) {
-                    return t.fileUrlRequired;
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  OutlinedButton.icon(
-                    onPressed: (_uploading || _saving) ? null : _pickFile,
-                    icon: const Icon(Icons.attach_file),
-                    label: Text(_uploading ? t.uploading : t.uploadPdf),
+                const SizedBox(height: 8),
+                if (_uploading || _saving) ...[
+                  const LinearProgressIndicator(),
+                  const SizedBox(height: 6),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      _uploading ? t.uploadingDocument : t.savingDocument,
+                      style: const TextStyle(fontSize: 12),
+                    ),
                   ),
                 ],
-              ),
-              const SizedBox(height: 8),
-              if (_uploading || _saving) ...[
-                const LinearProgressIndicator(),
-                const SizedBox(height: 6),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    _uploading ? t.uploadingDocument : t.savingDocument,
-                    style: const TextStyle(fontSize: 12),
-                  ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: (_uploading || _saving) ? null : _pickIssued,
+                        icon: const Icon(Icons.event),
+                        label: Text(
+                          _issuedAt == null
+                              ? t.issuedDate
+                              : '${_issuedAt!.year}-${_issuedAt!.month.toString().padLeft(2, '0')}-${_issuedAt!.day.toString().padLeft(2, '0')}',
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: (_uploading || _saving) ? null : _pickExpires,
+                        icon: const Icon(Icons.event_available),
+                        label: Text(
+                          _expiresAt == null
+                              ? t.expiresDate
+                              : '${_expiresAt!.year}-${_expiresAt!.month.toString().padLeft(2, '0')}-${_expiresAt!.day.toString().padLeft(2, '0')}',
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: (_uploading || _saving) ? null : _pickIssued,
-                      icon: const Icon(Icons.event),
-                      label: Text(
-                        _issuedAt == null
-                            ? t.issuedDate
-                            : '${_issuedAt!.year.toString().padLeft(4, '0')}-'
-                                  '${_issuedAt!.month.toString().padLeft(2, '0')}-'
-                                  '${_issuedAt!.day.toString().padLeft(2, '0')}',
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: (_uploading || _saving) ? null : _pickExpires,
-                      icon: const Icon(Icons.event_available),
-                      label: Text(
-                        _expiresAt == null
-                            ? t.expiresDate
-                            : '${_expiresAt!.year.toString().padLeft(4, '0')}-'
-                                  '${_expiresAt!.month.toString().padLeft(2, '0')}-'
-                                  '${_expiresAt!.day.toString().padLeft(2, '0')}',
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
+            ),
           ),
         ),
       ),
@@ -267,7 +356,10 @@ class _EmployeeDocsFormDialogState extends State<EmployeeDocsFormDialog> {
       final file = await SafeFilePicker.openSingle(
         context: context,
         acceptedTypeGroups: const [
-          XTypeGroup(label: 'PDF', extensions: ['pdf']),
+          XTypeGroup(
+            label: 'Documents',
+            extensions: ['pdf', 'jpg', 'png', 'jpeg', 'doc', 'docx'],
+          ),
         ],
       );
       if (file == null) return;
@@ -285,21 +377,34 @@ class _EmployeeDocsFormDialogState extends State<EmployeeDocsFormDialog> {
           .uploadBinary(
             path,
             bytes,
-            fileOptions: const FileOptions(contentType: 'application/pdf'),
+            fileOptions: FileOptions(
+              contentType: _getContentType(file.name),
+            ),
           )
           .timeout(const Duration(minutes: 2));
 
       final url = client.storage.from('employee_docs').getPublicUrl(path);
-      _fileUrl.text = url;
+      setState(() {
+        _uploadedFileUrl = url;
+      });
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(t.fileUploadedSuccessfully)),
       );
     } catch (e) {
+      // Temporary debug logging to inspect storage/upload failures in Windows.
+      print('EMPLOYEE_DOC_UPLOAD_ERROR: $e');
+      print('EMPLOYEE_DOC_UPLOAD_STACK: ${StackTrace.current}');
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(t.fileUploadFailed(e.toString()))));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            e is StorageException && e.statusCode == '403'
+                ? t.employeeDocsStorageUnauthorized
+                : t.fileUploadFailed(e.toString()),
+          ),
+        ),
+      );
     } finally {
       if (mounted) {
         setState(() => _uploading = false);
@@ -307,9 +412,29 @@ class _EmployeeDocsFormDialogState extends State<EmployeeDocsFormDialog> {
     }
   }
 
+  String _getContentType(String fileName) {
+    final ext = fileName.split('.').last.toLowerCase();
+    switch (ext) {
+      case 'pdf':
+        return 'application/pdf';
+      case 'jpg':
+      case 'jpeg':
+        return 'image/jpeg';
+      case 'png':
+        return 'image/png';
+      case 'doc':
+        return 'application/msword';
+      case 'docx':
+        return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+      default:
+        return 'application/octet-stream';
+    }
+  }
+
   Future<String> _fetchTenantId(SupabaseClient client) async {
+    final t = AppLocalizations.of(context)!;
     final uid = client.auth.currentUser?.id;
-    if (uid == null) throw Exception(AppLocalizations.of(context)!.notAuthenticated);
+    if (uid == null) throw Exception(t.notAuthenticated);
     final me = await client
         .from('users')
         .select('tenant_id')

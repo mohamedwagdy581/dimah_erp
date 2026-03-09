@@ -1328,6 +1328,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fileUrlRequired => 'File URL is required';
 
   @override
+  String get fileRequired => 'File is required';
+
+  @override
   String get uploading => 'Uploading...';
 
   @override
@@ -1354,8 +1357,145 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get employeeDocsStorageUnauthorized =>
+      'Employee documents storage is not configured yet. Run the employee docs bucket SQL first.';
+
+  @override
   String get notAuthenticated => 'Not authenticated';
 
   @override
   String get level => 'Level';
+
+  @override
+  String get checkInCoverage => 'Check-in Coverage';
+
+  @override
+  String get approvalLoad => 'Approval Load';
+
+  @override
+  String get teamMembers => 'Team Members';
+
+  @override
+  String get openTasks => 'Open Tasks';
+
+  @override
+  String get overdueTasks => 'Overdue Tasks';
+
+  @override
+  String get completionRate => 'Completion Rate';
+
+  @override
+  String get dueSoonTasks => 'Due Soon (7 days)';
+
+  @override
+  String get noDueSoonTasks => 'No tasks due in the next 7 days.';
+
+  @override
+  String get topPerformers => 'Top 5 Performers';
+
+  @override
+  String get needsAttention => 'Needs Attention';
+
+  @override
+  String get noTeamDataYet => 'No team data yet.';
+
+  @override
+  String get taskTimeline => 'Task Timeline';
+
+  @override
+  String get assignedToEmployeeAt => 'Assigned to employee at';
+
+  @override
+  String get employeeReceivedAt => 'Employee received task at';
+
+  @override
+  String get employeeStartedAt => 'Employee started task at';
+
+  @override
+  String get lastUpdateAt => 'Last update at';
+
+  @override
+  String get updatesTimeline => 'Updates Timeline';
+
+  @override
+  String get taskEventAssigned => 'Assigned';
+
+  @override
+  String get taskEventStatusChanged => 'Status changed';
+
+  @override
+  String get taskEventProgressUpdated => 'Progress updated';
+
+  @override
+  String get estimateHours => 'Estimated Hours';
+
+  @override
+  String get priority => 'Priority';
+
+  @override
+  String get priorityLow => 'Low';
+
+  @override
+  String get priorityMedium => 'Medium';
+
+  @override
+  String get priorityHigh => 'High';
+
+  @override
+  String get taskWeight => 'Task Weight';
+
+  @override
+  String get invalidEstimateHours =>
+      'Please enter a valid estimated hours value.';
+
+  @override
+  String get taskType => 'Task Type';
+
+  @override
+  String get taskTypeGeneral => 'General';
+
+  @override
+  String get taskTypeTransfer => 'Transfer';
+
+  @override
+  String get taskTypeReport => 'Report';
+
+  @override
+  String get taskTypeTax => 'Tax';
+
+  @override
+  String get taskTypePayroll => 'Payroll';
+
+  @override
+  String get taskTypeReconciliation => 'Reconciliation';
+
+  @override
+  String get taskTypeRecruitment => 'Recruitment';
+
+  @override
+  String get taskTypeEmployeeDocs => 'Employee Documents';
+
+  @override
+  String get uploadNewDocument => 'Upload New Document';
+
+  @override
+  String get idCard => 'ID Card';
+
+  @override
+  String get graduationCert => 'Graduation Certificate';
+
+  @override
+  String get nationalAddress => 'National Address';
+
+  @override
+  String get bankIbanCertificate => 'Bank IBAN Certificate';
+
+  @override
+  String get salaryCertificate => 'Salary Certificate';
+
+  @override
+  String get uploadFile => 'Upload File';
+
+  @override
+  String get noFileSelected => 'No file selected';
 }

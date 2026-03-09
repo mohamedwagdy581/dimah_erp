@@ -33,6 +33,24 @@ class EmployeesRepoImpl implements EmployeesRepo {
     return t.toString();
   }
 
+  Future<({String role, String? employeeId})> _currentUserIdentity() async {
+    final uid = _client.auth.currentUser?.id;
+    if (uid == null) throw Exception('Not authenticated');
+    final me = await _client
+        .from('users')
+        .select('role, employee_id')
+        .eq('id', uid)
+        .single();
+    return (
+      role: (me['role'] ?? 'employee').toString(),
+      employeeId: me['employee_id']?.toString(),
+    );
+  }
+
+  bool _isManagerRole(String role) =>
+      role.trim().toLowerCase() == 'manager' ||
+      role.trim().toLowerCase() == 'direct_manager';
+
   String _buildTestPasswordFromEmail(String email) {
     final local = email.split('@').first.trim();
     if (local.isEmpty) return 'Employee@2030';
@@ -636,6 +654,7 @@ class EmployeesRepoImpl implements EmployeesRepo {
     int limit = 200,
   }) async {
     final tenantId = await _tenantId();
+    final actor = await _currentUserIdentity();
     final s = search?.trim();
 
     dynamic q = _client
@@ -644,6 +663,17 @@ class EmployeesRepoImpl implements EmployeesRepo {
         .eq('tenant_id', tenantId)
         .order('full_name', ascending: true)
         .limit(limit);
+
+    if (_isManagerRole(actor.role) &&
+        actor.employeeId != null &&
+        actor.employeeId!.trim().isNotEmpty) {
+      final scopedIds = await _managerScopedEmployeeIds(
+        tenantId: tenantId,
+        managerEmployeeId: actor.employeeId!,
+      );
+      if (scopedIds.isEmpty) return const [];
+      q = q.inFilter('id', scopedIds);
+    }
 
     if (s != null && s.isNotEmpty) {
       final escaped = s.replaceAll('%', r'\%').replaceAll('_', r'\_');

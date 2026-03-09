@@ -5,9 +5,10 @@ abstract class EmployeeDocsRepo {
     required int page,
     required int pageSize,
     String? search,
+    String? employeeId,
     String? docType,
-    String sortBy,
-    bool ascending,
+    String sortBy = 'created_at',
+    bool ascending = false,
   });
 
   Future<void> createDoc({

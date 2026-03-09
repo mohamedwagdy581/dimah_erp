@@ -8,6 +8,10 @@ class AttendanceRepoImpl implements AttendanceRepo {
   AttendanceRepoImpl(this._client);
   final SupabaseClient _client;
 
+  bool _isManagerRole(String role) =>
+      role.trim().toLowerCase() == 'manager' ||
+      role.trim().toLowerCase() == 'direct_manager';
+
   Future<String> _tenantId() async {
     final uid = _client.auth.currentUser?.id;
     if (uid == null) throw Exception('Not authenticated');
@@ -26,6 +30,55 @@ class AttendanceRepoImpl implements AttendanceRepo {
   String _toDateOnly(DateTime d) =>
       DateTime(d.year, d.month, d.day).toIso8601String().split('T').first;
 
+  Future<({String role, String? employeeId})> _currentUserIdentity() async {
+    final uid = _client.auth.currentUser?.id;
+    if (uid == null) throw Exception('Not authenticated');
+    final me = await _client
+        .from('users')
+        .select('role, employee_id')
+        .eq('id', uid)
+        .single();
+    return (
+      role: (me['role'] ?? 'employee').toString(),
+      employeeId: me['employee_id']?.toString(),
+    );
+  }
+
+  Future<List<String>> _subordinateEmployeeIds({
+    required String tenantId,
+    required String managerEmployeeId,
+  }) async {
+    final directRes = await _client
+        .from('employees')
+        .select('id')
+        .eq('tenant_id', tenantId)
+        .eq('manager_id', managerEmployeeId);
+    final directIds = (directRes as List).map((e) => e['id'].toString()).toList();
+
+    final managedDepartmentsRes = await _client
+        .from('departments')
+        .select('id')
+        .eq('tenant_id', tenantId)
+        .eq('manager_id', managerEmployeeId);
+    final managedDepartmentIds = (managedDepartmentsRes as List)
+        .map((e) => e['id'].toString())
+        .toList();
+
+    final deptIds = <String>[];
+    if (managedDepartmentIds.isNotEmpty) {
+      final deptRes = await _client
+          .from('employees')
+          .select('id')
+          .eq('tenant_id', tenantId)
+          .inFilter('department_id', managedDepartmentIds);
+      deptIds.addAll((deptRes as List).map((e) => e['id'].toString()));
+    }
+
+    final all = {...directIds, ...deptIds};
+    all.remove(managerEmployeeId);
+    return all.toList();
+  }
+
   @override
   Future<({List<AttendanceRecord> items, int total})> fetchAttendance({
     required int page,
@@ -38,6 +91,7 @@ class AttendanceRepoImpl implements AttendanceRepo {
     bool ascending = false,
   }) async {
     final tenantId = await _tenantId();
+    final actor = await _currentUserIdentity();
     final from = page * pageSize;
     final to = from + pageSize - 1;
     final s = search?.trim();
@@ -49,6 +103,20 @@ class AttendanceRepoImpl implements AttendanceRepo {
           'employee:employees(full_name)',
         )
         .eq('tenant_id', tenantId);
+
+    if ((employeeId == null || employeeId.trim().isEmpty) &&
+        _isManagerRole(actor.role) &&
+        actor.employeeId != null &&
+        actor.employeeId!.isNotEmpty) {
+      final subordinateIds = await _subordinateEmployeeIds(
+        tenantId: tenantId,
+        managerEmployeeId: actor.employeeId!,
+      );
+      if (subordinateIds.isEmpty) {
+        return (items: const <AttendanceRecord>[], total: 0);
+      }
+      listQ = listQ.inFilter('employee_id', subordinateIds);
+    }
 
     if (status != null && status.trim().isNotEmpty) {
       listQ = listQ.eq('status', status);
@@ -78,6 +146,20 @@ class AttendanceRepoImpl implements AttendanceRepo {
         .from('attendance_records')
         .select('id')
         .eq('tenant_id', tenantId);
+
+    if ((employeeId == null || employeeId.trim().isEmpty) &&
+        _isManagerRole(actor.role) &&
+        actor.employeeId != null &&
+        actor.employeeId!.isNotEmpty) {
+      final subordinateIds = await _subordinateEmployeeIds(
+        tenantId: tenantId,
+        managerEmployeeId: actor.employeeId!,
+      );
+      if (subordinateIds.isEmpty) {
+        return (items: items, total: 0);
+      }
+      countQ = countQ.inFilter('employee_id', subordinateIds);
+    }
 
     if (status != null && status.trim().isNotEmpty) {
       countQ = countQ.eq('status', status);

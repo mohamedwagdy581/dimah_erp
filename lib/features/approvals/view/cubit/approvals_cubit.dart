@@ -88,12 +88,24 @@ class ApprovalsCubit extends Cubit<ApprovalsState> {
   }
 
   Future<void> approve(String id) async {
-    await _repo.approve(id);
-    await load();
+    try {
+      await _repo.approve(id);
+      await load();
+    } catch (e) {
+      if (isClosed) return;
+      emit(state.copyWith(error: AppError.message(e)));
+      await load();
+    }
   }
 
   Future<void> reject(String id, {String? reason}) async {
-    await _repo.reject(id, reason: reason);
-    await load();
+    try {
+      await _repo.reject(id, reason: reason);
+      await load();
+    } catch (e) {
+      if (isClosed) return;
+      emit(state.copyWith(error: AppError.message(e)));
+      await load();
+    }
   }
 }
