@@ -80,10 +80,16 @@ class AppLocalizationsAr extends AppLocalizations {
   String get hrAlertsInsuranceDays => 'أيام تنبيه التأمين';
 
   @override
+  String get hrAlertsDocumentsDays => 'أيام تنبيه المستندات';
+
+  @override
   String get hrAlertsSettingsSaved => 'تم حفظ إعدادات التنبيه';
 
   @override
   String get hrAlertsNoRows => 'لا توجد تنبيهات انتهاء.';
+
+  @override
+  String get hrAlertsTotal => 'إجمالي التنبيهات';
 
   @override
   String get hrAlertsColEmployee => 'الموظف';
@@ -123,6 +129,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get hrTypeInsurance => 'تأمين';
+
+  @override
+  String get hrTypeDocument => 'مستند';
 
   @override
   String get validationRange1To365 => 'أدخل رقمًا بين 1 و 365';
@@ -763,6 +772,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get openAttachment => 'فتح المرفق';
 
   @override
+  String get openDocument => 'فتح المستند';
+
+  @override
   String get close => 'إغلاق';
 
   @override
@@ -1022,6 +1034,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get open => 'فتح';
 
   @override
+  String get preview => 'معاينة';
+
+  @override
   String get documents => 'وثائق';
 
   @override
@@ -1135,7 +1150,20 @@ class AppLocalizationsAr extends AppLocalizations {
   String get pendingApprovalsKpi => 'الموافقات المعلقة';
 
   @override
+  String get expiryAlertsKpi => 'تنبيهات الانتهاء';
+
+  @override
+  String get expiredDocumentsKpi => 'المستندات المنتهية';
+
+  @override
+  String get urgentAlertsKpi => 'التنبيهات العاجلة';
+
+  @override
   String get waitingHrAction => 'بانتظار إجراء الموارد البشرية';
+
+  @override
+  String get documentExpiryNeedsAction =>
+      'مستندات تحتاج إجراء من الموارد البشرية';
 
   @override
   String get onLeaveTodayKpi => 'إجازات اليوم';
@@ -1175,6 +1203,48 @@ class AppLocalizationsAr extends AppLocalizations {
   String get productivity => 'الإنتاجية';
 
   @override
+  String get quickActions => 'إجراءات سريعة';
+
+  @override
+  String get hrWorkflowBoard => 'لوحة سير عمل الموارد البشرية';
+
+  @override
+  String get reviewPendingApprovals => 'مراجعة الموافقات المعلقة';
+
+  @override
+  String get resolveExpiryAlerts => 'معالجة تنبيهات الانتهاء';
+
+  @override
+  String get completeEmployeeDocuments => 'استكمال مستندات الموظفين';
+
+  @override
+  String get documentCompliance => 'التوافق في المستندات';
+
+  @override
+  String get expiringDocumentsByType => 'المستندات المنتهية حسب النوع';
+
+  @override
+  String get expiringWithin30Days => 'تنتهي خلال 30 يومًا';
+
+  @override
+  String get todayAttendanceInsights => 'ملخص حضور اليوم';
+
+  @override
+  String get attendanceAlertsToday => 'تنبيهات الحضور اليوم';
+
+  @override
+  String get noAttendanceInsightsToday => 'لا توجد مؤشرات حضور لليوم.';
+
+  @override
+  String get noAttendanceAlertsToday => 'لا توجد تنبيهات حضور لليوم.';
+
+  @override
+  String get checkedInTodayLabel => 'سجلوا حضور اليوم';
+
+  @override
+  String get absentTodayLabel => 'غائبون اليوم';
+
+  @override
   String pendingWithValue(int value) {
     return 'معلق: $value';
   }
@@ -1203,6 +1273,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get taskTitle => 'عنوان المهمة';
+
+  @override
+  String get dueDateLabel => 'تاريخ الاستحقاق';
 
   @override
   String get dueDateOptional => 'تاريخ الاستحقاق (اختياري)';
@@ -1245,6 +1318,12 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get edit => 'تعديل';
+
+  @override
+  String get download => 'تنزيل';
+
+  @override
+  String get delete => 'حذف';
 
   @override
   String get disable => 'تعطيل';
@@ -1361,6 +1440,31 @@ class AppLocalizationsAr extends AppLocalizations {
       'مستودع مستندات الموظفين غير مهيأ بعد. شغّل SQL الخاص بـ employee_docs أولًا.';
 
   @override
+  String get editDocument => 'تعديل المستند';
+
+  @override
+  String get deleteDocument => 'حذف المستند';
+
+  @override
+  String get deleteDocumentConfirm => 'هل أنت متأكد من حذف هذا المستند؟';
+
+  @override
+  String get documentUpdated => 'تم تحديث المستند بنجاح';
+
+  @override
+  String get documentDeleted => 'تم حذف المستند بنجاح';
+
+  @override
+  String fileSavedTo(Object path) {
+    return 'تم حفظ الملف في: $path';
+  }
+
+  @override
+  String fileDownloadFailed(Object error) {
+    return 'فشل تنزيل الملف: $error';
+  }
+
+  @override
   String get notAuthenticated => 'غير مسجل الدخول';
 
   @override
@@ -1412,6 +1516,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get employeeStartedAt => 'وقت بدء الموظف في تنفيذ المهمة';
 
   @override
+  String get completedAtLabel => 'وقت الإكمال';
+
+  @override
   String get lastUpdateAt => 'آخر تحديث';
 
   @override
@@ -1452,7 +1559,27 @@ class AppLocalizationsAr extends AppLocalizations {
   String get taskType => 'نوع المهمة';
 
   @override
+  String get taskCatalog => 'قائمة مهام القسم';
+
+  @override
+  String taskCatalogForDepartment(Object department) {
+    return 'قائمة مهام قسم $department';
+  }
+
+  @override
   String get taskTypeGeneral => 'عام';
+
+  @override
+  String get taskTypeDevelopment => 'تطوير';
+
+  @override
+  String get taskTypeBugFix => 'إصلاح أعطال';
+
+  @override
+  String get taskTypeTesting => 'اختبارات';
+
+  @override
+  String get taskTypeSupport => 'دعم فني';
 
   @override
   String get taskTypeTransfer => 'تحويل';
@@ -1473,7 +1600,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get taskTypeRecruitment => 'توظيف';
 
   @override
+  String get taskTypeOnboarding => 'تهيئة موظف';
+
+  @override
   String get taskTypeEmployeeDocs => 'مستندات موظف';
+
+  @override
+  String get allStatuses => 'كل الحالات';
 
   @override
   String get uploadNewDocument => 'رفع وثيقة جديدة';
@@ -1492,6 +1625,54 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get salaryCertificate => 'شهادة الأجور';
+
+  @override
+  String get identityDocuments => 'وثائق الهوية';
+
+  @override
+  String get educationAndCareerDocuments => 'الوثائق التعليمية والمهنية';
+
+  @override
+  String get financialDocuments => 'الوثائق المالية';
+
+  @override
+  String get medicalAndInsuranceDocuments => 'الوثائق الطبية والتأمينية';
+
+  @override
+  String get otherDocuments => 'وثائق أخرى';
+
+  @override
+  String get residencyDocument => 'الإقامة';
+
+  @override
+  String get drivingLicense => 'رخصة القيادة';
+
+  @override
+  String get offerLetter => 'عرض العمل';
+
+  @override
+  String get salaryDefinition => 'تعريف بالراتب';
+
+  @override
+  String get medicalInsurance => 'التأمين الطبي';
+
+  @override
+  String get medicalReport => 'تقرير طبي';
+
+  @override
+  String get expired => 'منتهي';
+
+  @override
+  String get expiringSoon => 'ينتهي قريبًا';
+
+  @override
+  String get valid => 'ساري';
+
+  @override
+  String get noExpiry => 'بدون انتهاء';
+
+  @override
+  String get documentFile => 'مستند';
 
   @override
   String get uploadFile => 'رفع ملف';

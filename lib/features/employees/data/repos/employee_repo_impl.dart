@@ -1043,7 +1043,7 @@ class EmployeesRepoImpl implements EmployeesRepo {
     final row = await _client
         .from('expiry_alert_settings')
         .select(
-          'contract_alert_days, residency_alert_days, insurance_alert_days',
+          'contract_alert_days, residency_alert_days, insurance_alert_days, documents_alert_days',
         )
         .eq('tenant_id', tenantId)
         .maybeSingle();
@@ -1053,6 +1053,7 @@ class EmployeesRepoImpl implements EmployeesRepo {
         contractAlertDays: 90,
         residencyAlertDays: 90,
         insuranceAlertDays: 90,
+        documentsAlertDays: 90,
       );
     }
 
@@ -1063,6 +1064,7 @@ class EmployeesRepoImpl implements EmployeesRepo {
       contractAlertDays: asInt(row['contract_alert_days'], 90),
       residencyAlertDays: asInt(row['residency_alert_days'], 90),
       insuranceAlertDays: asInt(row['insurance_alert_days'], 90),
+      documentsAlertDays: asInt(row['documents_alert_days'], 90),
     );
   }
 
@@ -1077,6 +1079,7 @@ class EmployeesRepoImpl implements EmployeesRepo {
           'p_contract_alert_days': settings.contractAlertDays,
           'p_residency_alert_days': settings.residencyAlertDays,
           'p_insurance_alert_days': settings.insuranceAlertDays,
+          'p_documents_alert_days': settings.documentsAlertDays,
         },
       );
     } catch (_) {
@@ -1085,6 +1088,7 @@ class EmployeesRepoImpl implements EmployeesRepo {
         'contract_alert_days': settings.contractAlertDays,
         'residency_alert_days': settings.residencyAlertDays,
         'insurance_alert_days': settings.insuranceAlertDays,
+        'documents_alert_days': settings.documentsAlertDays,
       });
     }
   }
@@ -1099,6 +1103,7 @@ class EmployeesRepoImpl implements EmployeesRepo {
       settings.contractAlertDays,
       settings.residencyAlertDays,
       settings.insuranceAlertDays,
+      settings.documentsAlertDays,
       120,
     ].reduce((a, b) => a > b ? a : b);
     final threshold = DateTime(
@@ -1132,6 +1137,12 @@ class EmployeesRepoImpl implements EmployeesRepo {
         .not('end_date', 'is', null)
         .order('created_at', ascending: false);
 
+    final documentsRes = await _client
+        .from('employee_documents')
+        .select('employee_id, doc_type, expires_at, file_url')
+        .eq('tenant_id', tenantId)
+        .not('expires_at', 'is', null);
+
     final latestContractEndByEmployee = <String, DateTime>{};
     for (final row in (contractsRes as List)) {
       final m = row as Map<String, dynamic>;
@@ -1157,6 +1168,7 @@ class EmployeesRepoImpl implements EmployeesRepo {
       required String type,
       required DateTime expiryDate,
       required int alertDays,
+      String? fileUrl,
     }) {
       final left = daysLeft(expiryDate);
       if (left > alertDays) return;
@@ -1169,6 +1181,7 @@ class EmployeesRepoImpl implements EmployeesRepo {
           type: type,
           expiryDate: expiryDate,
           daysLeft: left,
+          fileUrl: fileUrl,
         ),
       );
     }
@@ -1210,6 +1223,22 @@ class EmployeesRepoImpl implements EmployeesRepo {
           alertDays: settings.insuranceAlertDays,
         );
       }
+    }
+
+    for (final row in (documentsRes as List)) {
+      final m = row as Map<String, dynamic>;
+      final employeeId = m['employee_id']?.toString();
+      if (employeeId == null || employeeId.isEmpty) continue;
+      final expiry = DateTime.tryParse((m['expires_at'] ?? '').toString());
+      if (expiry == null) continue;
+      final docType = (m['doc_type'] ?? 'other').toString();
+      maybeAdd(
+        employeeId: employeeId,
+        type: 'document:$docType',
+        expiryDate: expiry,
+        alertDays: settings.documentsAlertDays,
+        fileUrl: (m['file_url'] ?? '').toString(),
+      );
     }
 
     items.sort((a, b) {

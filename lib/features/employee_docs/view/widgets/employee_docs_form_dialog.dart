@@ -7,12 +7,18 @@ import '../../../../core/di/app_di.dart';
 import '../../../../core/utils/safe_file_picker.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../employees/domain/models/employee_lookup.dart';
+import '../../domain/models/employee_document.dart';
 import '../cubit/employee_docs_cubit.dart';
 
 class EmployeeDocsFormDialog extends StatefulWidget {
-  const EmployeeDocsFormDialog({super.key, this.initialEmployeeId});
+  const EmployeeDocsFormDialog({
+    super.key,
+    this.initialEmployeeId,
+    this.initialDocument,
+  });
 
   final String? initialEmployeeId;
+  final EmployeeDocument? initialDocument;
 
   @override
   State<EmployeeDocsFormDialog> createState() => _EmployeeDocsFormDialogState();
@@ -44,7 +50,11 @@ class _EmployeeDocsFormDialogState extends State<EmployeeDocsFormDialog> {
   @override
   void initState() {
     super.initState();
-    _employeeId = widget.initialEmployeeId;
+    _employeeId = widget.initialEmployeeId ?? widget.initialDocument?.employeeId;
+    _docType.text = widget.initialDocument?.docType ?? 'id_card';
+    _issuedAt = widget.initialDocument?.issuedAt;
+    _expiresAt = widget.initialDocument?.expiresAt;
+    _uploadedFileUrl = widget.initialDocument?.fileUrl ?? '';
     _loadEmployees();
   }
 
@@ -108,22 +118,33 @@ class _EmployeeDocsFormDialogState extends State<EmployeeDocsFormDialog> {
     if (_uploading || _saving) return;
     setState(() => _saving = true);
     try {
-      await context.read<EmployeeDocsCubit>().create(
-            employeeId: _employeeId!,
-            docType: _docType.text.trim(),
-            fileUrl: _uploadedFileUrl.trim(),
-            issuedAt: _issuedAt,
-            expiresAt: _expiresAt,
-          );
+      if (widget.initialDocument == null) {
+        await context.read<EmployeeDocsCubit>().create(
+          employeeId: _employeeId!,
+          docType: _docType.text.trim(),
+          fileUrl: _uploadedFileUrl.trim(),
+          issuedAt: _issuedAt,
+          expiresAt: _expiresAt,
+        );
+      } else {
+        await context.read<EmployeeDocsCubit>().update(
+          id: widget.initialDocument!.id,
+          employeeId: _employeeId!,
+          docType: _docType.text.trim(),
+          fileUrl: _uploadedFileUrl.trim(),
+          issuedAt: _issuedAt,
+          expiresAt: _expiresAt,
+        );
+      }
       if (!mounted) return;
       Navigator.pop(context, true);
     } catch (e) {
       print('EMPLOYEE_DOC_SAVE_ERROR: $e');
       print('EMPLOYEE_DOC_SAVE_STACK: ${StackTrace.current}');
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(t.saveFailed(e.toString()))),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(t.saveFailed(e.toString()))));
       setState(() => _saving = false);
     }
   }
@@ -131,21 +152,77 @@ class _EmployeeDocsFormDialogState extends State<EmployeeDocsFormDialog> {
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context)!;
+    final isEdit = widget.initialDocument != null;
 
-    final docTypes = [
-      {'value': 'id_card', 'label': t.idCard},
-      {'value': 'passport', 'label': t.passport},
-      {'value': 'cv', 'label': 'CV'},
-      {'value': 'graduation_cert', 'label': t.graduationCert},
-      {'value': 'national_address', 'label': t.nationalAddress},
-      {'value': 'bank_iban_certificate', 'label': t.bankIbanCertificate},
-      {'value': 'salary_certificate', 'label': t.salaryCertificate},
-      {'value': 'contract', 'label': t.contract},
-      {'value': 'other', 'label': t.other},
+    final docTypeGroups = [
+      (
+        title: t.identityDocuments,
+        items: [
+          (value: 'id_card', label: t.idCard),
+          (value: 'passport', label: t.passport),
+          (value: 'national_address', label: t.nationalAddress),
+          (value: 'residency', label: t.residencyDocument),
+          (value: 'driving_license', label: t.drivingLicense),
+        ],
+      ),
+      (
+        title: t.educationAndCareerDocuments,
+        items: [
+          (value: 'cv', label: 'CV'),
+          (value: 'graduation_cert', label: t.graduationCert),
+          (value: 'offer_letter', label: t.offerLetter),
+          (value: 'contract', label: t.contract),
+        ],
+      ),
+      (
+        title: t.financialDocuments,
+        items: [
+          (value: 'bank_iban_certificate', label: t.bankIbanCertificate),
+          (value: 'salary_certificate', label: t.salaryCertificate),
+          (value: 'salary_definition', label: t.salaryDefinition),
+        ],
+      ),
+      (
+        title: t.medicalAndInsuranceDocuments,
+        items: [
+          (value: 'medical_insurance', label: t.medicalInsurance),
+          (value: 'medical_report', label: t.medicalReport),
+        ],
+      ),
+      (
+        title: t.otherDocuments,
+        items: [
+          (value: 'other', label: t.other),
+        ],
+      ),
+    ];
+
+    final docTypeItems = <DropdownMenuItem<String>>[
+      for (final group in docTypeGroups) ...[
+        DropdownMenuItem<String>(
+          enabled: false,
+          child: Text(
+            group.title,
+            style: TextStyle(
+              fontWeight: FontWeight.w700,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+        ),
+        ...group.items.map(
+          (item) => DropdownMenuItem<String>(
+            value: item.value,
+            child: Padding(
+              padding: const EdgeInsetsDirectional.only(start: 12),
+              child: Text(item.label),
+            ),
+          ),
+        ),
+      ],
     ];
 
     return AlertDialog(
-      title: Text(t.addDocument),
+      title: Text(isEdit ? t.editDocument : t.addDocument),
       content: SizedBox(
         width: 460,
         child: Form(
@@ -154,7 +231,8 @@ class _EmployeeDocsFormDialogState extends State<EmployeeDocsFormDialog> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                if (widget.initialEmployeeId == null) ...[
+                if (widget.initialEmployeeId == null &&
+                    widget.initialDocument == null) ...[
                   TextField(
                     controller: _search,
                     decoration: InputDecoration(
@@ -190,20 +268,20 @@ class _EmployeeDocsFormDialogState extends State<EmployeeDocsFormDialog> {
                 ] else
                   ListTile(
                     title: Text(t.employee),
-                    subtitle: Text(_employees.firstWhere((e) => e.id == _employeeId, orElse: () => EmployeeLookup(id: '', fullName: '')).fullName),
+                    subtitle: Text(
+                      _employees
+                          .firstWhere(
+                            (e) => e.id == _employeeId,
+                            orElse: () => EmployeeLookup(id: '', fullName: ''),
+                          )
+                          .fullName,
+                    ),
                     tileColor: Colors.grey[100],
                   ),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
                   initialValue: _docType.text,
-                  items: docTypes
-                      .map(
-                        (type) => DropdownMenuItem(
-                          value: type['value'],
-                          child: Text(type['label']!),
-                        ),
-                      )
-                      .toList(),
+                  items: docTypeItems,
                   onChanged: (v) {
                     if (v != null) _docType.text = v;
                   },
@@ -232,7 +310,9 @@ class _EmployeeDocsFormDialogState extends State<EmployeeDocsFormDialog> {
                             vertical: 14,
                           ),
                           decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.surfaceContainerHighest,
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
                               color: field.hasError
@@ -318,7 +398,9 @@ class _EmployeeDocsFormDialogState extends State<EmployeeDocsFormDialog> {
                     const SizedBox(width: 12),
                     Expanded(
                       child: OutlinedButton.icon(
-                        onPressed: (_uploading || _saving) ? null : _pickExpires,
+                        onPressed: (_uploading || _saving)
+                            ? null
+                            : _pickExpires,
                         icon: const Icon(Icons.event_available),
                         label: Text(
                           _expiresAt == null
@@ -377,9 +459,7 @@ class _EmployeeDocsFormDialogState extends State<EmployeeDocsFormDialog> {
           .uploadBinary(
             path,
             bytes,
-            fileOptions: FileOptions(
-              contentType: _getContentType(file.name),
-            ),
+            fileOptions: FileOptions(contentType: _getContentType(file.name)),
           )
           .timeout(const Duration(minutes: 2));
 
@@ -388,9 +468,9 @@ class _EmployeeDocsFormDialogState extends State<EmployeeDocsFormDialog> {
         _uploadedFileUrl = url;
       });
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(t.fileUploadedSuccessfully)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(t.fileUploadedSuccessfully)));
     } catch (e) {
       // Temporary debug logging to inspect storage/upload failures in Windows.
       print('EMPLOYEE_DOC_UPLOAD_ERROR: $e');

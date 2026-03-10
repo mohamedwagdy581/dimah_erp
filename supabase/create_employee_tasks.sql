@@ -60,12 +60,17 @@ from public.tenants t
 cross join (
   values
     ('general', 3),
+    ('development', 4),
+    ('bug_fix', 4),
+    ('testing', 3),
+    ('support', 2),
     ('transfer', 1),
     ('report', 3),
     ('tax', 5),
     ('payroll', 4),
     ('reconciliation', 4),
     ('recruitment', 3),
+    ('onboarding', 3),
     ('employee_docs', 2)
 ) as x(task_type, weight)
 on conflict (tenant_id, department_id, task_type) do nothing;

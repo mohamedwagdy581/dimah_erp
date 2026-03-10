@@ -236,6 +236,12 @@ abstract class AppLocalizations {
   /// **'Insurance alert days'**
   String get hrAlertsInsuranceDays;
 
+  /// No description provided for @hrAlertsDocumentsDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Document alert days'**
+  String get hrAlertsDocumentsDays;
+
   /// No description provided for @hrAlertsSettingsSaved.
   ///
   /// In en, this message translates to:
@@ -247,6 +253,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No expiry alerts found.'**
   String get hrAlertsNoRows;
+
+  /// No description provided for @hrAlertsTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Alerts'**
+  String get hrAlertsTotal;
 
   /// No description provided for @hrAlertsColEmployee.
   ///
@@ -325,6 +337,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Insurance'**
   String get hrTypeInsurance;
+
+  /// No description provided for @hrTypeDocument.
+  ///
+  /// In en, this message translates to:
+  /// **'Document'**
+  String get hrTypeDocument;
 
   /// No description provided for @validationRange1To365.
   ///
@@ -1562,6 +1580,12 @@ abstract class AppLocalizations {
   /// **'Open Attachment'**
   String get openAttachment;
 
+  /// No description provided for @openDocument.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Document'**
+  String get openDocument;
+
   /// No description provided for @close.
   ///
   /// In en, this message translates to:
@@ -2072,6 +2096,12 @@ abstract class AppLocalizations {
   /// **'Open'**
   String get open;
 
+  /// No description provided for @preview.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview'**
+  String get preview;
+
   /// No description provided for @documents.
   ///
   /// In en, this message translates to:
@@ -2282,11 +2312,35 @@ abstract class AppLocalizations {
   /// **'Pending Approvals'**
   String get pendingApprovalsKpi;
 
+  /// No description provided for @expiryAlertsKpi.
+  ///
+  /// In en, this message translates to:
+  /// **'Expiry Alerts'**
+  String get expiryAlertsKpi;
+
+  /// No description provided for @expiredDocumentsKpi.
+  ///
+  /// In en, this message translates to:
+  /// **'Expired Documents'**
+  String get expiredDocumentsKpi;
+
+  /// No description provided for @urgentAlertsKpi.
+  ///
+  /// In en, this message translates to:
+  /// **'Urgent Alerts'**
+  String get urgentAlertsKpi;
+
   /// No description provided for @waitingHrAction.
   ///
   /// In en, this message translates to:
   /// **'Waiting HR action'**
   String get waitingHrAction;
+
+  /// No description provided for @documentExpiryNeedsAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Documents need HR action'**
+  String get documentExpiryNeedsAction;
 
   /// No description provided for @onLeaveTodayKpi.
   ///
@@ -2360,6 +2414,90 @@ abstract class AppLocalizations {
   /// **'Productivity'**
   String get productivity;
 
+  /// No description provided for @quickActions.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Actions'**
+  String get quickActions;
+
+  /// No description provided for @hrWorkflowBoard.
+  ///
+  /// In en, this message translates to:
+  /// **'HR Workflow Board'**
+  String get hrWorkflowBoard;
+
+  /// No description provided for @reviewPendingApprovals.
+  ///
+  /// In en, this message translates to:
+  /// **'Review Pending Approvals'**
+  String get reviewPendingApprovals;
+
+  /// No description provided for @resolveExpiryAlerts.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolve Expiry Alerts'**
+  String get resolveExpiryAlerts;
+
+  /// No description provided for @completeEmployeeDocuments.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete Employee Documents'**
+  String get completeEmployeeDocuments;
+
+  /// No description provided for @documentCompliance.
+  ///
+  /// In en, this message translates to:
+  /// **'Document Compliance'**
+  String get documentCompliance;
+
+  /// No description provided for @expiringDocumentsByType.
+  ///
+  /// In en, this message translates to:
+  /// **'Expiring Documents by Type'**
+  String get expiringDocumentsByType;
+
+  /// No description provided for @expiringWithin30Days.
+  ///
+  /// In en, this message translates to:
+  /// **'Expiring within 30 days'**
+  String get expiringWithin30Days;
+
+  /// No description provided for @todayAttendanceInsights.
+  ///
+  /// In en, this message translates to:
+  /// **'Today Attendance Insights'**
+  String get todayAttendanceInsights;
+
+  /// No description provided for @attendanceAlertsToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance Alerts Today'**
+  String get attendanceAlertsToday;
+
+  /// No description provided for @noAttendanceInsightsToday.
+  ///
+  /// In en, this message translates to:
+  /// **'No attendance insights for today.'**
+  String get noAttendanceInsightsToday;
+
+  /// No description provided for @noAttendanceAlertsToday.
+  ///
+  /// In en, this message translates to:
+  /// **'No attendance alerts for today.'**
+  String get noAttendanceAlertsToday;
+
+  /// No description provided for @checkedInTodayLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Checked In Today'**
+  String get checkedInTodayLabel;
+
+  /// No description provided for @absentTodayLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Absent Today'**
+  String get absentTodayLabel;
+
   /// No description provided for @pendingWithValue.
   ///
   /// In en, this message translates to:
@@ -2407,6 +2545,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Task Title'**
   String get taskTitle;
+
+  /// No description provided for @dueDateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Due Date'**
+  String get dueDateLabel;
 
   /// No description provided for @dueDateOptional.
   ///
@@ -2479,6 +2623,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Edit'**
   String get edit;
+
+  /// No description provided for @download.
+  ///
+  /// In en, this message translates to:
+  /// **'Download'**
+  String get download;
+
+  /// No description provided for @delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
 
   /// No description provided for @disable.
   ///
@@ -2702,6 +2858,48 @@ abstract class AppLocalizations {
   /// **'Employee documents storage is not configured yet. Run the employee docs bucket SQL first.'**
   String get employeeDocsStorageUnauthorized;
 
+  /// No description provided for @editDocument.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Document'**
+  String get editDocument;
+
+  /// No description provided for @deleteDocument.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Document'**
+  String get deleteDocument;
+
+  /// No description provided for @deleteDocumentConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this document?'**
+  String get deleteDocumentConfirm;
+
+  /// No description provided for @documentUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Document updated successfully'**
+  String get documentUpdated;
+
+  /// No description provided for @documentDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Document deleted successfully'**
+  String get documentDeleted;
+
+  /// No description provided for @fileSavedTo.
+  ///
+  /// In en, this message translates to:
+  /// **'File saved to: {path}'**
+  String fileSavedTo(Object path);
+
+  /// No description provided for @fileDownloadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'File download failed: {error}'**
+  String fileDownloadFailed(Object error);
+
   /// No description provided for @notAuthenticated.
   ///
   /// In en, this message translates to:
@@ -2804,6 +3002,12 @@ abstract class AppLocalizations {
   /// **'Employee started task at'**
   String get employeeStartedAt;
 
+  /// No description provided for @completedAtLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed at'**
+  String get completedAtLabel;
+
   /// No description provided for @lastUpdateAt.
   ///
   /// In en, this message translates to:
@@ -2882,11 +3086,47 @@ abstract class AppLocalizations {
   /// **'Task Type'**
   String get taskType;
 
+  /// No description provided for @taskCatalog.
+  ///
+  /// In en, this message translates to:
+  /// **'Task Catalog'**
+  String get taskCatalog;
+
+  /// No description provided for @taskCatalogForDepartment.
+  ///
+  /// In en, this message translates to:
+  /// **'{department} task catalog'**
+  String taskCatalogForDepartment(Object department);
+
   /// No description provided for @taskTypeGeneral.
   ///
   /// In en, this message translates to:
   /// **'General'**
   String get taskTypeGeneral;
+
+  /// No description provided for @taskTypeDevelopment.
+  ///
+  /// In en, this message translates to:
+  /// **'Development'**
+  String get taskTypeDevelopment;
+
+  /// No description provided for @taskTypeBugFix.
+  ///
+  /// In en, this message translates to:
+  /// **'Bug Fix'**
+  String get taskTypeBugFix;
+
+  /// No description provided for @taskTypeTesting.
+  ///
+  /// In en, this message translates to:
+  /// **'Testing'**
+  String get taskTypeTesting;
+
+  /// No description provided for @taskTypeSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Support'**
+  String get taskTypeSupport;
 
   /// No description provided for @taskTypeTransfer.
   ///
@@ -2924,11 +3164,23 @@ abstract class AppLocalizations {
   /// **'Recruitment'**
   String get taskTypeRecruitment;
 
+  /// No description provided for @taskTypeOnboarding.
+  ///
+  /// In en, this message translates to:
+  /// **'Onboarding'**
+  String get taskTypeOnboarding;
+
   /// No description provided for @taskTypeEmployeeDocs.
   ///
   /// In en, this message translates to:
   /// **'Employee Documents'**
   String get taskTypeEmployeeDocs;
+
+  /// No description provided for @allStatuses.
+  ///
+  /// In en, this message translates to:
+  /// **'All Statuses'**
+  String get allStatuses;
 
   /// No description provided for @uploadNewDocument.
   ///
@@ -2965,6 +3217,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Salary Certificate'**
   String get salaryCertificate;
+
+  /// No description provided for @identityDocuments.
+  ///
+  /// In en, this message translates to:
+  /// **'Identity Documents'**
+  String get identityDocuments;
+
+  /// No description provided for @educationAndCareerDocuments.
+  ///
+  /// In en, this message translates to:
+  /// **'Education and Career Documents'**
+  String get educationAndCareerDocuments;
+
+  /// No description provided for @financialDocuments.
+  ///
+  /// In en, this message translates to:
+  /// **'Financial Documents'**
+  String get financialDocuments;
+
+  /// No description provided for @medicalAndInsuranceDocuments.
+  ///
+  /// In en, this message translates to:
+  /// **'Medical and Insurance Documents'**
+  String get medicalAndInsuranceDocuments;
+
+  /// No description provided for @otherDocuments.
+  ///
+  /// In en, this message translates to:
+  /// **'Other Documents'**
+  String get otherDocuments;
+
+  /// No description provided for @residencyDocument.
+  ///
+  /// In en, this message translates to:
+  /// **'Residency'**
+  String get residencyDocument;
+
+  /// No description provided for @drivingLicense.
+  ///
+  /// In en, this message translates to:
+  /// **'Driving License'**
+  String get drivingLicense;
+
+  /// No description provided for @offerLetter.
+  ///
+  /// In en, this message translates to:
+  /// **'Offer Letter'**
+  String get offerLetter;
+
+  /// No description provided for @salaryDefinition.
+  ///
+  /// In en, this message translates to:
+  /// **'Salary Definition'**
+  String get salaryDefinition;
+
+  /// No description provided for @medicalInsurance.
+  ///
+  /// In en, this message translates to:
+  /// **'Medical Insurance'**
+  String get medicalInsurance;
+
+  /// No description provided for @medicalReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Medical Report'**
+  String get medicalReport;
+
+  /// No description provided for @expired.
+  ///
+  /// In en, this message translates to:
+  /// **'Expired'**
+  String get expired;
+
+  /// No description provided for @expiringSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Expiring Soon'**
+  String get expiringSoon;
+
+  /// No description provided for @valid.
+  ///
+  /// In en, this message translates to:
+  /// **'Valid'**
+  String get valid;
+
+  /// No description provided for @noExpiry.
+  ///
+  /// In en, this message translates to:
+  /// **'No Expiry'**
+  String get noExpiry;
+
+  /// No description provided for @documentFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Document'**
+  String get documentFile;
 
   /// No description provided for @uploadFile.
   ///

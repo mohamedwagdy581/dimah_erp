@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../../l10n/app_localizations.dart';
 
 import '../../../../core/di/app_di.dart';
+import '../../../../core/routing/app_routes.dart';
 import '../../../employees/domain/models/expiry_alert.dart';
 
 class HrAlertsPage extends StatefulWidget {
-  const HrAlertsPage({super.key});
+  const HrAlertsPage({super.key, this.initialTypeFilter});
+
+  final String? initialTypeFilter;
 
   @override
   State<HrAlertsPage> createState() => _HrAlertsPageState();
@@ -13,10 +18,12 @@ class HrAlertsPage extends StatefulWidget {
 
 class _HrAlertsPageState extends State<HrAlertsPage> {
   late Future<_AlertsData> _future;
+  String? _typeFilter;
 
   @override
   void initState() {
     super.initState();
+    _typeFilter = widget.initialTypeFilter;
     _future = _load();
   }
 
@@ -64,6 +71,14 @@ class _HrAlertsPageState extends State<HrAlertsPage> {
         }
 
         final data = snap.data!;
+        final filteredItems = data.items.where((item) {
+          if (_typeFilter == null) return true;
+          if (_typeFilter == 'document') {
+            return item.type.startsWith('document:');
+          }
+          return item.type == _typeFilter;
+        }).toList();
+        final summary = _AlertsSummary.fromItems(filteredItems);
         return Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -90,8 +105,72 @@ class _HrAlertsPageState extends State<HrAlertsPage> {
                 ],
               ),
               const SizedBox(height: 12),
+              Wrap(
+                spacing: 12,
+                runSpacing: 12,
+                children: [
+                  DropdownButton<String?>(
+                    value: _typeFilter,
+                    onChanged: (value) {
+                      setState(() => _typeFilter = value);
+                    },
+                    items: [
+                      DropdownMenuItem(value: null, child: Text(t.allTypes)),
+                      DropdownMenuItem(
+                        value: 'contract',
+                        child: Text(t.hrTypeContract),
+                      ),
+                      DropdownMenuItem(
+                        value: 'residency',
+                        child: Text(t.hrTypeResidency),
+                      ),
+                      DropdownMenuItem(
+                        value: 'insurance',
+                        child: Text(t.hrTypeInsurance),
+                      ),
+                      DropdownMenuItem(
+                        value: 'document',
+                        child: Text(t.hrTypeDocument),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 12,
+                runSpacing: 12,
+                children: [
+                  _SummaryCard(
+                    label: t.hrAlertsTotal,
+                    value: '${summary.total}',
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  _SummaryCard(
+                    label: t.hrBandExpired,
+                    value: '${summary.expired}',
+                    color: Colors.red.shade700,
+                  ),
+                  _SummaryCard(
+                    label: t.hrBandUrgent,
+                    value: '${summary.urgent}',
+                    color: Colors.orange.shade700,
+                  ),
+                  _SummaryCard(
+                    label: t.hrTypeDocument,
+                    value: '${summary.documents}',
+                    color: Colors.indigo.shade700,
+                  ),
+                  _SummaryCard(
+                    label: t.hrTypeContract,
+                    value: '${summary.contracts}',
+                    color: Colors.teal.shade700,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
               Expanded(
-                child: _AlertsTable(items: data.items),
+                child: _AlertsTable(items: filteredItems),
               ),
             ],
           ),
@@ -110,6 +189,9 @@ class _HrAlertsPageState extends State<HrAlertsPage> {
     );
     final insuranceCtrl = TextEditingController(
       text: current.insuranceAlertDays.toString(),
+    );
+    final documentsCtrl = TextEditingController(
+      text: current.documentsAlertDays.toString(),
     );
     final formKey = GlobalKey<FormState>();
 
@@ -138,6 +220,11 @@ class _HrAlertsPageState extends State<HrAlertsPage> {
                   controller: insuranceCtrl,
                   label: t.hrAlertsInsuranceDays,
                 ),
+                const SizedBox(height: 10),
+                _daysField(
+                  controller: documentsCtrl,
+                  label: t.hrAlertsDocumentsDays,
+                ),
               ],
             ),
           ),
@@ -165,6 +252,7 @@ class _HrAlertsPageState extends State<HrAlertsPage> {
           contractAlertDays: int.parse(contractCtrl.text.trim()),
           residencyAlertDays: int.parse(residencyCtrl.text.trim()),
           insuranceAlertDays: int.parse(insuranceCtrl.text.trim()),
+          documentsAlertDays: int.parse(documentsCtrl.text.trim()),
         ),
       );
       if (!mounted) return;
@@ -229,6 +317,7 @@ class _AlertsTable extends StatelessWidget {
               DataColumn(label: Text(AppLocalizations.of(context)!.hrAlertsColExpiryDate)),
               DataColumn(label: Text(AppLocalizations.of(context)!.hrAlertsColDaysLeft)),
               DataColumn(label: Text(AppLocalizations.of(context)!.hrAlertsColStatus)),
+              DataColumn(label: Text(AppLocalizations.of(context)!.actions)),
             ],
             rows: items.map((e) {
               final band = _band(context, e.daysLeft);
@@ -254,6 +343,30 @@ class _AlertsTable extends StatelessWidget {
                       side: BorderSide(color: band.fg.withValues(alpha: 0.4)),
                     ),
                   ),
+                  DataCell(
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        OutlinedButton.icon(
+                          onPressed: () {
+                            context.push(
+                              AppRoutes.employeeProfile.replaceFirst(':id', e.employeeId),
+                            );
+                          },
+                          icon: const Icon(Icons.open_in_new, size: 16),
+                          label: Text(AppLocalizations.of(context)!.openProfile),
+                        ),
+                        if (e.type.startsWith('document:') &&
+                            (e.fileUrl ?? '').trim().isNotEmpty)
+                          OutlinedButton.icon(
+                            onPressed: () => _openDocument(context, e.fileUrl!),
+                            icon: const Icon(Icons.description_outlined, size: 16),
+                            label: Text(AppLocalizations.of(context)!.openDocument),
+                          ),
+                      ],
+                    ),
+                  ),
                 ],
               );
             }).toList(),
@@ -261,6 +374,22 @@ class _AlertsTable extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _openDocument(BuildContext context, String url) async {
+    final uri = Uri.tryParse(url);
+    if (uri == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.invalidFileUrl)));
+      return;
+    }
+    final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!ok && context.mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.unableOpenFile)));
+    }
   }
 
   _Band _band(BuildContext context, int daysLeft) {
@@ -305,7 +434,46 @@ class _AlertsTable extends StatelessWidget {
     if (type == 'contract') return t.hrTypeContract;
     if (type == 'residency') return t.hrTypeResidency;
     if (type == 'insurance') return t.hrTypeInsurance;
+    if (type.startsWith('document:')) {
+      final docType = type.substring('document:'.length);
+      return '${t.hrTypeDocument}: ${_documentLabel(t, docType)}';
+    }
     return type;
+  }
+
+  String _documentLabel(AppLocalizations t, String docType) {
+    switch (docType) {
+      case 'id_card':
+        return t.idCard;
+      case 'passport':
+        return t.passport;
+      case 'cv':
+        return 'CV';
+      case 'graduation_cert':
+        return t.graduationCert;
+      case 'national_address':
+        return t.nationalAddress;
+      case 'bank_iban_certificate':
+        return t.bankIbanCertificate;
+      case 'salary_certificate':
+        return t.salaryCertificate;
+      case 'salary_definition':
+        return t.salaryDefinition;
+      case 'contract':
+        return t.contract;
+      case 'residency':
+        return t.residencyDocument;
+      case 'driving_license':
+        return t.drivingLicense;
+      case 'offer_letter':
+        return t.offerLetter;
+      case 'medical_insurance':
+        return t.medicalInsurance;
+      case 'medical_report':
+        return t.medicalReport;
+      default:
+        return t.other;
+    }
   }
 
   String _fmtDate(DateTime d) {
@@ -328,4 +496,83 @@ class _AlertsData {
 
   final ExpiryAlertSettings settings;
   final List<ExpiryAlertItem> items;
+}
+
+class _SummaryCard extends StatelessWidget {
+  const _SummaryCard({
+    required this.label,
+    required this.value,
+    required this.color,
+  });
+
+  final String label;
+  final String value;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 170,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color.withValues(alpha: 0.18)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              color: color,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AlertsSummary {
+  const _AlertsSummary({
+    required this.total,
+    required this.expired,
+    required this.urgent,
+    required this.documents,
+    required this.contracts,
+  });
+
+  final int total;
+  final int expired;
+  final int urgent;
+  final int documents;
+  final int contracts;
+
+  factory _AlertsSummary.fromItems(List<ExpiryAlertItem> items) {
+    var expired = 0;
+    var urgent = 0;
+    var documents = 0;
+    var contracts = 0;
+    for (final item in items) {
+      if (item.daysLeft < 0) expired++;
+      if (item.daysLeft >= 0 && item.daysLeft < 30) urgent++;
+      if (item.type.startsWith('document:')) documents++;
+      if (item.type == 'contract') contracts++;
+    }
+    return _AlertsSummary(
+      total: items.length,
+      expired: expired,
+      urgent: urgent,
+      documents: documents,
+      contracts: contracts,
+    );
+  }
 }

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../core/di/app_di.dart';
+import '../../../core/routing/app_routes.dart';
 import '../../../core/session/session_cubit.dart';
 import '../../../l10n/app_localizations.dart';
 
@@ -166,8 +169,33 @@ class _HrDashboardState extends State<_HrDashboard> {
                       subtitle: t.approvedLeaveRequests,
                       icon: Icons.date_range_outlined,
                     ),
+                    _KpiCard(
+                      width: kpiWidth,
+                      title: t.expiryAlertsKpi,
+                      value: '${data.totalExpiryAlerts}',
+                      subtitle: t.hrAlertsTitle,
+                      icon: Icons.notifications_active_outlined,
+                    ),
+                    _KpiCard(
+                      width: kpiWidth,
+                      title: t.expiredDocumentsKpi,
+                      value: '${data.expiredDocumentsCount}',
+                      subtitle: t.documentExpiryNeedsAction,
+                      icon: Icons.warning_amber_outlined,
+                    ),
+                    _KpiCard(
+                      width: kpiWidth,
+                      title: t.urgentAlertsKpi,
+                      value: '${data.urgentExpiryAlerts}',
+                      subtitle: t.expiringWithin30Days,
+                      icon: Icons.crisis_alert_outlined,
+                    ),
                   ],
                 ),
+                const SizedBox(height: 12),
+                _HrWorkflowPanel(data: data),
+                const SizedBox(height: 12),
+                _QuickActionsPanel(data: data),
                 const SizedBox(height: 12),
                 Wrap(
                   spacing: 12,
@@ -183,6 +211,78 @@ class _HrDashboardState extends State<_HrDashboard> {
                       title: t.approvalLoad,
                       value: data.approvalLoad,
                       invertColor: true,
+                    ),
+                    _MetricBarCard(
+                      width: isWide ? (c.maxWidth - 24) / 2 : c.maxWidth,
+                      title: t.documentCompliance,
+                      value: data.documentCompliance,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 12,
+                  runSpacing: 12,
+                  children: [
+                    _InsightPanel(
+                      width: isWide ? (c.maxWidth - 24) / 2 : c.maxWidth,
+                      title: t.todayAttendanceInsights,
+                      count: data.checkedInToday,
+                      emptyText: t.noAttendanceInsightsToday,
+                      children: [
+                        _MiniStatTile(
+                          icon: Icons.how_to_reg_outlined,
+                          label: t.checkedInTodayLabel,
+                          value: '${data.checkedInToday}',
+                        ),
+                        _MiniStatTile(
+                          icon: Icons.schedule_outlined,
+                          label: t.attendanceLate,
+                          value: '${data.lateToday}',
+                          color: Colors.orange,
+                        ),
+                        _MiniStatTile(
+                          icon: Icons.more_time_outlined,
+                          label: t.overtime,
+                          value: '${data.overtimeToday}',
+                          color: Colors.lightBlue,
+                        ),
+                        _MiniStatTile(
+                          icon: Icons.person_off_outlined,
+                          label: t.absentTodayLabel,
+                          value: '${data.missingCheckInToday}',
+                          color: Colors.redAccent,
+                        ),
+                      ],
+                    ),
+                    _InsightPanel(
+                      width: isWide ? (c.maxWidth - 24) / 2 : c.maxWidth,
+                      title: t.attendanceAlertsToday,
+                      count: data.todayAttentionItems.length,
+                      emptyText: t.noAttendanceAlertsToday,
+                      children: data.todayAttentionItems
+                          .map(
+                            (item) => ListTile(
+                              dense: true,
+                              contentPadding: EdgeInsets.zero,
+                              leading: Icon(
+                                item.type == 'late'
+                                    ? Icons.schedule_outlined
+                                    : Icons.more_time_outlined,
+                              ),
+                              title: Text(item.employeeName),
+                              trailing: Text(
+                                item.valueLabel,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  color: item.type == 'late'
+                                      ? Colors.orange
+                                      : Colors.lightBlue,
+                                ),
+                              ),
+                            ),
+                          )
+                          .toList(),
                     ),
                   ],
                 ),
@@ -224,6 +324,28 @@ class _HrDashboardState extends State<_HrDashboard> {
                               title: Text(d['employee_name']?.toString() ?? '-'),
                               subtitle: Text(
                                 '${d['doc_type'] ?? t.documentLabel} | ${t.expires}: ${d['expires_at'] ?? '-'}',
+                              ),
+                            ),
+                          )
+                          .toList(),
+                    ),
+                    _InsightPanel(
+                      width: isWide ? (c.maxWidth - 24) / 2 : c.maxWidth,
+                      title: t.expiringDocumentsByType,
+                      count: data.expiringDocumentTypeCounts.length,
+                      emptyText: t.noDocumentExpiries30Days,
+                      children: data.expiringDocumentTypeCounts.entries
+                          .map(
+                            (entry) => ListTile(
+                              dense: true,
+                              contentPadding: EdgeInsets.zero,
+                              leading: const Icon(Icons.label_outline),
+                              title: Text(_labelForDocumentType(t, entry.key)),
+                              trailing: Text(
+                                '${entry.value}',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
                             ),
                           )
@@ -292,15 +414,51 @@ class _HrDashboardState extends State<_HrDashboard> {
 
     final todayAttendanceRes = await client
         .from('attendance_records')
-        .select('employee_id, check_in')
+        .select('employee_id, check_in, check_out, status, employee:employees(full_name)')
         .eq('tenant_id', tenantId)
         .eq('date', todayStr);
-    final attendedEmployeeIds = (todayAttendanceRes as List)
+    final todayAttendanceRows = (todayAttendanceRes as List);
+    final attendedEmployeeIds = todayAttendanceRows
         .where((r) => r['check_in'] != null)
         .map((r) => r['employee_id'].toString())
         .toSet();
     final checkedInToday = attendedEmployeeIds.length;
     final missingCheckInToday = activeEmployees - attendedEmployeeIds.length;
+    final lateToday = todayAttendanceRows
+        .where((r) => (r['status'] ?? '').toString().toLowerCase() == 'late')
+        .length;
+    final overtimeToday = todayAttendanceRows
+        .where((r) => _overtimeMinutesFromRow(r['check_out']) > 0)
+        .length;
+    final todayAttentionItems = todayAttendanceRows
+        .map((r) {
+          final employee = r['employee'];
+          final employeeName = employee is Map
+              ? (employee['full_name'] ?? '-').toString()
+              : '-';
+          final lateMinutes = _lateMinutesFromRow(r['check_in']);
+          final overtimeMinutes = _overtimeMinutesFromRow(r['check_out']);
+          if (lateMinutes > 0) {
+            return _AttendanceAttentionItem(
+              employeeName: employeeName,
+              type: 'late',
+              valueLabel: '${lateMinutes}m',
+              value: lateMinutes,
+            );
+          }
+          if (overtimeMinutes > 0) {
+            return _AttendanceAttentionItem(
+              employeeName: employeeName,
+              type: 'overtime',
+              valueLabel: '${overtimeMinutes}m',
+              value: overtimeMinutes,
+            );
+          }
+          return null;
+        })
+        .whereType<_AttendanceAttentionItem>()
+        .toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
 
     final pendingItemsRes = await client
         .from('approval_requests')
@@ -327,7 +485,29 @@ class _HrDashboardState extends State<_HrDashboard> {
     }).toList();
 
     List<Map<String, dynamic>> expiringDocuments = const [];
+    var expiredDocumentsCount = 0;
+    var totalDocumentsWithExpiry = 0;
+    var validDocumentsWithExpiry = 0;
+    Map<String, int> expiringDocumentTypeCounts = const {};
     try {
+      final allDocumentsRes = await client
+          .from('employee_documents')
+          .select('doc_type, expires_at')
+          .eq('tenant_id', tenantId)
+          .not('expires_at', 'is', null);
+      final docTypeCounts = <String, int>{};
+      for (final row in (allDocumentsRes as List)) {
+        final m = row as Map<String, dynamic>;
+        final expiry = DateTime.tryParse((m['expires_at'] ?? '').toString());
+        if (expiry == null) continue;
+        totalDocumentsWithExpiry++;
+        if (!expiry.isBefore(DateTime(today.year, today.month, today.day))) {
+          validDocumentsWithExpiry++;
+        } else {
+          expiredDocumentsCount++;
+        }
+      }
+
       final expiringDocumentsRes = await client
           .from('employee_documents')
           .select(
@@ -341,16 +521,26 @@ class _HrDashboardState extends State<_HrDashboard> {
           .limit(10);
       expiringDocuments = (expiringDocumentsRes as List).map((e) {
         final employee = e['employee'];
+        final docType = e['doc_type']?.toString() ?? '-';
+        docTypeCounts.update(docType, (v) => v + 1, ifAbsent: () => 1);
         return {
           'employee_name': employee is Map
               ? (employee['full_name'] ?? '-').toString()
               : '-',
-          'doc_type': e['doc_type']?.toString() ?? '-',
+          'doc_type': docType,
           'expires_at': e['expires_at']?.toString() ?? '-',
         };
       }).toList();
+      expiringDocumentTypeCounts = Map<String, int>.fromEntries(
+        docTypeCounts.entries.toList()
+          ..sort((a, b) => b.value.compareTo(a.value)),
+      );
     } catch (_) {
       expiringDocuments = const [];
+      expiredDocumentsCount = 0;
+      totalDocumentsWithExpiry = 0;
+      validDocumentsWithExpiry = 0;
+      expiringDocumentTypeCounts = const {};
     }
 
     int leavesThisMonth = 0;
@@ -366,6 +556,17 @@ class _HrDashboardState extends State<_HrDashboard> {
       leavesThisMonth = 0;
     }
 
+    int totalExpiryAlerts = 0;
+    int urgentExpiryAlerts = 0;
+    try {
+      final alerts = await AppDI.employeesRepo.fetchExpiryAlerts();
+      totalExpiryAlerts = alerts.length;
+      urgentExpiryAlerts = alerts.where((a) => a.daysLeft <= 30).length;
+    } catch (_) {
+      totalExpiryAlerts = 0;
+      urgentExpiryAlerts = 0;
+    }
+
     return _HrDashboardData(
       activeEmployees: activeEmployees,
       pendingApprovals: pendingApprovals,
@@ -373,9 +574,48 @@ class _HrDashboardState extends State<_HrDashboard> {
       missingCheckInToday: missingCheckInToday < 0 ? 0 : missingCheckInToday,
       leavesThisMonth: leavesThisMonth,
       checkedInToday: checkedInToday,
+      lateToday: lateToday,
+      overtimeToday: overtimeToday,
+      todayAttentionItems: todayAttentionItems.take(8).toList(),
       pendingItems: pendingItems,
       expiringDocuments: expiringDocuments,
+      totalExpiryAlerts: totalExpiryAlerts,
+      urgentExpiryAlerts: urgentExpiryAlerts,
+      expiredDocumentsCount: expiredDocumentsCount,
+      totalDocumentsWithExpiry: totalDocumentsWithExpiry,
+      validDocumentsWithExpiry: validDocumentsWithExpiry,
+      expiringDocumentTypeCounts: expiringDocumentTypeCounts,
     );
+  }
+
+  int _lateMinutesFromRow(dynamic value) {
+    if (value == null) return 0;
+    final checkIn = DateTime.tryParse(value.toString());
+    if (checkIn == null) return 0;
+    final workStart = DateTime(
+      checkIn.year,
+      checkIn.month,
+      checkIn.day,
+      9,
+      15,
+    );
+    if (!checkIn.isAfter(workStart)) return 0;
+    return checkIn.difference(workStart).inMinutes;
+  }
+
+  int _overtimeMinutesFromRow(dynamic value) {
+    if (value == null) return 0;
+    final checkOut = DateTime.tryParse(value.toString());
+    if (checkOut == null) return 0;
+    final workEnd = DateTime(
+      checkOut.year,
+      checkOut.month,
+      checkOut.day,
+      17,
+      0,
+    );
+    if (!checkOut.isAfter(workEnd)) return 0;
+    return checkOut.difference(workEnd).inMinutes;
   }
 }
 
@@ -442,8 +682,17 @@ class _HrDashboardData {
     this.missingCheckInToday = 0,
     this.leavesThisMonth = 0,
     this.checkedInToday = 0,
+    this.lateToday = 0,
+    this.overtimeToday = 0,
+    this.todayAttentionItems = const [],
     this.pendingItems = const [],
     this.expiringDocuments = const [],
+    this.totalExpiryAlerts = 0,
+    this.urgentExpiryAlerts = 0,
+    this.expiredDocumentsCount = 0,
+    this.totalDocumentsWithExpiry = 0,
+    this.validDocumentsWithExpiry = 0,
+    this.expiringDocumentTypeCounts = const {},
   });
 
   final int activeEmployees;
@@ -452,8 +701,17 @@ class _HrDashboardData {
   final int missingCheckInToday;
   final int leavesThisMonth;
   final int checkedInToday;
+  final int lateToday;
+  final int overtimeToday;
+  final List<_AttendanceAttentionItem> todayAttentionItems;
   final List<_PendingItem> pendingItems;
   final List<Map<String, dynamic>> expiringDocuments;
+  final int totalExpiryAlerts;
+  final int urgentExpiryAlerts;
+  final int expiredDocumentsCount;
+  final int totalDocumentsWithExpiry;
+  final int validDocumentsWithExpiry;
+  final Map<String, int> expiringDocumentTypeCounts;
 
   double get checkInCoverage {
     if (activeEmployees <= 0) return 0;
@@ -463,6 +721,224 @@ class _HrDashboardData {
   double get approvalLoad {
     if (activeEmployees <= 0) return 0;
     return pendingApprovals / activeEmployees;
+  }
+
+  double get documentCompliance {
+    if (totalDocumentsWithExpiry <= 0) return 0;
+    return validDocumentsWithExpiry / totalDocumentsWithExpiry;
+  }
+}
+
+class _AttendanceAttentionItem {
+  const _AttendanceAttentionItem({
+    required this.employeeName,
+    required this.type,
+    required this.valueLabel,
+    required this.value,
+  });
+
+  final String employeeName;
+  final String type;
+  final String valueLabel;
+  final int value;
+}
+
+class _QuickActionsPanel extends StatelessWidget {
+  const _QuickActionsPanel({required this.data});
+
+  final _HrDashboardData data;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              t.quickActions,
+              style: const TextStyle(fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              children: [
+                OutlinedButton.icon(
+                  onPressed: () => context.go('${AppRoutes.approvals}?status=pending'),
+                  icon: const Icon(Icons.approval_outlined),
+                  label: Text('${t.pendingApprovalsKpi} (${data.pendingApprovals})'),
+                ),
+                OutlinedButton.icon(
+                  onPressed: () => context.go('${AppRoutes.hrAlerts}?type=document'),
+                  icon: const Icon(Icons.notifications_active_outlined),
+                  label: Text('${t.hrAlertsTitle} (${data.totalExpiryAlerts})'),
+                ),
+                OutlinedButton.icon(
+                  onPressed: () =>
+                      context.go('${AppRoutes.employeeDocs}?expiry=expired'),
+                  icon: const Icon(Icons.description_outlined),
+                  label: Text('${t.menuEmployeeDocs} (${data.expiringDocuments.length})'),
+                ),
+                OutlinedButton.icon(
+                  onPressed: () => context.go(AppRoutes.employees),
+                  icon: const Icon(Icons.people_outline),
+                  label: Text(t.activeEmployeesKpi),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _HrWorkflowPanel extends StatelessWidget {
+  const _HrWorkflowPanel({required this.data});
+
+  final _HrDashboardData data;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              t.hrWorkflowBoard,
+              style: const TextStyle(fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              children: [
+                _WorkflowStepCard(
+                  index: 1,
+                  title: t.reviewPendingApprovals,
+                  subtitle: t.pendingWithValue(data.pendingApprovals),
+                  color: Colors.orange,
+                  onTap: () => context.go('${AppRoutes.approvals}?status=pending'),
+                ),
+                _WorkflowStepCard(
+                  index: 2,
+                  title: t.resolveExpiryAlerts,
+                  subtitle: t.pendingWithValue(data.totalExpiryAlerts),
+                  color: Colors.redAccent,
+                  onTap: () => context.go(AppRoutes.hrAlerts),
+                ),
+                _WorkflowStepCard(
+                  index: 3,
+                  title: t.completeEmployeeDocuments,
+                  subtitle: t.pendingWithValue(data.expiredDocumentsCount),
+                  color: Colors.indigo,
+                  onTap: () =>
+                      context.go('${AppRoutes.employeeDocs}?expiry=expired'),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _WorkflowStepCard extends StatelessWidget {
+  const _WorkflowStepCard({
+    required this.index,
+    required this.title,
+    required this.subtitle,
+    required this.color,
+    required this.onTap,
+  });
+
+  final int index;
+  final String title;
+  final String subtitle;
+  final Color color;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        width: 250,
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.10),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: color.withValues(alpha: 0.18)),
+        ),
+        child: Row(
+          children: [
+            CircleAvatar(
+              radius: 16,
+              backgroundColor: color.withValues(alpha: 0.18),
+              foregroundColor: color,
+              child: Text('$index'),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(fontWeight: FontWeight.w700),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(subtitle, style: const TextStyle(fontSize: 12)),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+String _labelForDocumentType(AppLocalizations t, String type) {
+  switch (type) {
+    case 'id_card':
+      return t.idCard;
+    case 'passport':
+      return t.passport;
+    case 'cv':
+      return 'CV';
+    case 'graduation_cert':
+      return t.graduationCert;
+    case 'national_address':
+      return t.nationalAddress;
+    case 'bank_iban_certificate':
+      return t.bankIbanCertificate;
+    case 'salary_certificate':
+      return t.salaryCertificate;
+    case 'salary_definition':
+      return t.salaryDefinition;
+    case 'contract':
+      return t.contract;
+    case 'residency':
+      return t.residencyDocument;
+    case 'driving_license':
+      return t.drivingLicense;
+    case 'offer_letter':
+      return t.offerLetter;
+    case 'medical_insurance':
+      return t.medicalInsurance;
+    case 'medical_report':
+      return t.medicalReport;
+    default:
+      return t.documentLabel;
   }
 }
 
@@ -519,6 +995,38 @@ class _MetricBarCard extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _MiniStatTile extends StatelessWidget {
+  const _MiniStatTile({
+    required this.icon,
+    required this.label,
+    required this.value,
+    this.color,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    final effectiveColor = color ?? Theme.of(context).colorScheme.primary;
+    return ListTile(
+      dense: true,
+      contentPadding: EdgeInsets.zero,
+      leading: Icon(icon, color: effectiveColor),
+      title: Text(label),
+      trailing: Text(
+        value,
+        style: TextStyle(
+          color: effectiveColor,
+          fontWeight: FontWeight.w700,
         ),
       ),
     );
@@ -713,10 +1221,12 @@ class _ManagerDashboard extends StatefulWidget {
 
 class _ManagerDashboardState extends State<_ManagerDashboard> {
   final _title = TextEditingController();
+  final _description = TextEditingController();
   final _estimateHours = TextEditingController(text: '8');
   String? _employeeId;
   String _priority = 'medium';
   String _taskType = 'general';
+  List<String> _visibleTaskCatalog = const ['general'];
   bool _saving = false;
   DateTime? _dueDate;
   late Future<_ManagerDashboardData> _future;
@@ -730,6 +1240,7 @@ class _ManagerDashboardState extends State<_ManagerDashboard> {
   @override
   void dispose() {
     _title.dispose();
+    _description.dispose();
     _estimateHours.dispose();
     super.dispose();
   }
@@ -744,6 +1255,11 @@ class _ManagerDashboardState extends State<_ManagerDashboard> {
           return const Center(child: CircularProgressIndicator());
         }
         final data = snapshot.data ?? const _ManagerDashboardData();
+        final taskCatalog = _taskCatalogForDepartments(data.managedDepartmentNames);
+        _visibleTaskCatalog = taskCatalog;
+        if (!taskCatalog.contains(_taskType)) {
+          _taskType = taskCatalog.first;
+        }
         return LayoutBuilder(
           builder: (context, c) {
             return ListView(
@@ -889,6 +1405,31 @@ class _ManagerDashboardState extends State<_ManagerDashboard> {
                             fontWeight: FontWeight.w700,
                           ),
                         ),
+                        const SizedBox(height: 6),
+                        Text(
+                          data.primaryManagedDepartmentName == null
+                              ? t.taskCatalog
+                              : t.taskCatalogForDepartment(
+                                  data.primaryManagedDepartmentName!,
+                                ),
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: taskCatalog
+                              .map(
+                                (type) => Chip(
+                                  label: Text(_taskTypeLabel(t, type)),
+                                  visualDensity: VisualDensity.compact,
+                                ),
+                              )
+                              .toList(),
+                        ),
                         const SizedBox(height: 10),
                         DropdownButtonFormField<String>(
                           initialValue: _employeeId,
@@ -914,6 +1455,16 @@ class _ManagerDashboardState extends State<_ManagerDashboard> {
                           enabled: !_saving,
                           decoration: InputDecoration(
                             labelText: t.taskTitle,
+                            border: const OutlineInputBorder(),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        TextField(
+                          controller: _description,
+                          enabled: !_saving,
+                          maxLines: 3,
+                          decoration: InputDecoration(
+                            labelText: t.descriptionOptional,
                             border: const OutlineInputBorder(),
                           ),
                         ),
@@ -969,20 +1520,11 @@ class _ManagerDashboardState extends State<_ManagerDashboard> {
                                   labelText: t.taskType,
                                   border: const OutlineInputBorder(),
                                 ),
-                                items: [
-                                  ('general', t.taskTypeGeneral),
-                                  ('transfer', t.taskTypeTransfer),
-                                  ('report', t.taskTypeReport),
-                                  ('tax', t.taskTypeTax),
-                                  ('payroll', t.taskTypePayroll),
-                                  ('reconciliation', t.taskTypeReconciliation),
-                                  ('recruitment', t.taskTypeRecruitment),
-                                  ('employee_docs', t.taskTypeEmployeeDocs),
-                                ]
+                                items: taskCatalog
                                     .map(
-                                      (item) => DropdownMenuItem<String>(
-                                        value: item.$1,
-                                        child: Text(item.$2),
+                                      (type) => DropdownMenuItem<String>(
+                                        value: type,
+                                        child: Text(_taskTypeLabel(t, type)),
                                       ),
                                     )
                                     .toList(),
@@ -1072,6 +1614,9 @@ class _ManagerDashboardState extends State<_ManagerDashboard> {
         'employee_id': _employeeId,
         'assigned_by_employee_id': widget.managerEmployeeId,
         'title': title,
+        'description': _description.text.trim().isEmpty
+            ? null
+            : _description.text.trim(),
         'task_type': _taskType,
         'estimate_hours': estimate,
         'priority': _priority,
@@ -1095,9 +1640,10 @@ class _ManagerDashboardState extends State<_ManagerDashboard> {
       }
       if (!mounted) return;
       _title.clear();
+      _description.clear();
       _estimateHours.text = '8';
       _priority = 'medium';
-      _taskType = 'general';
+      _taskType = _visibleTaskCatalog.first;
       _dueDate = null;
       ScaffoldMessenger.of(
         context,
@@ -1117,6 +1663,14 @@ class _ManagerDashboardState extends State<_ManagerDashboard> {
 
   int _defaultWeightForType(String type) {
     switch (type) {
+      case 'development':
+        return 4;
+      case 'bug_fix':
+        return 4;
+      case 'testing':
+        return 3;
+      case 'support':
+        return 2;
       case 'transfer':
         return 1;
       case 'report':
@@ -1129,11 +1683,93 @@ class _ManagerDashboardState extends State<_ManagerDashboard> {
         return 4;
       case 'recruitment':
         return 3;
+      case 'onboarding':
+        return 3;
       case 'employee_docs':
         return 2;
       default:
         return 3;
     }
+  }
+
+  String _taskTypeLabel(AppLocalizations t, String type) {
+    switch (type) {
+      case 'development':
+        return t.taskTypeDevelopment;
+      case 'bug_fix':
+        return t.taskTypeBugFix;
+      case 'testing':
+        return t.taskTypeTesting;
+      case 'support':
+        return t.taskTypeSupport;
+      case 'transfer':
+        return t.taskTypeTransfer;
+      case 'report':
+        return t.taskTypeReport;
+      case 'tax':
+        return t.taskTypeTax;
+      case 'payroll':
+        return t.taskTypePayroll;
+      case 'reconciliation':
+        return t.taskTypeReconciliation;
+      case 'recruitment':
+        return t.taskTypeRecruitment;
+      case 'onboarding':
+        return t.taskTypeOnboarding;
+      case 'employee_docs':
+        return t.taskTypeEmployeeDocs;
+      default:
+        return t.taskTypeGeneral;
+    }
+  }
+
+  List<String> _taskCatalogForDepartments(List<String> departmentNames) {
+    final catalog = <String>{'general'};
+    for (final rawName in departmentNames) {
+      final name = rawName.toLowerCase();
+      if (name.contains('it') ||
+          name.contains('tech') ||
+          name.contains('develop') ||
+          name.contains('برمج') ||
+          name.contains('تقني') ||
+          name.contains('التطوير')) {
+        catalog.addAll([
+          'development',
+          'bug_fix',
+          'testing',
+          'support',
+          'report',
+        ]);
+        continue;
+      }
+      if (name.contains('fin') ||
+          name.contains('account') ||
+          name.contains('مال') ||
+          name.contains('محاسب')) {
+        catalog.addAll([
+          'transfer',
+          'report',
+          'tax',
+          'payroll',
+          'reconciliation',
+        ]);
+        continue;
+      }
+      if (name.contains('hr') ||
+          name.contains('human') ||
+          name.contains('بشر') ||
+          name.contains('موارد')) {
+        catalog.addAll([
+          'recruitment',
+          'employee_docs',
+          'onboarding',
+          'report',
+        ]);
+        continue;
+      }
+      catalog.add('report');
+    }
+    return catalog.toList();
   }
 
   Future<int> _resolveAutoWeight({
@@ -1189,11 +1825,16 @@ class _ManagerDashboardState extends State<_ManagerDashboard> {
 
     final managedDepartmentsRes = await client
         .from('departments')
-        .select('id')
+        .select('id, name')
         .eq('tenant_id', tenantId)
         .eq('manager_id', widget.managerEmployeeId);
-    final managedDepartmentIds = (managedDepartmentsRes as List)
+    final managedDepartments = (managedDepartmentsRes as List).cast<Map<String, dynamic>>();
+    final managedDepartmentIds = managedDepartments
         .map((e) => e['id'].toString())
+        .toList();
+    final managedDepartmentNames = managedDepartments
+        .map((e) => (e['name'] ?? '').toString())
+        .where((e) => e.isNotEmpty)
         .toList();
 
     final directReportsRes = await client
@@ -1388,6 +2029,7 @@ class _ManagerDashboardState extends State<_ManagerDashboard> {
 
     return _ManagerDashboardData(
       members: metrics,
+      managedDepartmentNames: managedDepartmentNames,
       teamTotalTasks: teamTotalTasks,
       teamDoneTasks: teamDoneTasks,
       teamPendingTasks: teamPendingTasks,
@@ -1687,6 +2329,7 @@ class _EmployeeDashboardData {
 class _ManagerDashboardData {
   const _ManagerDashboardData({
     this.members = const [],
+    this.managedDepartmentNames = const [],
     this.teamTotalTasks = 0,
     this.teamDoneTasks = 0,
     this.teamPendingTasks = 0,
@@ -1698,6 +2341,7 @@ class _ManagerDashboardData {
     this.needsAttention = const [],
   });
   final List<_MemberProductivity> members;
+  final List<String> managedDepartmentNames;
   final int teamTotalTasks;
   final int teamDoneTasks;
   final int teamPendingTasks;
@@ -1711,6 +2355,11 @@ class _ManagerDashboardData {
   double get completionRate {
     if (teamTotalTasks == 0) return 0;
     return (teamDoneTasks / teamTotalTasks) * 100;
+  }
+
+  String? get primaryManagedDepartmentName {
+    if (managedDepartmentNames.isEmpty) return null;
+    return managedDepartmentNames.first;
   }
 }
 

@@ -5,8 +5,17 @@ import '../../domain/repos/approvals_repo.dart';
 import 'approvals_state.dart';
 
 class ApprovalsCubit extends Cubit<ApprovalsState> {
-  ApprovalsCubit(this._repo, {this.employeeId})
-      : super(ApprovalsState.initial);
+  ApprovalsCubit(
+    this._repo, {
+    this.employeeId,
+    String? initialStatus,
+    String? initialRequestType,
+  }) : super(
+          ApprovalsState.initial.copyWith(
+            status: initialStatus,
+            requestType: initialRequestType,
+          ),
+        );
 
   final ApprovalsRepo _repo;
   final String? employeeId;

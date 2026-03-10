@@ -18,4 +18,18 @@ abstract class EmployeeDocsRepo {
     DateTime? issuedAt,
     DateTime? expiresAt,
   });
+
+  Future<void> updateDoc({
+    required String id,
+    required String employeeId,
+    required String docType,
+    required String fileUrl,
+    DateTime? issuedAt,
+    DateTime? expiresAt,
+  });
+
+  Future<void> deleteDoc({
+    required String id,
+    required String fileUrl,
+  });
 }

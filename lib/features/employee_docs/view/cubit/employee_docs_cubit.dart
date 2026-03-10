@@ -10,7 +10,16 @@ import '../../domain/repos/employee_docs_repo.dart';
 import 'employee_docs_state.dart';
 
 class EmployeeDocsCubit extends Cubit<EmployeeDocsState> {
-  EmployeeDocsCubit(this._repo) : super(EmployeeDocsState.initial);
+  EmployeeDocsCubit(
+    this._repo, {
+    String? initialDocType,
+    String? initialExpiryStatus,
+  }) : super(
+          EmployeeDocsState.initial.copyWith(
+            docType: initialDocType,
+            expiryStatus: initialExpiryStatus,
+          ),
+        );
 
   final EmployeeDocsRepo _repo;
   Timer? _debounce;
@@ -41,24 +50,43 @@ class EmployeeDocsCubit extends Cubit<EmployeeDocsState> {
       );
 
       final employeeLookups = result.items.map((e) => e.toLookup()).toList();
+      final docsMap = await _loadDocsForEmployees(employeeLookups);
 
       if (isClosed) return;
       emit(
         state.copyWith(
           loading: false,
           employees: employeeLookups,
+          docsMap: docsMap,
           total: result.total,
         ),
       );
-      
-      // Reload docs for currently expanded employees if any
-      for (final id in state.expandedEmployeeIds) {
-        _loadEmployeeDocs(id);
-      }
     } catch (e) {
       if (isClosed) return;
       emit(state.copyWith(loading: false, error: AppError.message(e)));
     }
+  }
+
+  Future<Map<String, List<EmployeeDocument>>> _loadDocsForEmployees(
+    List<EmployeeLookup> employees,
+  ) async {
+    final map = <String, List<EmployeeDocument>>{};
+    for (final employee in employees) {
+      try {
+        final result = await _repo.fetchDocs(
+          page: 0,
+          pageSize: 100,
+          employeeId: employee.id,
+          docType: state.docType,
+          sortBy: state.sortBy,
+          ascending: state.ascending,
+        );
+        map[employee.id] = result.items;
+      } catch (_) {
+        map[employee.id] = const [];
+      }
+    }
+    return map;
   }
 
   Future<void> _loadEmployeeDocs(String employeeId) async {
@@ -107,6 +135,10 @@ class EmployeeDocsCubit extends Cubit<EmployeeDocsState> {
     await load(resetPage: true);
   }
 
+  void expiryStatusChanged(String? v) {
+    emit(state.copyWith(expiryStatus: v));
+  }
+
   Future<void> toggleSort(String sortBy) async {
     if (state.sortBy == sortBy) {
       emit(state.copyWith(ascending: !state.ascending));
@@ -147,6 +179,34 @@ class EmployeeDocsCubit extends Cubit<EmployeeDocsState> {
       issuedAt: issuedAt,
       expiresAt: expiresAt,
     );
+    await _loadEmployeeDocs(employeeId);
+  }
+
+  Future<void> update({
+    required String id,
+    required String employeeId,
+    required String docType,
+    required String fileUrl,
+    DateTime? issuedAt,
+    DateTime? expiresAt,
+  }) async {
+    await _repo.updateDoc(
+      id: id,
+      employeeId: employeeId,
+      docType: docType,
+      fileUrl: fileUrl,
+      issuedAt: issuedAt,
+      expiresAt: expiresAt,
+    );
+    await _loadEmployeeDocs(employeeId);
+  }
+
+  Future<void> delete({
+    required String id,
+    required String employeeId,
+    required String fileUrl,
+  }) async {
+    await _repo.deleteDoc(id: id, fileUrl: fileUrl);
     await _loadEmployeeDocs(employeeId);
   }
 }

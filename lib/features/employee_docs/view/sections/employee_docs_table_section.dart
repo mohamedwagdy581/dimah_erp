@@ -91,10 +91,65 @@ class _Header extends StatelessWidget {
               onChanged: (v) => cubit.docTypeChanged(v),
               items: [
                 DropdownMenuItem(value: null, child: Text(t.allTypes)),
-                const DropdownMenuItem(value: 'id_card', child: Text('ID Card')),
+                DropdownMenuItem(value: 'id_card', child: Text(t.idCard)),
                 DropdownMenuItem(value: 'passport', child: Text(t.passport)),
+                DropdownMenuItem(value: 'cv', child: const Text('CV')),
+                DropdownMenuItem(
+                  value: 'graduation_cert',
+                  child: Text(t.graduationCert),
+                ),
+                DropdownMenuItem(
+                  value: 'national_address',
+                  child: Text(t.nationalAddress),
+                ),
+                DropdownMenuItem(
+                  value: 'bank_iban_certificate',
+                  child: Text(t.bankIbanCertificate),
+                ),
+                DropdownMenuItem(
+                  value: 'salary_certificate',
+                  child: Text(t.salaryCertificate),
+                ),
+                DropdownMenuItem(
+                  value: 'salary_definition',
+                  child: Text(t.salaryDefinition),
+                ),
+                DropdownMenuItem(
+                  value: 'medical_insurance',
+                  child: Text(t.medicalInsurance),
+                ),
+                DropdownMenuItem(
+                  value: 'medical_report',
+                  child: Text(t.medicalReport),
+                ),
+                DropdownMenuItem(
+                  value: 'residency',
+                  child: Text(t.residencyDocument),
+                ),
+                DropdownMenuItem(
+                  value: 'driving_license',
+                  child: Text(t.drivingLicense),
+                ),
+                DropdownMenuItem(
+                  value: 'offer_letter',
+                  child: Text(t.offerLetter),
+                ),
                 DropdownMenuItem(value: 'contract', child: Text(t.contract)),
                 DropdownMenuItem(value: 'other', child: Text(t.other)),
+              ],
+            ),
+            DropdownButton<String?>(
+              value: state.expiryStatus,
+              onChanged: cubit.expiryStatusChanged,
+              items: [
+                DropdownMenuItem(value: null, child: Text(t.allStatuses)),
+                DropdownMenuItem(value: 'expired', child: Text(t.expired)),
+                DropdownMenuItem(
+                  value: 'expiring_soon',
+                  child: Text(t.expiringSoon),
+                ),
+                DropdownMenuItem(value: 'valid', child: Text(t.valid)),
+                DropdownMenuItem(value: 'no_expiry', child: Text(t.noExpiry)),
               ],
             ),
             OutlinedButton.icon(

@@ -25,6 +25,15 @@ class EmployeeDocsRepoImpl implements EmployeeDocsRepo {
   String _toDateOnly(DateTime d) =>
       DateTime(d.year, d.month, d.day).toIso8601String().split('T').first;
 
+  String? _storagePathFromPublicUrl(String fileUrl) {
+    final uri = Uri.tryParse(fileUrl);
+    if (uri == null) return null;
+    final parts = uri.pathSegments;
+    final bucketIndex = parts.indexOf('employee_docs');
+    if (bucketIndex == -1 || bucketIndex + 1 >= parts.length) return null;
+    return parts.sublist(bucketIndex + 1).join('/');
+  }
+
   @override
   Future<({List<EmployeeDocument> items, int total})> fetchDocs({
     required int page,
@@ -111,5 +120,49 @@ class EmployeeDocsRepoImpl implements EmployeeDocsRepo {
       'issued_at': issuedAt == null ? null : _toDateOnly(issuedAt),
       'expires_at': expiresAt == null ? null : _toDateOnly(expiresAt),
     });
+  }
+
+  @override
+  Future<void> updateDoc({
+    required String id,
+    required String employeeId,
+    required String docType,
+    required String fileUrl,
+    DateTime? issuedAt,
+    DateTime? expiresAt,
+  }) async {
+    final tenantId = await _tenantId();
+    await _client
+        .from('employee_documents')
+        .update({
+          'employee_id': employeeId,
+          'doc_type': docType,
+          'file_url': fileUrl,
+          'issued_at': issuedAt == null ? null : _toDateOnly(issuedAt),
+          'expires_at': expiresAt == null ? null : _toDateOnly(expiresAt),
+        })
+        .eq('id', id)
+        .eq('tenant_id', tenantId);
+  }
+
+  @override
+  Future<void> deleteDoc({
+    required String id,
+    required String fileUrl,
+  }) async {
+    final tenantId = await _tenantId();
+    final storagePath = _storagePathFromPublicUrl(fileUrl);
+    if (storagePath != null && storagePath.isNotEmpty) {
+      try {
+        await _client.storage.from('employee_docs').remove([storagePath]);
+      } catch (_) {
+        // Keep DB deletion independent during test phase.
+      }
+    }
+    await _client
+        .from('employee_documents')
+        .delete()
+        .eq('id', id)
+        .eq('tenant_id', tenantId);
   }
 }

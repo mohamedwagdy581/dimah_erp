@@ -107,15 +107,23 @@ class AppRouter {
           ),
           GoRoute(
             path: AppRoutes.employeeDocs,
-            builder: (context, state) => const EmployeeDocsPage(),
+            builder: (context, state) => EmployeeDocsPage(
+              initialDocType: state.uri.queryParameters['docType'],
+              initialExpiryStatus: state.uri.queryParameters['expiry'],
+            ),
           ),
           GoRoute(
             path: AppRoutes.hrAlerts,
-            builder: (context, state) => const HrAlertsPage(),
+            builder: (context, state) => HrAlertsPage(
+              initialTypeFilter: state.uri.queryParameters['type'],
+            ),
           ),
           GoRoute(
             path: AppRoutes.approvals,
-            builder: (context, state) => const ApprovalsPage(),
+            builder: (context, state) => ApprovalsPage(
+              initialStatus: state.uri.queryParameters['status'],
+              initialRequestType: state.uri.queryParameters['requestType'],
+            ),
           ),
           GoRoute(
             path: AppRoutes.myPortal,

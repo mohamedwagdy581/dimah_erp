@@ -73,6 +73,54 @@ class _MyTasksSectionState extends State<MyTasksSection> {
                         .isNotEmpty)
                       Text(task['description'].toString()),
                     const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        _TaskMetaChip(
+                          label: _taskTypeLabel(
+                            t,
+                            (task['task_type'] ?? 'general').toString(),
+                          ),
+                        ),
+                        _TaskMetaChip(
+                          label: _priorityLabel(
+                            t,
+                            (task['priority'] ?? 'medium').toString(),
+                          ),
+                        ),
+                        _TaskMetaChip(
+                          label:
+                              '${t.estimateHours}: ${((task['estimate_hours'] as num?)?.toStringAsFixed(0) ?? '0')}',
+                        ),
+                        _TaskMetaChip(
+                          label:
+                              '${t.dueDateLabel}: ${_dateOnly(task['due_date']?.toString())}',
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    _MetaLine(
+                      label: t.assignedToEmployeeAt,
+                      value: _dateTime(task['created_at']?.toString()),
+                    ),
+                    _MetaLine(
+                      label: t.employeeReceivedAt,
+                      value: _dateTime(task['assignee_received_at']?.toString()),
+                    ),
+                    _MetaLine(
+                      label: t.employeeStartedAt,
+                      value: _dateTime(task['assignee_started_at']?.toString()),
+                    ),
+                    _MetaLine(
+                      label: t.completedAtLabel,
+                      value: _dateTime(task['completed_at']?.toString()),
+                    ),
+                    _MetaLine(
+                      label: t.lastUpdateAt,
+                      value: _dateTime(task['updated_at']?.toString()),
+                    ),
+                    const SizedBox(height: 8),
                     Row(
                       children: [
                         Expanded(
@@ -149,7 +197,8 @@ class _MyTasksSectionState extends State<MyTasksSection> {
     final res = await client
         .from('employee_tasks')
         .select(
-          'id, title, description, status, progress, due_date, updated_at, created_at',
+          'id, title, description, task_type, priority, estimate_hours, status, progress, due_date, '
+          'created_at, updated_at, assignee_received_at, assignee_started_at, completed_at',
         )
         .eq('tenant_id', tenantId)
         .eq('employee_id', widget.employeeId)
@@ -240,5 +289,118 @@ class _MyTasksSectionState extends State<MyTasksSection> {
         'created_by_user_id': uid,
       });
     } catch (_) {}
+  }
+
+  String _dateOnly(String? raw) {
+    final dt = DateTime.tryParse(raw ?? '');
+    if (dt == null) return '-';
+    return '${dt.year.toString().padLeft(4, '0')}-'
+        '${dt.month.toString().padLeft(2, '0')}-'
+        '${dt.day.toString().padLeft(2, '0')}';
+  }
+
+  String _dateTime(String? raw) {
+    final dt = DateTime.tryParse(raw ?? '');
+    if (dt == null) return '-';
+    return '${dt.year.toString().padLeft(4, '0')}-'
+        '${dt.month.toString().padLeft(2, '0')}-'
+        '${dt.day.toString().padLeft(2, '0')} '
+        '${dt.hour.toString().padLeft(2, '0')}:'
+        '${dt.minute.toString().padLeft(2, '0')}';
+  }
+
+  String _priorityLabel(AppLocalizations t, String priority) {
+    switch (priority) {
+      case 'low':
+        return t.priorityLow;
+      case 'high':
+        return t.priorityHigh;
+      default:
+        return t.priorityMedium;
+    }
+  }
+
+  String _taskTypeLabel(AppLocalizations t, String type) {
+    switch (type) {
+      case 'development':
+        return t.taskTypeDevelopment;
+      case 'bug_fix':
+        return t.taskTypeBugFix;
+      case 'testing':
+        return t.taskTypeTesting;
+      case 'support':
+        return t.taskTypeSupport;
+      case 'transfer':
+        return t.taskTypeTransfer;
+      case 'report':
+        return t.taskTypeReport;
+      case 'tax':
+        return t.taskTypeTax;
+      case 'payroll':
+        return t.taskTypePayroll;
+      case 'reconciliation':
+        return t.taskTypeReconciliation;
+      case 'recruitment':
+        return t.taskTypeRecruitment;
+      case 'onboarding':
+        return t.taskTypeOnboarding;
+      case 'employee_docs':
+        return t.taskTypeEmployeeDocs;
+      default:
+        return t.taskTypeGeneral;
+    }
+  }
+}
+
+class _TaskMetaChip extends StatelessWidget {
+  const _TaskMetaChip({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
+      ),
+    );
+  }
+}
+
+class _MetaLine extends StatelessWidget {
+  const _MetaLine({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            value,
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+          ),
+        ],
+      ),
+    );
   }
 }

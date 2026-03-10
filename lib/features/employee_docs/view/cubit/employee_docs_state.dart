@@ -13,6 +13,7 @@ class EmployeeDocsState extends Equatable {
     required this.pageSize,
     required this.search,
     required this.docType,
+    required this.expiryStatus,
     required this.sortBy,
     required this.ascending,
     this.error,
@@ -27,6 +28,7 @@ class EmployeeDocsState extends Equatable {
   final int pageSize;
   final String search;
   final String? docType;
+  final String? expiryStatus;
   final String sortBy;
   final bool ascending;
   final String? error;
@@ -51,6 +53,7 @@ class EmployeeDocsState extends Equatable {
     int? pageSize,
     String? search,
     Object? docType = _unset,
+    Object? expiryStatus = _unset,
     String? sortBy,
     bool? ascending,
     String? error,
@@ -66,6 +69,9 @@ class EmployeeDocsState extends Equatable {
       pageSize: pageSize ?? this.pageSize,
       search: search ?? this.search,
       docType: docType == _unset ? this.docType : docType as String?,
+      expiryStatus: expiryStatus == _unset
+          ? this.expiryStatus
+          : expiryStatus as String?,
       sortBy: sortBy ?? this.sortBy,
       ascending: ascending ?? this.ascending,
       error: clearError ? null : (error ?? this.error),
@@ -82,6 +88,7 @@ class EmployeeDocsState extends Equatable {
     pageSize: 10,
     search: '',
     docType: null,
+    expiryStatus: null,
     sortBy: 'created_at',
     ascending: false,
     error: null,
@@ -98,6 +105,7 @@ class EmployeeDocsState extends Equatable {
         pageSize,
         search,
         docType,
+        expiryStatus,
         sortBy,
         ascending,
         error,

@@ -80,10 +80,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get hrAlertsInsuranceDays => 'Insurance alert days';
 
   @override
+  String get hrAlertsDocumentsDays => 'Document alert days';
+
+  @override
   String get hrAlertsSettingsSaved => 'Alert settings saved';
 
   @override
   String get hrAlertsNoRows => 'No expiry alerts found.';
+
+  @override
+  String get hrAlertsTotal => 'Total Alerts';
 
   @override
   String get hrAlertsColEmployee => 'Employee';
@@ -123,6 +129,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get hrTypeInsurance => 'Insurance';
+
+  @override
+  String get hrTypeDocument => 'Document';
 
   @override
   String get validationRange1To365 => 'Enter a number between 1 and 365';
@@ -763,6 +772,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get openAttachment => 'Open Attachment';
 
   @override
+  String get openDocument => 'Open Document';
+
+  @override
   String get close => 'Close';
 
   @override
@@ -1022,6 +1034,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get open => 'Open';
 
   @override
+  String get preview => 'Preview';
+
+  @override
   String get documents => 'Documents';
 
   @override
@@ -1135,7 +1150,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pendingApprovalsKpi => 'Pending Approvals';
 
   @override
+  String get expiryAlertsKpi => 'Expiry Alerts';
+
+  @override
+  String get expiredDocumentsKpi => 'Expired Documents';
+
+  @override
+  String get urgentAlertsKpi => 'Urgent Alerts';
+
+  @override
   String get waitingHrAction => 'Waiting HR action';
+
+  @override
+  String get documentExpiryNeedsAction => 'Documents need HR action';
 
   @override
   String get onLeaveTodayKpi => 'On Leave Today';
@@ -1175,6 +1202,48 @@ class AppLocalizationsEn extends AppLocalizations {
   String get productivity => 'Productivity';
 
   @override
+  String get quickActions => 'Quick Actions';
+
+  @override
+  String get hrWorkflowBoard => 'HR Workflow Board';
+
+  @override
+  String get reviewPendingApprovals => 'Review Pending Approvals';
+
+  @override
+  String get resolveExpiryAlerts => 'Resolve Expiry Alerts';
+
+  @override
+  String get completeEmployeeDocuments => 'Complete Employee Documents';
+
+  @override
+  String get documentCompliance => 'Document Compliance';
+
+  @override
+  String get expiringDocumentsByType => 'Expiring Documents by Type';
+
+  @override
+  String get expiringWithin30Days => 'Expiring within 30 days';
+
+  @override
+  String get todayAttendanceInsights => 'Today Attendance Insights';
+
+  @override
+  String get attendanceAlertsToday => 'Attendance Alerts Today';
+
+  @override
+  String get noAttendanceInsightsToday => 'No attendance insights for today.';
+
+  @override
+  String get noAttendanceAlertsToday => 'No attendance alerts for today.';
+
+  @override
+  String get checkedInTodayLabel => 'Checked In Today';
+
+  @override
+  String get absentTodayLabel => 'Absent Today';
+
+  @override
   String pendingWithValue(int value) {
     return 'Pending: $value';
   }
@@ -1203,6 +1272,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get taskTitle => 'Task Title';
+
+  @override
+  String get dueDateLabel => 'Due Date';
 
   @override
   String get dueDateOptional => 'Due Date (optional)';
@@ -1245,6 +1317,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get edit => 'Edit';
+
+  @override
+  String get download => 'Download';
+
+  @override
+  String get delete => 'Delete';
 
   @override
   String get disable => 'Disable';
@@ -1361,6 +1439,32 @@ class AppLocalizationsEn extends AppLocalizations {
       'Employee documents storage is not configured yet. Run the employee docs bucket SQL first.';
 
   @override
+  String get editDocument => 'Edit Document';
+
+  @override
+  String get deleteDocument => 'Delete Document';
+
+  @override
+  String get deleteDocumentConfirm =>
+      'Are you sure you want to delete this document?';
+
+  @override
+  String get documentUpdated => 'Document updated successfully';
+
+  @override
+  String get documentDeleted => 'Document deleted successfully';
+
+  @override
+  String fileSavedTo(Object path) {
+    return 'File saved to: $path';
+  }
+
+  @override
+  String fileDownloadFailed(Object error) {
+    return 'File download failed: $error';
+  }
+
+  @override
   String get notAuthenticated => 'Not authenticated';
 
   @override
@@ -1412,6 +1516,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get employeeStartedAt => 'Employee started task at';
 
   @override
+  String get completedAtLabel => 'Completed at';
+
+  @override
   String get lastUpdateAt => 'Last update at';
 
   @override
@@ -1452,7 +1559,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get taskType => 'Task Type';
 
   @override
+  String get taskCatalog => 'Task Catalog';
+
+  @override
+  String taskCatalogForDepartment(Object department) {
+    return '$department task catalog';
+  }
+
+  @override
   String get taskTypeGeneral => 'General';
+
+  @override
+  String get taskTypeDevelopment => 'Development';
+
+  @override
+  String get taskTypeBugFix => 'Bug Fix';
+
+  @override
+  String get taskTypeTesting => 'Testing';
+
+  @override
+  String get taskTypeSupport => 'Support';
 
   @override
   String get taskTypeTransfer => 'Transfer';
@@ -1473,7 +1600,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get taskTypeRecruitment => 'Recruitment';
 
   @override
+  String get taskTypeOnboarding => 'Onboarding';
+
+  @override
   String get taskTypeEmployeeDocs => 'Employee Documents';
+
+  @override
+  String get allStatuses => 'All Statuses';
 
   @override
   String get uploadNewDocument => 'Upload New Document';
@@ -1492,6 +1625,54 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get salaryCertificate => 'Salary Certificate';
+
+  @override
+  String get identityDocuments => 'Identity Documents';
+
+  @override
+  String get educationAndCareerDocuments => 'Education and Career Documents';
+
+  @override
+  String get financialDocuments => 'Financial Documents';
+
+  @override
+  String get medicalAndInsuranceDocuments => 'Medical and Insurance Documents';
+
+  @override
+  String get otherDocuments => 'Other Documents';
+
+  @override
+  String get residencyDocument => 'Residency';
+
+  @override
+  String get drivingLicense => 'Driving License';
+
+  @override
+  String get offerLetter => 'Offer Letter';
+
+  @override
+  String get salaryDefinition => 'Salary Definition';
+
+  @override
+  String get medicalInsurance => 'Medical Insurance';
+
+  @override
+  String get medicalReport => 'Medical Report';
+
+  @override
+  String get expired => 'Expired';
+
+  @override
+  String get expiringSoon => 'Expiring Soon';
+
+  @override
+  String get valid => 'Valid';
+
+  @override
+  String get noExpiry => 'No Expiry';
+
+  @override
+  String get documentFile => 'Document';
 
   @override
   String get uploadFile => 'Upload File';
