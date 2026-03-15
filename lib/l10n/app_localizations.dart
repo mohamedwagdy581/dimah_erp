@@ -2432,6 +2432,342 @@ abstract class AppLocalizations {
   /// **'Review Pending Approvals'**
   String get reviewPendingApprovals;
 
+  /// No description provided for @pendingTaskReviews.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending Task Reviews'**
+  String get pendingTaskReviews;
+
+  /// No description provided for @pendingTaskQa.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending Final QA'**
+  String get pendingTaskQa;
+
+  /// No description provided for @noPendingTaskReviews.
+  ///
+  /// In en, this message translates to:
+  /// **'No pending task reviews.'**
+  String get noPendingTaskReviews;
+
+  /// No description provided for @noPendingTaskQa.
+  ///
+  /// In en, this message translates to:
+  /// **'No tasks pending final QA.'**
+  String get noPendingTaskQa;
+
+  /// No description provided for @requestManagerReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Request Manager Review'**
+  String get requestManagerReview;
+
+  /// No description provided for @reviewPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Review Pending'**
+  String get reviewPending;
+
+  /// No description provided for @reviewApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Review Approved'**
+  String get reviewApproved;
+
+  /// No description provided for @reviewRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Review Rejected'**
+  String get reviewRejected;
+
+  /// No description provided for @noActiveReview.
+  ///
+  /// In en, this message translates to:
+  /// **'No Active Review'**
+  String get noActiveReview;
+
+  /// No description provided for @reviewNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Review Note'**
+  String get reviewNote;
+
+  /// No description provided for @reviewNoteRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Review note is required'**
+  String get reviewNoteRequired;
+
+  /// No description provided for @reviewRequestedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Review requested at'**
+  String get reviewRequestedAt;
+
+  /// No description provided for @yourReviewNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Your note'**
+  String get yourReviewNote;
+
+  /// No description provided for @managerResponseNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Manager response'**
+  String get managerResponseNote;
+
+  /// No description provided for @reviewRequestSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Review request sent'**
+  String get reviewRequestSent;
+
+  /// No description provided for @approveAndUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve and Update'**
+  String get approveAndUpdate;
+
+  /// No description provided for @rejectReviewRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject Review Request'**
+  String get rejectReviewRequest;
+
+  /// No description provided for @reviewApprovedAndTaskUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Review approved and task updated'**
+  String get reviewApprovedAndTaskUpdated;
+
+  /// No description provided for @reviewRejectedAndReturned.
+  ///
+  /// In en, this message translates to:
+  /// **'Review rejected and task returned'**
+  String get reviewRejectedAndReturned;
+
+  /// No description provided for @taskEventReviewRequested.
+  ///
+  /// In en, this message translates to:
+  /// **'Review requested'**
+  String get taskEventReviewRequested;
+
+  /// No description provided for @taskEventReviewApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Review approved'**
+  String get taskEventReviewApproved;
+
+  /// No description provided for @taskEventReviewRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Review rejected'**
+  String get taskEventReviewRejected;
+
+  /// No description provided for @taskEventQaAccepted.
+  ///
+  /// In en, this message translates to:
+  /// **'QA accepted'**
+  String get taskEventQaAccepted;
+
+  /// No description provided for @taskEventQaRework.
+  ///
+  /// In en, this message translates to:
+  /// **'QA sent for rework'**
+  String get taskEventQaRework;
+
+  /// No description provided for @taskEventQaRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'QA rejected'**
+  String get taskEventQaRejected;
+
+  /// No description provided for @taskEventAttachmentAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Attachment added'**
+  String get taskEventAttachmentAdded;
+
+  /// No description provided for @taskEventTimeLogged.
+  ///
+  /// In en, this message translates to:
+  /// **'Time logged'**
+  String get taskEventTimeLogged;
+
+  /// No description provided for @send.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get send;
+
+  /// No description provided for @attachFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Attach File'**
+  String get attachFile;
+
+  /// No description provided for @logHours.
+  ///
+  /// In en, this message translates to:
+  /// **'Log Hours'**
+  String get logHours;
+
+  /// No description provided for @logHoursTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Log Hours'**
+  String get logHoursTitle;
+
+  /// No description provided for @loggedHours.
+  ///
+  /// In en, this message translates to:
+  /// **'Logged Hours'**
+  String get loggedHours;
+
+  /// No description provided for @invalidLoggedHours.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid logged hours value.'**
+  String get invalidLoggedHours;
+
+  /// No description provided for @hoursLoggedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Hours logged successfully'**
+  String get hoursLoggedSuccessfully;
+
+  /// No description provided for @attachments.
+  ///
+  /// In en, this message translates to:
+  /// **'Attachments'**
+  String get attachments;
+
+  /// No description provided for @attachmentsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} attachments'**
+  String attachmentsCount(int count);
+
+  /// No description provided for @allTasks.
+  ///
+  /// In en, this message translates to:
+  /// **'All Tasks'**
+  String get allTasks;
+
+  /// No description provided for @attachmentUploaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Attachment uploaded'**
+  String get attachmentUploaded;
+
+  /// No description provided for @qaPending.
+  ///
+  /// In en, this message translates to:
+  /// **'QA Pending'**
+  String get qaPending;
+
+  /// No description provided for @qaAccepted.
+  ///
+  /// In en, this message translates to:
+  /// **'QA Accepted'**
+  String get qaAccepted;
+
+  /// No description provided for @qaRework.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs Rework'**
+  String get qaRework;
+
+  /// No description provided for @qaRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'QA Rejected'**
+  String get qaRejected;
+
+  /// No description provided for @qaApprove.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve'**
+  String get qaApprove;
+
+  /// No description provided for @qaSendRework.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Rework'**
+  String get qaSendRework;
+
+  /// No description provided for @qaReject.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject'**
+  String get qaReject;
+
+  /// No description provided for @qaApprovedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Task approved in final QA'**
+  String get qaApprovedMessage;
+
+  /// No description provided for @qaReworkMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Task sent back for rework'**
+  String get qaReworkMessage;
+
+  /// No description provided for @qaRejectedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Task rejected in final QA'**
+  String get qaRejectedMessage;
+
+  /// No description provided for @qaLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'QA: {status}'**
+  String qaLabel(Object status);
+
+  /// No description provided for @employeeActionCenter.
+  ///
+  /// In en, this message translates to:
+  /// **'Action Center'**
+  String get employeeActionCenter;
+
+  /// No description provided for @employeeNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get employeeNotifications;
+
+  /// No description provided for @noEmployeeNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'No notifications right now.'**
+  String get noEmployeeNotifications;
+
+  /// No description provided for @taskDueSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Task due soon'**
+  String get taskDueSoon;
+
+  /// No description provided for @reviewPendingWithValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Review pending: {value}'**
+  String reviewPendingWithValue(int value);
+
+  /// No description provided for @qaPendingWithValue.
+  ///
+  /// In en, this message translates to:
+  /// **'QA pending: {value}'**
+  String qaPendingWithValue(int value);
+
+  /// No description provided for @dueSoonWithValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Due soon: {value}'**
+  String dueSoonWithValue(int value);
+
   /// No description provided for @resolveExpiryAlerts.
   ///
   /// In en, this message translates to:
@@ -3098,6 +3434,12 @@ abstract class AppLocalizations {
   /// **'{department} task catalog'**
   String taskCatalogForDepartment(Object department);
 
+  /// No description provided for @taskTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Task Template'**
+  String get taskTemplate;
+
   /// No description provided for @taskTypeGeneral.
   ///
   /// In en, this message translates to:
@@ -3175,6 +3517,228 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Employee Documents'**
   String get taskTypeEmployeeDocs;
+
+  /// No description provided for @templateLoginSignup.
+  ///
+  /// In en, this message translates to:
+  /// **'Login and signup delivery'**
+  String get templateLoginSignup;
+
+  /// No description provided for @templateLoginSignupDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Build and complete the login and signup flow with validation, state handling, and final QA.'**
+  String get templateLoginSignupDesc;
+
+  /// No description provided for @templateBugFixRelease.
+  ///
+  /// In en, this message translates to:
+  /// **'Release blocker bug fix'**
+  String get templateBugFixRelease;
+
+  /// No description provided for @templateBugFixReleaseDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Investigate the blocker, apply the fix, validate affected flows, and prepare the release notes.'**
+  String get templateBugFixReleaseDesc;
+
+  /// No description provided for @templateRegressionTesting.
+  ///
+  /// In en, this message translates to:
+  /// **'Regression testing cycle'**
+  String get templateRegressionTesting;
+
+  /// No description provided for @templateRegressionTestingDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Run the assigned regression checklist, document findings, and retest the resolved issues.'**
+  String get templateRegressionTestingDesc;
+
+  /// No description provided for @templateTransferBatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer batch processing'**
+  String get templateTransferBatch;
+
+  /// No description provided for @templateTransferBatchDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Process the assigned transfers, verify amounts, and log completion status for each transaction.'**
+  String get templateTransferBatchDesc;
+
+  /// No description provided for @templateMonthlyFinanceReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly finance report'**
+  String get templateMonthlyFinanceReport;
+
+  /// No description provided for @templateMonthlyFinanceReportDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Prepare the monthly finance report, review the source numbers, and submit the final summary.'**
+  String get templateMonthlyFinanceReportDesc;
+
+  /// No description provided for @templateTaxSubmission.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax submission package'**
+  String get templateTaxSubmission;
+
+  /// No description provided for @templateTaxSubmissionDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Prepare tax data, validate required documents, and submit the filing package before the deadline.'**
+  String get templateTaxSubmissionDesc;
+
+  /// No description provided for @templateOnboardingPack.
+  ///
+  /// In en, this message translates to:
+  /// **'Employee onboarding pack'**
+  String get templateOnboardingPack;
+
+  /// No description provided for @templateOnboardingPackDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Collect, review, and complete the onboarding checklist and required employee documents.'**
+  String get templateOnboardingPackDesc;
+
+  /// No description provided for @templateDocumentAudit.
+  ///
+  /// In en, this message translates to:
+  /// **'Employee document audit'**
+  String get templateDocumentAudit;
+
+  /// No description provided for @templateDocumentAuditDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Review the employee document set, flag missing items, and update expiry-sensitive files.'**
+  String get templateDocumentAuditDesc;
+
+  /// No description provided for @templateRecruitmentFollowup.
+  ///
+  /// In en, this message translates to:
+  /// **'Recruitment follow-up'**
+  String get templateRecruitmentFollowup;
+
+  /// No description provided for @templateRecruitmentFollowupDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow up on the assigned candidates, update statuses, and move the pipeline forward.'**
+  String get templateRecruitmentFollowupDesc;
+
+  /// No description provided for @templateGeneralFollowup.
+  ///
+  /// In en, this message translates to:
+  /// **'General follow-up task'**
+  String get templateGeneralFollowup;
+
+  /// No description provided for @templateGeneralFollowupDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Track the assigned work item, update the status, and close the task on time.'**
+  String get templateGeneralFollowupDesc;
+
+  /// No description provided for @monthDepartmentOverview.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly Department Overview'**
+  String get monthDepartmentOverview;
+
+  /// No description provided for @monthTasksCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Tasks created this month'**
+  String get monthTasksCreated;
+
+  /// No description provided for @monthTasksCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Tasks completed this month'**
+  String get monthTasksCompleted;
+
+  /// No description provided for @monthOnTimeRate.
+  ///
+  /// In en, this message translates to:
+  /// **'On-time completion'**
+  String get monthOnTimeRate;
+
+  /// No description provided for @monthDepartmentProductivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Department productivity'**
+  String get monthDepartmentProductivity;
+
+  /// No description provided for @monthCompletionRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Completion rate'**
+  String get monthCompletionRate;
+
+  /// No description provided for @monthlyCompletionTrend.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly Completion Trend'**
+  String get monthlyCompletionTrend;
+
+  /// No description provided for @lastSixMonths.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 6 months'**
+  String get lastSixMonths;
+
+  /// No description provided for @onTimeVsDelayed.
+  ///
+  /// In en, this message translates to:
+  /// **'On-time vs Delayed'**
+  String get onTimeVsDelayed;
+
+  /// No description provided for @taskTypeDistribution.
+  ///
+  /// In en, this message translates to:
+  /// **'Task Type Distribution'**
+  String get taskTypeDistribution;
+
+  /// No description provided for @employeeWorkload.
+  ///
+  /// In en, this message translates to:
+  /// **'Employee Workload'**
+  String get employeeWorkload;
+
+  /// No description provided for @currentMonthBreakdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Current month breakdown'**
+  String get currentMonthBreakdown;
+
+  /// No description provided for @onTime.
+  ///
+  /// In en, this message translates to:
+  /// **'On-time'**
+  String get onTime;
+
+  /// No description provided for @delayed.
+  ///
+  /// In en, this message translates to:
+  /// **'Delayed'**
+  String get delayed;
+
+  /// No description provided for @monthTasksWithValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Month tasks: {value}'**
+  String monthTasksWithValue(int value);
+
+  /// No description provided for @completedThisMonthWithValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed this month: {value}'**
+  String completedThisMonthWithValue(int value);
+
+  /// No description provided for @avgTaskProgressWithValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Avg progress: {value}%'**
+  String avgTaskProgressWithValue(Object value);
 
   /// No description provided for @allStatuses.
   ///
@@ -3325,6 +3889,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No file selected'**
   String get noFileSelected;
+
+  /// No description provided for @notificationsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get notificationsTitle;
+
+  /// No description provided for @failedToLoadNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load notifications'**
+  String get failedToLoadNotifications;
+
+  /// No description provided for @noNotificationsAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No notifications available.'**
+  String get noNotificationsAvailable;
 }
 
 class _AppLocalizationsDelegate

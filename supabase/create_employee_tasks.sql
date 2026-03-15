@@ -12,9 +12,15 @@ create table if not exists public.employee_tasks (
   weight int not null default 3 check (weight >= 1 and weight <= 5),
   status text not null default 'todo' check (status in ('todo', 'in_progress', 'done')),
   qa_status text not null default 'pending' check (qa_status in ('pending', 'accepted', 'rework', 'rejected')),
+  employee_review_status text not null default 'none' check (employee_review_status in ('none', 'pending', 'approved', 'rejected')),
+  employee_review_note text null,
+  employee_review_requested_at timestamptz null,
+  manager_review_note text null,
+  manager_reviewed_at timestamptz null,
   progress int not null default 0 check (progress >= 0 and progress <= 100),
   assignee_received_at timestamptz null,
   assignee_started_at timestamptz null,
+  active_timer_started_at timestamptz null,
   completed_at timestamptz null,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -26,8 +32,14 @@ alter table public.employee_tasks
   add column if not exists priority text not null default 'medium',
   add column if not exists weight int not null default 3,
   add column if not exists qa_status text not null default 'pending',
+  add column if not exists employee_review_status text not null default 'none',
+  add column if not exists employee_review_note text null,
+  add column if not exists employee_review_requested_at timestamptz null,
+  add column if not exists manager_review_note text null,
+  add column if not exists manager_reviewed_at timestamptz null,
   add column if not exists assignee_received_at timestamptz null,
   add column if not exists assignee_started_at timestamptz null,
+  add column if not exists active_timer_started_at timestamptz null,
   add column if not exists completed_at timestamptz null;
 
 create index if not exists idx_employee_tasks_tenant_employee

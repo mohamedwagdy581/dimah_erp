@@ -1,0 +1,163 @@
+  const _AddCompensationVersionDialog({required this.profile});
+
+  final EmployeeProfileDetails profile;
+
+  @override
+  State<_AddCompensationVersionDialog> createState() =>
+      _AddCompensationVersionDialogState();
+}
+
+class _AddCompensationVersionDialogState
+    extends State<_AddCompensationVersionDialog> {
+  final _formKey = GlobalKey<FormState>();
+  late final TextEditingController _basic;
+  late final TextEditingController _housing;
+  late final TextEditingController _transport;
+  late final TextEditingController _other;
+  late final TextEditingController _note;
+  DateTime? _effectiveAt;
+  bool _saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _basic = TextEditingController(
+      text: (widget.profile.basicSalary ?? 0).toStringAsFixed(2),
+    );
+    _housing = TextEditingController(
+      text: (widget.profile.housingAllowance ?? 0).toStringAsFixed(2),
+    );
+    _transport = TextEditingController(
+      text: (widget.profile.transportAllowance ?? 0).toStringAsFixed(2),
+    );
+    _other = TextEditingController(
+      text: (widget.profile.otherAllowance ?? 0).toStringAsFixed(2),
+    );
+    _note = TextEditingController();
+    _effectiveAt = DateTime.now();
+  }
+
+  @override
+  void dispose() {
+    _basic.dispose();
+    _housing.dispose();
+    _transport.dispose();
+    _other.dispose();
+    _note.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
+    return AlertDialog(
+      title: Text(t.addCompensationVersion),
+      content: SizedBox(
+        width: 520,
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _numField(_basic, t.basicSalary),
+              const SizedBox(height: 10),
+              _numField(_housing, t.housingAllowance),
+              const SizedBox(height: 10),
+              _numField(_transport, t.transportAllowance),
+              const SizedBox(height: 10),
+              _numField(_other, t.otherAllowance),
+              const SizedBox(height: 10),
+              OutlinedButton.icon(
+                onPressed: _pickEffectiveDate,
+                icon: const Icon(Icons.event),
+                label: Text(
+                  _effectiveAt == null ? t.effectiveDate : _fmt(_effectiveAt),
+                ),
+              ),
+              const SizedBox(height: 10),
+              TextFormField(
+                controller: _note,
+                decoration: InputDecoration(
+                  labelText: t.noteOptional,
+                  border: const OutlineInputBorder(),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: _saving ? null : () => Navigator.pop(context, false),
+          child: Text(t.cancel),
+        ),
+        ElevatedButton(
+          onPressed: _saving ? null : _save,
+          child: Text(_saving ? t.saving : t.save),
+        ),
+      ],
+    );
+  }
+
+  Widget _numField(TextEditingController c, String label) {
+    return TextFormField(
+      controller: c,
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      decoration: InputDecoration(
+        labelText: label,
+        border: const OutlineInputBorder(),
+      ),
+      validator: (v) {
+        if ((v ?? '').trim().isEmpty)
+          return AppLocalizations.of(context)!.fieldRequired(label);
+        if (double.tryParse(v!.trim()) == null)
+          return AppLocalizations.of(context)!.invalidNumber;
+        return null;
+      },
+    );
+  }
+
+  Future<void> _pickEffectiveDate() async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _effectiveAt ?? now,
+      firstDate: DateTime(now.year - 20, 1, 1),
+      lastDate: DateTime(now.year + 20, 12, 31),
+    );
+    if (picked != null) setState(() => _effectiveAt = picked);
+  }
+
+  Future<void> _save() async {
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+    setState(() => _saving = true);
+    try {
+      await AppDI.employeesRepo.addEmployeeCompensationVersion(
+        employeeId: widget.profile.id,
+        basicSalary: double.parse(_basic.text.trim()),
+        housingAllowance: double.parse(_housing.text.trim()),
+        transportAllowance: double.parse(_transport.text.trim()),
+        otherAllowance: double.parse(_other.text.trim()),
+        effectiveAt: _effectiveAt,
+        note: _note.text.trim(),
+      );
+      if (!mounted) return;
+      Navigator.pop(context, true);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _saving = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.saveFailed(e.toString())),
+        ),
+      );
+    }
+  }
+
+  String _fmt(DateTime? d) {
+    if (d == null) return '-';
+    return '${d.year.toString().padLeft(4, '0')}-'
+        '${d.month.toString().padLeft(2, '0')}-'
+        '${d.day.toString().padLeft(2, '0')}';
+  }
+}

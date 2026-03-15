@@ -27,6 +27,8 @@ String localizedNavLabel(BuildContext context, NavItem item) {
       return t.menuHrAlerts;
     case AppRoutes.approvals:
       return t.menuApprovals;
+    case AppRoutes.notifications:
+      return t.notificationsTitle;
     case AppRoutes.myPortal:
       return t.menuMyPortal;
     case AppRoutes.accounts:

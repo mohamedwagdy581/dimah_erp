@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/di/app_di.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../employees/domain/models/employee_lookup.dart';
 import '../../domain/models/department.dart';
-import '../cubit/departments_cubit.dart';
+import 'department_form_dialog_actions.dart';
+import 'department_form_dialog_manager_field.dart';
 
 class DepartmentFormDialog extends StatefulWidget {
   const DepartmentFormDialog({super.key, this.edit});
@@ -76,85 +76,23 @@ class _DepartmentFormDialogState extends State<DepartmentFormDialog> {
                 maxLines: 3,
               ),
               const SizedBox(height: 10),
-              FutureBuilder<List<EmployeeLookup>>(
-                future: _managersFuture,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const LinearProgressIndicator();
-                  }
-                  if (snapshot.hasError) {
-                    return Text(
-                      '${t.unableToLoadManagers}: ${snapshot.error}',
-                      style: const TextStyle(color: Colors.red),
-                    );
-                  }
-                  final rawManagers = snapshot.data ?? const <EmployeeLookup>[];
-                  final seen = <String>{};
-                  final managers = rawManagers.where((m) {
-                    if (seen.contains(m.id)) return false;
-                    seen.add(m.id);
-                    return true;
-                  }).toList();
-                  final currentValue = managers.any((m) => m.id == _managerId)
-                      ? _managerId
-                      : '';
-                  return DropdownButtonFormField<String>(
-                    initialValue: currentValue,
-                    decoration: InputDecoration(
-                      labelText: t.departmentManager,
-                    ),
-                    items: [
-                      DropdownMenuItem(
-                        value: '',
-                        child: Text(t.noManager),
-                      ),
-                      ...managers.map(
-                        (m) => DropdownMenuItem(
-                          value: m.id,
-                          child: Text(m.fullName),
-                        ),
-                      ),
-                    ],
-                    onChanged: (v) =>
-                        setState(() => _managerId = (v ?? '').trim().isEmpty ? null : v),
-                  );
-                },
+              DepartmentManagerField(
+                managersFuture: _managersFuture,
+                managerId: _managerId,
+                onChanged: (value) => setState(() => _managerId = value),
               ),
             ],
           ),
         ),
       ),
       actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context, false),
-          child: Text(t.cancel),
-        ),
-        ElevatedButton(
-          onPressed: () async {
-            if (!_formKey.currentState!.validate()) return;
-
-            final cubit = context.read<DepartmentsCubit>();
-
-            if (isEdit) {
-              await cubit.update(
-                id: widget.edit!.id,
-                name: _name.text,
-                code: _code.text,
-                description: _desc.text,
-                managerId: _managerId,
-                isActive: widget.edit!.isActive,
-              );
-            } else {
-              await cubit.create(
-                name: _name.text,
-                code: _code.text,
-                description: _desc.text,
-                managerId: _managerId,
-              );
-            }
-            if (context.mounted) Navigator.pop(context, true);
-          },
-          child: Text(isEdit ? t.save : t.create),
+        DepartmentFormDialogActions(
+          formKey: _formKey,
+          nameController: _name,
+          codeController: _code,
+          descriptionController: _desc,
+          managerId: _managerId,
+          edit: widget.edit,
         ),
       ],
     );

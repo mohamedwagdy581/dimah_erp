@@ -1212,6 +1212,185 @@ class AppLocalizationsAr extends AppLocalizations {
   String get reviewPendingApprovals => 'مراجعة الموافقات المعلقة';
 
   @override
+  String get pendingTaskReviews => 'طلبات مراجعة المهام';
+
+  @override
+  String get pendingTaskQa => 'مهام بانتظار الاعتماد النهائي';
+
+  @override
+  String get noPendingTaskReviews => 'لا توجد طلبات مراجعة مهام معلقة.';
+
+  @override
+  String get noPendingTaskQa => 'لا توجد مهام بانتظار الاعتماد النهائي.';
+
+  @override
+  String get requestManagerReview => 'طلب مراجعة من المدير';
+
+  @override
+  String get reviewPending => 'المراجعة معلقة';
+
+  @override
+  String get reviewApproved => 'تمت الموافقة على المراجعة';
+
+  @override
+  String get reviewRejected => 'تم رفض المراجعة';
+
+  @override
+  String get noActiveReview => 'لا توجد مراجعة نشطة';
+
+  @override
+  String get reviewNote => 'ملاحظة المراجعة';
+
+  @override
+  String get reviewNoteRequired => 'ملاحظة المراجعة مطلوبة';
+
+  @override
+  String get reviewRequestedAt => 'تاريخ طلب المراجعة';
+
+  @override
+  String get yourReviewNote => 'ملاحظتك';
+
+  @override
+  String get managerResponseNote => 'رد المدير';
+
+  @override
+  String get reviewRequestSent => 'تم إرسال طلب المراجعة';
+
+  @override
+  String get approveAndUpdate => 'موافقة وتحديث';
+
+  @override
+  String get rejectReviewRequest => 'رفض طلب المراجعة';
+
+  @override
+  String get reviewApprovedAndTaskUpdated =>
+      'تمت الموافقة على المراجعة وتحديث المهمة';
+
+  @override
+  String get reviewRejectedAndReturned => 'تم رفض المراجعة وإرجاع المهمة';
+
+  @override
+  String get taskEventReviewRequested => 'تم طلب مراجعة';
+
+  @override
+  String get taskEventReviewApproved => 'تمت الموافقة على المراجعة';
+
+  @override
+  String get taskEventReviewRejected => 'تم رفض المراجعة';
+
+  @override
+  String get taskEventQaAccepted => 'تم اعتماد المهمة نهائيًا';
+
+  @override
+  String get taskEventQaRework => 'تمت إعادة المهمة لإعادة العمل';
+
+  @override
+  String get taskEventQaRejected => 'تم رفض المهمة في الاعتماد النهائي';
+
+  @override
+  String get taskEventAttachmentAdded => 'تمت إضافة مرفق';
+
+  @override
+  String get taskEventTimeLogged => 'تم تسجيل وقت';
+
+  @override
+  String get send => 'إرسال';
+
+  @override
+  String get attachFile => 'إرفاق ملف';
+
+  @override
+  String get logHours => 'تسجيل ساعات';
+
+  @override
+  String get logHoursTitle => 'تسجيل ساعات العمل';
+
+  @override
+  String get loggedHours => 'الساعات المسجلة';
+
+  @override
+  String get invalidLoggedHours => 'يرجى إدخال عدد ساعات صحيح.';
+
+  @override
+  String get hoursLoggedSuccessfully => 'تم تسجيل الساعات بنجاح';
+
+  @override
+  String get attachments => 'المرفقات';
+
+  @override
+  String attachmentsCount(int count) {
+    return '$count مرفقات';
+  }
+
+  @override
+  String get allTasks => 'كل المهام';
+
+  @override
+  String get attachmentUploaded => 'تم رفع المرفق';
+
+  @override
+  String get qaPending => 'بانتظار الاعتماد';
+
+  @override
+  String get qaAccepted => 'تم الاعتماد';
+
+  @override
+  String get qaRework => 'تحتاج إعادة عمل';
+
+  @override
+  String get qaRejected => 'مرفوضة';
+
+  @override
+  String get qaApprove => 'اعتماد';
+
+  @override
+  String get qaSendRework => 'إعادة للعمل';
+
+  @override
+  String get qaReject => 'رفض';
+
+  @override
+  String get qaApprovedMessage => 'تم اعتماد المهمة في المراجعة النهائية';
+
+  @override
+  String get qaReworkMessage => 'تمت إعادة المهمة للموظف لاستكمالها';
+
+  @override
+  String get qaRejectedMessage => 'تم رفض المهمة في المراجعة النهائية';
+
+  @override
+  String qaLabel(Object status) {
+    return 'حالة الاعتماد: $status';
+  }
+
+  @override
+  String get employeeActionCenter => 'مركز الإجراءات';
+
+  @override
+  String get employeeNotifications => 'الإشعارات';
+
+  @override
+  String get noEmployeeNotifications => 'لا توجد إشعارات حاليًا.';
+
+  @override
+  String get taskDueSoon => 'مهمة مستحقة قريبًا';
+
+  @override
+  String reviewPendingWithValue(int value) {
+    return 'مراجعات معلقة: $value';
+  }
+
+  @override
+  String qaPendingWithValue(int value) {
+    return 'اعتمادات نهائية معلقة: $value';
+  }
+
+  @override
+  String dueSoonWithValue(int value) {
+    return 'مستحق قريبًا: $value';
+  }
+
+  @override
   String get resolveExpiryAlerts => 'معالجة تنبيهات الانتهاء';
 
   @override
@@ -1567,6 +1746,9 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get taskTemplate => 'قالب المهمة';
+
+  @override
   String get taskTypeGeneral => 'عام';
 
   @override
@@ -1604,6 +1786,133 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get taskTypeEmployeeDocs => 'مستندات موظف';
+
+  @override
+  String get templateLoginSignup => 'إنجاز شاشة تسجيل الدخول وإنشاء الحساب';
+
+  @override
+  String get templateLoginSignupDesc =>
+      'تنفيذ شاشة الدخول وإنشاء الحساب بالكامل مع التحقق من الحقول وإدارة الحالة والاختبار النهائي.';
+
+  @override
+  String get templateBugFixRelease => 'إصلاح عطل مؤثر قبل الإصدار';
+
+  @override
+  String get templateBugFixReleaseDesc =>
+      'تحليل العطل المؤثر، تنفيذ الإصلاح، اختبار المسارات المتأثرة، وتجهيز ملاحظات الإصدار.';
+
+  @override
+  String get templateRegressionTesting => 'دورة اختبارات رجعية';
+
+  @override
+  String get templateRegressionTestingDesc =>
+      'تشغيل قائمة الاختبارات المطلوبة، توثيق النتائج، وإعادة اختبار العناصر التي تم إصلاحها.';
+
+  @override
+  String get templateTransferBatch => 'معالجة دفعة تحويلات';
+
+  @override
+  String get templateTransferBatchDesc =>
+      'تنفيذ التحويلات المكلفة، التحقق من المبالغ، وتسجيل حالة الإنجاز لكل عملية.';
+
+  @override
+  String get templateMonthlyFinanceReport => 'التقرير المالي الشهري';
+
+  @override
+  String get templateMonthlyFinanceReportDesc =>
+      'إعداد التقرير المالي الشهري، مراجعة الأرقام المصدرية، ورفع الملخص النهائي.';
+
+  @override
+  String get templateTaxSubmission => 'ملف تقديم الضريبة';
+
+  @override
+  String get templateTaxSubmissionDesc =>
+      'تجهيز بيانات الضريبة، مراجعة المستندات المطلوبة، وتقديم الملف قبل الموعد المحدد.';
+
+  @override
+  String get templateOnboardingPack => 'حزمة تهيئة موظف جديد';
+
+  @override
+  String get templateOnboardingPackDesc =>
+      'استكمال قائمة تهيئة الموظف الجديد ومراجعة المستندات المطلوبة وإغلاق العناصر الناقصة.';
+
+  @override
+  String get templateDocumentAudit => 'مراجعة مستندات الموظفين';
+
+  @override
+  String get templateDocumentAuditDesc =>
+      'فحص مجموعة مستندات الموظف، تحديد النواقص، وتحديث الملفات الحساسة التاريخ الانتهاء.';
+
+  @override
+  String get templateRecruitmentFollowup => 'متابعة التوظيف';
+
+  @override
+  String get templateRecruitmentFollowupDesc =>
+      'متابعة المرشحين المكلفين، تحديث الحالات، وتحريك خط سير التوظيف.';
+
+  @override
+  String get templateGeneralFollowup => 'مهمة متابعة عامة';
+
+  @override
+  String get templateGeneralFollowupDesc =>
+      'متابعة العمل المكلف، تحديث الحالة باستمرار، وإغلاق المهمة في الموعد.';
+
+  @override
+  String get monthDepartmentOverview => 'نظرة القسم خلال الشهر';
+
+  @override
+  String get monthTasksCreated => 'المهام المنشأة هذا الشهر';
+
+  @override
+  String get monthTasksCompleted => 'المهام المكتملة هذا الشهر';
+
+  @override
+  String get monthOnTimeRate => 'الإنجاز في الموعد';
+
+  @override
+  String get monthDepartmentProductivity => 'إنتاجية القسم';
+
+  @override
+  String get monthCompletionRate => 'نسبة الإكمال';
+
+  @override
+  String get monthlyCompletionTrend => 'اتجاه الإكمال الشهري';
+
+  @override
+  String get lastSixMonths => 'آخر 6 أشهر';
+
+  @override
+  String get onTimeVsDelayed => 'في الموعد مقابل المتأخر';
+
+  @override
+  String get taskTypeDistribution => 'توزيع أنواع المهام';
+
+  @override
+  String get employeeWorkload => 'عبء العمل على الموظفين';
+
+  @override
+  String get currentMonthBreakdown => 'تفصيل الشهر الحالي';
+
+  @override
+  String get onTime => 'في الموعد';
+
+  @override
+  String get delayed => 'متأخر';
+
+  @override
+  String monthTasksWithValue(int value) {
+    return 'مهام الشهر: $value';
+  }
+
+  @override
+  String completedThisMonthWithValue(int value) {
+    return 'المكتمل هذا الشهر: $value';
+  }
+
+  @override
+  String avgTaskProgressWithValue(Object value) {
+    return 'متوسط التقدم: $value%';
+  }
 
   @override
   String get allStatuses => 'كل الحالات';
@@ -1679,4 +1988,13 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get noFileSelected => 'لم يتم اختيار ملف';
+
+  @override
+  String get notificationsTitle => 'الإشعارات';
+
+  @override
+  String get failedToLoadNotifications => 'فشل تحميل الإشعارات';
+
+  @override
+  String get noNotificationsAvailable => 'لا توجد إشعارات متاحة.';
 }

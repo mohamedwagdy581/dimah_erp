@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/models/attendance_record.dart';
+import 'attendance_actions_cell.dart';
+import 'attendance_status_chip.dart';
+import 'attendance_table_empty.dart';
+import 'attendance_table_utils.dart';
 
 class AttendanceTable extends StatelessWidget {
   const AttendanceTable({
@@ -16,12 +21,7 @@ class AttendanceTable extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context)!;
     if (items.isEmpty) {
-      return Card(
-        child: Padding(
-          padding: EdgeInsets.all(24),
-          child: Center(child: Text(t.noAttendanceRecordsFound)),
-        ),
-      );
+      return const AttendanceTableEmpty();
     }
 
     return Card(
@@ -44,48 +44,21 @@ class AttendanceTable extends StatelessWidget {
                   DataColumn(label: Text(t.actions)),
                 ],
                 rows: items.map((r) {
-                  final lateMinutes = _lateMinutes(r.checkIn);
-                  final overtimeMinutes = _overtimeMinutes(r.checkOut);
-                  final rowColor = lateMinutes > 0
-                      ? Colors.orange.withValues(alpha: 0.06)
-                      : (overtimeMinutes > 0
-                            ? Colors.blue.withValues(alpha: 0.06)
-                            : Colors.transparent);
                   return DataRow(
-                    color: WidgetStatePropertyAll(rowColor),
+                    color: WidgetStatePropertyAll(attendanceRowColor(r)),
                     cells: [
                       DataCell(Text(r.employeeName)),
-                      DataCell(Text(_formatDate(r.date))),
-                      DataCell(_statusChip(context, r.status)),
-                      DataCell(Text(_formatTime(r.checkIn))),
-                      DataCell(Text(_formatTime(r.checkOut))),
-                      DataCell(
-                        Text(
-                          lateMinutes == 0 ? '-' : '${lateMinutes}m',
-                          style: TextStyle(
-                            color: lateMinutes > 0 ? Colors.orange : null,
-                            fontWeight: lateMinutes > 0
-                                ? FontWeight.w700
-                                : FontWeight.w400,
-                          ),
-                        ),
-                      ),
-                      DataCell(
-                        Text(
-                          overtimeMinutes == 0 ? '-' : '${overtimeMinutes}m',
-                          style: TextStyle(
-                            color: overtimeMinutes > 0 ? Colors.lightBlue : null,
-                            fontWeight: overtimeMinutes > 0
-                                ? FontWeight.w700
-                                : FontWeight.w400,
-                          ),
-                        ),
-                      ),
+                      DataCell(Text(formatAttendanceDate(r.date))),
+                      DataCell(AttendanceStatusChip(status: r.status)),
+                      DataCell(Text(formatAttendanceTime(r.checkIn))),
+                      DataCell(Text(formatAttendanceTime(r.checkOut))),
+                      DataCell(Text(_lateLabel(r))),
+                      DataCell(Text(_overtimeLabel(r))),
                       DataCell(Text(r.notes ?? '-')),
                       DataCell(
-                        TextButton(
-                          onPressed: () => onRequestCorrection(r),
-                          child: Text(t.requestCorrection),
+                        AttendanceActionsCell(
+                          record: r,
+                          onRequestCorrection: onRequestCorrection,
                         ),
                       ),
                     ],
@@ -99,62 +72,13 @@ class AttendanceTable extends StatelessWidget {
     );
   }
 
-  String _formatDate(DateTime d) {
-    return '${d.year.toString().padLeft(4, '0')}-'
-        '${d.month.toString().padLeft(2, '0')}-'
-        '${d.day.toString().padLeft(2, '0')}';
+  String _lateLabel(AttendanceRecord record) {
+    final minutes = attendanceLateMinutes(record.checkIn);
+    return minutes == 0 ? '-' : '${minutes}m';
   }
 
-  String _formatTime(DateTime? d) {
-    if (d == null) return '-';
-    return '${d.hour.toString().padLeft(2, '0')}:'
-        '${d.minute.toString().padLeft(2, '0')}';
-  }
-
-  int _lateMinutes(DateTime? checkIn) {
-    if (checkIn == null) return 0;
-    final workStart = DateTime(
-      checkIn.year,
-      checkIn.month,
-      checkIn.day,
-      9,
-      15,
-    );
-    if (!checkIn.isAfter(workStart)) return 0;
-    return checkIn.difference(workStart).inMinutes;
-  }
-
-  int _overtimeMinutes(DateTime? checkOut) {
-    if (checkOut == null) return 0;
-    final workEnd = DateTime(checkOut.year, checkOut.month, checkOut.day, 17, 0);
-    if (!checkOut.isAfter(workEnd)) return 0;
-    return checkOut.difference(workEnd).inMinutes;
-  }
-
-  Widget _statusChip(BuildContext context, String status) {
-    final t = AppLocalizations.of(context)!;
-    final s = status.toLowerCase();
-    if (s == 'late') {
-      return Chip(
-        label: Text(t.attendanceLate),
-        backgroundColor: Color(0x33FF9800),
-      );
-    }
-    if (s == 'absent') {
-      return Chip(
-        label: Text(t.attendanceAbsent),
-        backgroundColor: Color(0x33F44336),
-      );
-    }
-    if (s == 'on_leave') {
-      return Chip(
-        label: Text(t.attendanceOnLeave),
-        backgroundColor: Color(0x339C27B0),
-      );
-    }
-    return Chip(
-      label: Text(t.attendancePresent),
-      backgroundColor: Color(0x334CAF50),
-    );
+  String _overtimeLabel(AttendanceRecord record) {
+    final minutes = attendanceOvertimeMinutes(record.checkOut);
+    return minutes == 0 ? '-' : '${minutes}m';
   }
 }

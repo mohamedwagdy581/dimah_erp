@@ -1,6 +1,16 @@
+import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+import '../../../../core/utils/safe_file_picker.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../data/repos/my_tasks_repo.dart';
+import '../widgets/my_tasks/task_card.dart';
+import '../widgets/my_tasks/task_filters_bar.dart';
+import '../widgets/my_tasks/task_formatters.dart';
+import '../widgets/my_tasks/task_filters_utils.dart';
+import '../widgets/my_tasks/task_review_dialog.dart';
 
 class MyTasksSection extends StatefulWidget {
   const MyTasksSection({super.key, required this.employeeId});
@@ -12,17 +22,20 @@ class MyTasksSection extends StatefulWidget {
 }
 
 class _MyTasksSectionState extends State<MyTasksSection> {
+  late final MyTasksRepo _repo;
   late Future<List<Map<String, dynamic>>> _future;
+  String _statusFilter = 'all';
 
   @override
   void initState() {
     super.initState();
-    _future = _load();
+    _repo = MyTasksRepo(Supabase.instance.client);
+    _future = _repo.loadTasks(widget.employeeId);
   }
 
   Future<void> _reload() async {
     setState(() {
-      _future = _load();
+      _future = _repo.loadTasks(widget.employeeId);
     });
   }
 
@@ -36,147 +49,43 @@ class _MyTasksSectionState extends State<MyTasksSection> {
           return const Center(child: CircularProgressIndicator());
         }
         if (snapshot.hasError) {
-          return Center(
-            child: Text(t.failedToLoadTasks(snapshot.error.toString())),
-          );
+          return Center(child: Text(t.failedToLoadTasks(snapshot.error.toString())));
         }
-        final items = snapshot.data ?? const [];
-        if (items.isEmpty) {
-          return Center(child: Text(t.noTasksAssigned));
-        }
+        final allItems = snapshot.data ?? const [];
+        final items = applyTaskFilter(allItems, _statusFilter);
         return ListView.separated(
           padding: const EdgeInsets.all(12),
-          itemCount: items.length,
-          separatorBuilder: (_, _) => const SizedBox(height: 8),
+          itemCount: items.isEmpty ? 2 : items.length + 1,
+          separatorBuilder: (_, index) => index == 0 ? const SizedBox(height: 12) : const SizedBox(height: 8),
           itemBuilder: (context, index) {
-            final task = items[index];
-            final status = (task['status'] ?? 'todo').toString();
-            final progress = (task['progress'] as num?)?.toInt() ?? 0;
-            return Card(
-              key: ValueKey(task['id']),
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      task['title']?.toString() ?? '-',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 15,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    if ((task['description'] ?? '')
-                        .toString()
-                        .trim()
-                        .isNotEmpty)
-                      Text(task['description'].toString()),
-                    const SizedBox(height: 8),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [
-                        _TaskMetaChip(
-                          label: _taskTypeLabel(
-                            t,
-                            (task['task_type'] ?? 'general').toString(),
-                          ),
-                        ),
-                        _TaskMetaChip(
-                          label: _priorityLabel(
-                            t,
-                            (task['priority'] ?? 'medium').toString(),
-                          ),
-                        ),
-                        _TaskMetaChip(
-                          label:
-                              '${t.estimateHours}: ${((task['estimate_hours'] as num?)?.toStringAsFixed(0) ?? '0')}',
-                        ),
-                        _TaskMetaChip(
-                          label:
-                              '${t.dueDateLabel}: ${_dateOnly(task['due_date']?.toString())}',
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    _MetaLine(
-                      label: t.assignedToEmployeeAt,
-                      value: _dateTime(task['created_at']?.toString()),
-                    ),
-                    _MetaLine(
-                      label: t.employeeReceivedAt,
-                      value: _dateTime(task['assignee_received_at']?.toString()),
-                    ),
-                    _MetaLine(
-                      label: t.employeeStartedAt,
-                      value: _dateTime(task['assignee_started_at']?.toString()),
-                    ),
-                    _MetaLine(
-                      label: t.completedAtLabel,
-                      value: _dateTime(task['completed_at']?.toString()),
-                    ),
-                    _MetaLine(
-                      label: t.lastUpdateAt,
-                      value: _dateTime(task['updated_at']?.toString()),
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: DropdownButtonFormField<String>(
-                            initialValue: status,
-                            decoration: InputDecoration(
-                              labelText: t.status,
-                              border: const OutlineInputBorder(),
-                              isDense: true,
-                            ),
-                            items: [
-                              DropdownMenuItem(
-                                value: 'todo',
-                                child: Text(t.statusTodo),
-                              ),
-                              DropdownMenuItem(
-                                value: 'in_progress',
-                                child: Text(t.statusInProgress),
-                              ),
-                              DropdownMenuItem(
-                                value: 'done',
-                                child: Text(t.statusDone),
-                              ),
-                            ],
-                            onChanged: (v) => _updateTask(
-                              id: task['id'].toString(),
-                              status: v ?? status,
-                              progress: v == 'done'
-                                  ? 100
-                                  : progress.clamp(0, 99).toInt(),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        SizedBox(
-                          width: 160,
-                          child: Text(t.progressLabel(progress)),
-                        ),
-                      ],
-                    ),
-                    Slider(
-                      value: progress.toDouble().clamp(0, 100),
-                      min: 0,
-                      max: 100,
-                      divisions: 20,
-                      label: '$progress%',
-                      onChanged: (_) {},
-                      onChangeEnd: (v) => _updateTask(
-                        id: task['id'].toString(),
-                        status: v >= 100 ? 'done' : status,
-                        progress: v.round(),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            if (index == 0) {
+              return TaskFiltersBar(
+                currentFilter: _statusFilter,
+                totalCount: allItems.length,
+                todoCount: countByTaskFilter(allItems, 'todo'),
+                inProgressCount: countByTaskFilter(allItems, 'in_progress'),
+                doneCount: countByTaskFilter(allItems, 'done'),
+                reviewCount: countByTaskFilter(allItems, 'review_pending'),
+                qaCount: countByTaskFilter(allItems, 'qa_pending'),
+                onChanged: (value) => setState(() {
+                  _statusFilter = value;
+                }),
+              );
+            }
+            if (items.isEmpty) {
+              return Center(child: Text(t.noTasksAssigned));
+            }
+            final task = items[index - 1];
+            return TaskCard(
+              task: task,
+              onStatusChanged: (value) => _updateTask(task, value, ((task['progress'] as num?)?.toInt() ?? 0)),
+              onProgressChanged: (value) => _updateTask(task, value >= 100 ? 'done' : (task['status'] ?? 'todo').toString(), value),
+              onRequestReview: () => _requestReview(task),
+              onAttachFile: () => _pickAttachment(task['id'].toString()),
+              onLogHours: () => _logHours(task),
+              onStartTimer: () => _startTimer(task),
+              onStopTimer: () => _stopTimer(task),
+              onOpenAttachment: _openAttachment,
             );
           },
         );
@@ -184,223 +93,187 @@ class _MyTasksSectionState extends State<MyTasksSection> {
     );
   }
 
-  Future<List<Map<String, dynamic>>> _load() async {
-    final client = Supabase.instance.client;
-    final uid = client.auth.currentUser?.id;
-    if (uid == null) return const [];
-    final me = await client
-        .from('users')
-        .select('tenant_id')
-        .eq('id', uid)
-        .single();
-    final tenantId = me['tenant_id'].toString();
-    final res = await client
-        .from('employee_tasks')
-        .select(
-          'id, title, description, task_type, priority, estimate_hours, status, progress, due_date, '
-          'created_at, updated_at, assignee_received_at, assignee_started_at, completed_at',
-        )
-        .eq('tenant_id', tenantId)
-        .eq('employee_id', widget.employeeId)
-        .order('created_at', ascending: false)
-        .limit(60);
-    return (res as List).cast<Map<String, dynamic>>();
-  }
-
-  Future<void> _updateTask({
-    required String id,
-    required String status,
-    required int progress,
-  }) async {
-    final client = Supabase.instance.client;
-    final existing = await client
-        .from('employee_tasks')
-        .select('status, progress')
-        .eq('id', id)
-        .maybeSingle();
-
-    final oldStatus = (existing?['status'] ?? 'todo').toString();
-    final oldProgress = (existing?['progress'] as num?)?.toInt() ?? 0;
-    final clamped = progress.clamp(0, 100).toInt();
-    final adjustedStatus = clamped >= 100 ? 'done' : status;
-    final payload = <String, dynamic>{
-      'status': adjustedStatus,
-      'progress': clamped,
-      'updated_at': DateTime.now().toIso8601String(),
-    };
-    if (oldStatus != 'done' && adjustedStatus == 'done') {
-      payload['completed_at'] = DateTime.now().toIso8601String();
-    } else if (oldStatus == 'done' && adjustedStatus != 'done') {
-      payload['completed_at'] = null;
-    }
-    if (oldStatus == 'todo' && adjustedStatus != 'todo') {
-      payload['assignee_received_at'] = DateTime.now().toIso8601String();
-    }
-    if (oldStatus != 'in_progress' && adjustedStatus == 'in_progress') {
-      payload['assignee_started_at'] = DateTime.now().toIso8601String();
-    }
-
-    await client.from('employee_tasks').update(payload).eq('id', id);
-
-    await _appendTaskEvent(
-      taskId: id,
-      oldStatus: oldStatus,
-      newStatus: adjustedStatus,
-      oldProgress: oldProgress,
-      newProgress: clamped,
-    );
+  Future<void> _updateTask(Map<String, dynamic> task, String status, int progress) async {
+    await _repo.updateTask(id: task['id'].toString(), status: status, progress: progress);
     if (!mounted) return;
     await _reload();
   }
 
-  Future<void> _appendTaskEvent({
-    required String taskId,
-    required String oldStatus,
-    required String newStatus,
-    required int oldProgress,
-    required int newProgress,
-  }) async {
-    try {
-      final client = Supabase.instance.client;
-      final uid = client.auth.currentUser?.id;
-      if (uid == null) return;
-      final me = await client
-          .from('users')
-          .select('tenant_id')
-          .eq('id', uid)
-          .single();
-      String eventType = 'progress_updated';
-      if (oldStatus != newStatus) {
-        eventType = 'status_changed';
-      } else if (oldProgress != newProgress) {
-        eventType = 'progress_updated';
-      }
-      await client.from('employee_task_events').insert({
-        'tenant_id': me['tenant_id'].toString(),
-        'task_id': taskId,
-        'event_type': eventType,
-        'event_note': null,
-        'event_payload': {
-          'old_status': oldStatus,
-          'new_status': newStatus,
-          'old_progress': oldProgress,
-          'new_progress': newProgress,
-        },
-        'created_by_user_id': uid,
-      });
-    } catch (_) {}
-  }
-
-  String _dateOnly(String? raw) {
-    final dt = DateTime.tryParse(raw ?? '');
-    if (dt == null) return '-';
-    return '${dt.year.toString().padLeft(4, '0')}-'
-        '${dt.month.toString().padLeft(2, '0')}-'
-        '${dt.day.toString().padLeft(2, '0')}';
-  }
-
-  String _dateTime(String? raw) {
-    final dt = DateTime.tryParse(raw ?? '');
-    if (dt == null) return '-';
-    return '${dt.year.toString().padLeft(4, '0')}-'
-        '${dt.month.toString().padLeft(2, '0')}-'
-        '${dt.day.toString().padLeft(2, '0')} '
-        '${dt.hour.toString().padLeft(2, '0')}:'
-        '${dt.minute.toString().padLeft(2, '0')}';
-  }
-
-  String _priorityLabel(AppLocalizations t, String priority) {
-    switch (priority) {
-      case 'low':
-        return t.priorityLow;
-      case 'high':
-        return t.priorityHigh;
-      default:
-        return t.priorityMedium;
+  Future<void> _requestReview(Map<String, dynamic> task) async {
+    final t = AppLocalizations.of(context)!;
+    final note = await showTaskReviewDialog(context);
+    if (note == null) return;
+    if (note.isEmpty) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t.reviewNoteRequired)));
+      return;
     }
+    await _repo.requestReview(taskId: task['id'].toString(), note: note);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t.reviewRequestSent)));
+    await _reload();
   }
 
-  String _taskTypeLabel(AppLocalizations t, String type) {
-    switch (type) {
-      case 'development':
-        return t.taskTypeDevelopment;
-      case 'bug_fix':
-        return t.taskTypeBugFix;
-      case 'testing':
-        return t.taskTypeTesting;
-      case 'support':
-        return t.taskTypeSupport;
-      case 'transfer':
-        return t.taskTypeTransfer;
-      case 'report':
-        return t.taskTypeReport;
-      case 'tax':
-        return t.taskTypeTax;
-      case 'payroll':
-        return t.taskTypePayroll;
-      case 'reconciliation':
-        return t.taskTypeReconciliation;
-      case 'recruitment':
-        return t.taskTypeRecruitment;
-      case 'onboarding':
-        return t.taskTypeOnboarding;
-      case 'employee_docs':
-        return t.taskTypeEmployeeDocs;
-      default:
-        return t.taskTypeGeneral;
-    }
-  }
-}
-
-class _TaskMetaChip extends StatelessWidget {
-  const _TaskMetaChip({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(
-        label,
-        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
+  Future<void> _logHours(Map<String, dynamic> task) async {
+    final t = AppLocalizations.of(context)!;
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+    final hoursController = TextEditingController();
+    final noteController = TextEditingController();
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(isArabic ? 'تسجيل ساعات' : 'Log Hours'),
+        content: SizedBox(
+          width: 360,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: hoursController,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                decoration: InputDecoration(
+                  labelText: isArabic ? 'الساعات المسجلة' : 'Logged Hours',
+                  hintText: '2.5',
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: noteController,
+                maxLines: 3,
+                decoration: InputDecoration(labelText: t.noteOptional),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(context).pop(false), child: Text(t.cancel)),
+          FilledButton(onPressed: () => Navigator.of(context).pop(true), child: Text(t.save)),
+        ],
       ),
     );
-  }
-}
+    if (result != true) return;
 
-class _MetaLine extends StatelessWidget {
-  const _MetaLine({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
+    final hours = double.tryParse(hoursController.text.trim());
+    if (hours == null || hours <= 0) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            isArabic
+                ? 'يرجى إدخال عدد ساعات صحيح.'
+                : 'Please enter a valid logged hours value.',
           ),
-          const SizedBox(width: 8),
-          Text(
-            value,
-            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+        ),
+      );
+      return;
+    }
+
+    await _repo.logHours(
+      taskId: task['id'].toString(),
+      employeeId: widget.employeeId,
+      hours: hours,
+      note: noteController.text.trim(),
+    );
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          isArabic ? 'تم تسجيل الساعات بنجاح' : 'Hours logged successfully',
+        ),
+      ),
+    );
+    await _reload();
+  }
+
+  Future<void> _startTimer(Map<String, dynamic> task) async {
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+    await _repo.startTimer(taskId: task['id'].toString());
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(isArabic ? 'تم بدء المؤقت' : 'Timer started'),
+      ),
+    );
+    await _reload();
+  }
+
+  Future<void> _stopTimer(Map<String, dynamic> task) async {
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+    final noteController = TextEditingController();
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(isArabic ? 'إيقاف المؤقت' : 'Stop Timer'),
+        content: TextField(
+          controller: noteController,
+          maxLines: 3,
+          decoration: InputDecoration(
+            labelText: isArabic ? 'ملاحظة (اختياري)' : 'Note (optional)',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(isArabic ? 'إلغاء' : 'Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(isArabic ? 'إيقاف' : 'Stop'),
           ),
         ],
       ),
     );
+    if (result != true) return;
+
+    final hours = await _repo.stopTimer(
+      taskId: task['id'].toString(),
+      employeeId: widget.employeeId,
+      note: noteController.text.trim(),
+    );
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          isArabic
+              ? 'تم إيقاف المؤقت وتسجيل ${hours.toStringAsFixed(2)} ساعة.'
+              : 'Timer stopped. $hours h logged.',
+        ),
+      ),
+    );
+    await _reload();
+  }
+
+  Future<void> _pickAttachment(String taskId) async {
+    final t = AppLocalizations.of(context)!;
+    try {
+      final file = await SafeFilePicker.openSingle(
+        context: context,
+        acceptedTypeGroups: const [
+          XTypeGroup(label: 'Attachments', extensions: ['pdf', 'jpg', 'jpeg', 'png', 'doc', 'docx', 'xlsx', 'xls']),
+        ],
+      );
+      if (file == null) return;
+      await _repo.addAttachment(
+        taskId: taskId,
+        fileName: file.name,
+        bytes: await file.readAsBytes(),
+        mimeType: contentTypeFor(file.name),
+      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t.attachmentUploaded)));
+      await _reload();
+    } catch (e) {
+      print('TASK_ATTACHMENT_UPLOAD_ERROR: $e');
+      print('TASK_ATTACHMENT_UPLOAD_STACK: ${StackTrace.current}');
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t.fileUploadFailed(e.toString()))));
+    }
+  }
+
+  Future<void> _openAttachment(String url) async {
+    if (url.trim().isEmpty) return;
+    final uri = Uri.tryParse(url);
+    if (uri == null) return;
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 }

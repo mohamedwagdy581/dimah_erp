@@ -166,7 +166,7 @@
   "created": "تاريخ الإنشاء",
   "actions": "الإجراءات",
   "openProfile": "فتح الملف",
-  "noEmployeesFound": "لا يوجد موظفون.",
+  "noEmployeesFound": "لم يتم العثور على موظفين.",
   "totalWithValue": "الإجمالي: {total}",
   "@totalWithValue": {
     "placeholders": {
@@ -403,7 +403,7 @@
   "noContractHistory": "لا يوجد سجل عقود",
   "open": "فتح",
   "preview": "معاينة",
-  "documents": "المستندات",
+  "documents": "وثائق",
   "noDocumentsUploaded": "لا توجد مستندات مرفوعة",
   "invalidUrl": "رابط غير صالح",
   "unableOpenFile": "تعذر فتح الملف",
@@ -478,6 +478,42 @@
   "quickActions": "إجراءات سريعة",
   "hrWorkflowBoard": "لوحة سير عمل الموارد البشرية",
   "reviewPendingApprovals": "مراجعة الموافقات المعلقة",
+  "pendingTaskReviews": "طلبات مراجعة المهام",
+  "pendingTaskQa": "مهام بانتظار الاعتماد النهائي",
+  "noPendingTaskReviews": "لا توجد طلبات مراجعة مهام معلقة.",
+  "noPendingTaskQa": "لا توجد مهام بانتظار الاعتماد النهائي.",
+  "requestManagerReview": "طلب مراجعة من المدير",
+  "reviewPending": "المراجعة معلقة",
+  "reviewApproved": "تمت الموافقة على المراجعة",
+  "reviewRejected": "تم رفض المراجعة",
+  "noActiveReview": "لا توجد مراجعة نشطة",
+  "reviewNote": "ملاحظة المراجعة",
+  "reviewNoteRequired": "ملاحظة المراجعة مطلوبة",
+  "reviewRequestedAt": "تاريخ طلب المراجعة",
+  "yourReviewNote": "ملاحظتك",
+  "managerResponseNote": "رد المدير",
+  "reviewRequestSent": "تم إرسال طلب المراجعة",
+  "approveAndUpdate": "موافقة وتحديث",
+  "rejectReviewRequest": "رفض طلب المراجعة",
+  "reviewApprovedAndTaskUpdated": "تمت الموافقة على المراجعة وتحديث المهمة",
+  "reviewRejectedAndReturned": "تم رفض المراجعة وإرجاع المهمة",
+  "taskEventReviewRequested": "تم طلب مراجعة",
+  "taskEventReviewApproved": "تمت الموافقة على المراجعة",
+  "taskEventReviewRejected": "تم رفض المراجعة",
+  "send": "إرسال",
+  "taskEventQaAccepted": "تم اعتماد المهمة نهائيًا",
+  "taskEventQaRework": "تمت إعادة المهمة لإعادة العمل",
+  "taskEventQaRejected": "تم رفض المهمة في الاعتماد النهائي",
+  "qaPending": "بانتظار الاعتماد",
+  "qaAccepted": "تم الاعتماد",
+  "qaRework": "تحتاج إعادة عمل",
+  "qaRejected": "مرفوضة",
+  "qaApprove": "اعتماد",
+  "qaSendRework": "إعادة للعمل",
+  "qaReject": "رفض",
+  "qaApprovedMessage": "تم اعتماد المهمة في المراجعة النهائية",
+  "qaReworkMessage": "تمت إعادة المهمة للموظف لاستكمالها",
+  "qaRejectedMessage": "تم رفض المهمة في المراجعة النهائية",
   "resolveExpiryAlerts": "معالجة تنبيهات الانتهاء",
   "completeEmployeeDocuments": "استكمال مستندات الموظفين",
   "documentCompliance": "التوافق في المستندات",
@@ -647,6 +683,7 @@
       "department": {}
     }
   },
+  "taskTemplate": "قالب المهمة",
   "taskTypeGeneral": "عام",
   "taskTypeDevelopment": "تطوير",
   "taskTypeBugFix": "إصلاح أعطال",
@@ -660,10 +697,64 @@
   "taskTypeRecruitment": "توظيف",
   "taskTypeOnboarding": "تهيئة موظف",
   "taskTypeEmployeeDocs": "مستندات موظف",
-  "documents": "وثائق",
+  "templateLoginSignup": "إنجاز شاشة تسجيل الدخول وإنشاء الحساب",
+  "templateLoginSignupDesc": "تنفيذ شاشة الدخول وإنشاء الحساب بالكامل مع التحقق من الحقول وإدارة الحالة والاختبار النهائي.",
+  "templateBugFixRelease": "إصلاح عطل مؤثر قبل الإصدار",
+  "templateBugFixReleaseDesc": "تحليل العطل المؤثر، تنفيذ الإصلاح، اختبار المسارات المتأثرة، وتجهيز ملاحظات الإصدار.",
+  "templateRegressionTesting": "دورة اختبارات رجعية",
+  "templateRegressionTestingDesc": "تشغيل قائمة الاختبارات المطلوبة، توثيق النتائج، وإعادة اختبار العناصر التي تم إصلاحها.",
+  "templateTransferBatch": "معالجة دفعة تحويلات",
+  "templateTransferBatchDesc": "تنفيذ التحويلات المكلفة، التحقق من المبالغ، وتسجيل حالة الإنجاز لكل عملية.",
+  "templateMonthlyFinanceReport": "التقرير المالي الشهري",
+  "templateMonthlyFinanceReportDesc": "إعداد التقرير المالي الشهري، مراجعة الأرقام المصدرية، ورفع الملخص النهائي.",
+  "templateTaxSubmission": "ملف تقديم الضريبة",
+  "templateTaxSubmissionDesc": "تجهيز بيانات الضريبة، مراجعة المستندات المطلوبة، وتقديم الملف قبل الموعد المحدد.",
+  "templateOnboardingPack": "حزمة تهيئة موظف جديد",
+  "templateOnboardingPackDesc": "استكمال قائمة تهيئة الموظف الجديد ومراجعة المستندات المطلوبة وإغلاق العناصر الناقصة.",
+  "templateDocumentAudit": "مراجعة مستندات الموظفين",
+  "templateDocumentAuditDesc": "فحص مجموعة مستندات الموظف، تحديد النواقص، وتحديث الملفات الحساسة التاريخ الانتهاء.",
+  "templateRecruitmentFollowup": "متابعة التوظيف",
+  "templateRecruitmentFollowupDesc": "متابعة المرشحين المكلفين، تحديث الحالات، وتحريك خط سير التوظيف.",
+  "templateGeneralFollowup": "مهمة متابعة عامة",
+  "templateGeneralFollowupDesc": "متابعة العمل المكلف، تحديث الحالة باستمرار، وإغلاق المهمة في الموعد.",
+  "monthDepartmentOverview": "نظرة القسم خلال الشهر",
+  "monthTasksCreated": "المهام المنشأة هذا الشهر",
+  "monthTasksCompleted": "المهام المكتملة هذا الشهر",
+  "monthOnTimeRate": "الإنجاز في الموعد",
+  "monthDepartmentProductivity": "إنتاجية القسم",
+  "monthCompletionRate": "نسبة الإكمال",
+  "monthlyCompletionTrend": "اتجاه الإكمال الشهري",
+  "lastSixMonths": "آخر 6 أشهر",
+  "onTimeVsDelayed": "في الموعد مقابل المتأخر",
+  "taskTypeDistribution": "توزيع أنواع المهام",
+  "employeeWorkload": "عبء العمل على الموظفين",
+  "currentMonthBreakdown": "تفصيل الشهر الحالي",
+  "onTime": "في الموعد",
+  "delayed": "متأخر",
+  "monthTasksWithValue": "مهام الشهر: {value}",
+  "@monthTasksWithValue": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "completedThisMonthWithValue": "المكتمل هذا الشهر: {value}",
+  "@completedThisMonthWithValue": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "avgTaskProgressWithValue": "متوسط التقدم: {value}%",
+  "@avgTaskProgressWithValue": {
+    "placeholders": {
+      "value": {}
+    }
+  },
   "allStatuses": "كل الحالات",
   "uploadNewDocument": "رفع وثيقة جديدة",
-  "noEmployeesFound": "لم يتم العثور على موظفين.",
   "idCard": "بطاقة الهوية",
   "graduationCert": "شهادة التخرج",
   "nationalAddress": "العنوان الوطني",
@@ -686,5 +777,61 @@
   "noExpiry": "بدون انتهاء",
   "documentFile": "مستند",
   "uploadFile": "رفع ملف",
-  "noFileSelected": "لم يتم اختيار ملف"
+  "noFileSelected": "لم يتم اختيار ملف",
+  "attachFile": "إرفاق ملف",
+  "logHours": "تسجيل ساعات",
+  "logHoursTitle": "تسجيل ساعات العمل",
+  "loggedHours": "الساعات المسجلة",
+  "invalidLoggedHours": "يرجى إدخال عدد ساعات صحيح.",
+  "hoursLoggedSuccessfully": "تم تسجيل الساعات بنجاح",
+  "attachments": "المرفقات",
+  "attachmentsCount": "{count} مرفقات",
+  "@attachmentsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "attachmentUploaded": "تم رفع المرفق",
+  "taskEventAttachmentAdded": "تمت إضافة مرفق",
+  "taskEventTimeLogged": "تم تسجيل وقت",
+  "allTasks": "كل المهام",
+  "qaLabel": "حالة الاعتماد: {status}",
+  "@qaLabel": {
+    "placeholders": {
+      "status": {}
+    }
+  },
+  "employeeActionCenter": "مركز الإجراءات",
+  "reviewPendingWithValue": "مراجعات معلقة: {value}",
+  "@reviewPendingWithValue": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "qaPendingWithValue": "اعتمادات نهائية معلقة: {value}",
+  "@qaPendingWithValue": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "dueSoonWithValue": "مستحق قريبًا: {value}",
+  "@dueSoonWithValue": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "employeeNotifications": "الإشعارات",
+  "noEmployeeNotifications": "لا توجد إشعارات حاليًا.",
+  "taskDueSoon": "مهمة مستحقة قريبًا",
+  "notificationsTitle": "الإشعارات",
+  "failedToLoadNotifications": "فشل تحميل الإشعارات",
+  "noNotificationsAvailable": "لا توجد إشعارات متاحة."
 }

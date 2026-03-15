@@ -1,3 +1,8 @@
+part 'employee_profile_details_parsers.dart';
+part 'employee_profile_document.dart';
+part 'employee_contract_version.dart';
+part 'employee_compensation_version.dart';
+
 class EmployeeProfileDetails {
   const EmployeeProfileDetails({
     required this.id,
@@ -46,48 +51,20 @@ class EmployeeProfileDetails {
     this.documents = const [],
   });
 
-  final String id;
-  final String fullName;
-  final String email;
-  final String phone;
-  final String? photoUrl;
-  final String status;
-  final String? departmentName;
-  final String? jobTitleName;
-  final DateTime? hireDate;
-  final String? nationalId;
-  final DateTime? dateOfBirth;
-  final String? gender;
-  final String? nationality;
-  final String? maritalStatus;
-  final String? address;
-  final String? city;
-  final String? country;
-  final String? passportNo;
-  final DateTime? passportExpiry;
-  final DateTime? residencyIssueDate;
-  final DateTime? residencyExpiryDate;
-  final DateTime? insuranceStartDate;
-  final DateTime? insuranceExpiryDate;
-  final String? insuranceProvider;
-  final String? insurancePolicyNo;
-  final String? educationLevel;
-  final String? major;
-  final String? university;
-  final double? basicSalary;
-  final double? housingAllowance;
-  final double? transportAllowance;
-  final double? otherAllowance;
-  final List<EmployeeCompensationVersion> compensationHistory;
-  final String? bankName;
-  final String? iban;
-  final String? accountNumber;
-  final String? paymentMethod;
-  final String? contractType;
-  final DateTime? contractStart;
-  final DateTime? contractEnd;
-  final int? probationMonths;
+  final String id, fullName, email, phone, status;
+  final String? photoUrl, departmentName, jobTitleName, nationalId;
+  final String? gender, nationality, maritalStatus, address, city, country;
+  final String? passportNo, insuranceProvider, insurancePolicyNo;
+  final String? educationLevel, major, university;
+  final String? bankName, iban, accountNumber, paymentMethod, contractType;
   final String? contractFileUrl;
+  final DateTime? hireDate, dateOfBirth, passportExpiry;
+  final DateTime? residencyIssueDate, residencyExpiryDate;
+  final DateTime? insuranceStartDate, insuranceExpiryDate;
+  final DateTime? contractStart, contractEnd;
+  final double? basicSalary, housingAllowance, transportAllowance, otherAllowance;
+  final List<EmployeeCompensationVersion> compensationHistory;
+  final int? probationMonths;
   final List<EmployeeContractVersion> contractHistory;
   final List<EmployeeProfileDocument> documents;
 
@@ -114,22 +91,27 @@ class EmployeeProfileDetails {
       departmentName:
           department is Map ? department['name']?.toString() : null,
       jobTitleName: jobTitle is Map ? jobTitle['name']?.toString() : null,
-      hireDate: _parseDate(employee['hire_date']),
+      hireDate: parseEmployeeProfileDate(employee['hire_date']),
       nationalId: employee['national_id']?.toString(),
-      dateOfBirth: _parseDate(employee['date_of_birth']),
+      dateOfBirth: parseEmployeeProfileDate(employee['date_of_birth']),
       gender: employee['gender']?.toString(),
-      nationality: personal?['nationality']?.toString() ??
+      nationality:
+          personal?['nationality']?.toString() ??
           employee['nationality']?.toString(),
       maritalStatus: personal?['marital_status']?.toString(),
       address: personal?['address']?.toString(),
       city: personal?['city']?.toString(),
       country: personal?['country']?.toString(),
       passportNo: personal?['passport_no']?.toString(),
-      passportExpiry: _parseDate(personal?['passport_expiry']),
-      residencyIssueDate: _parseDate(personal?['residency_issue_date']),
-      residencyExpiryDate: _parseDate(personal?['residency_expiry_date']),
-      insuranceStartDate: _parseDate(personal?['insurance_start_date']),
-      insuranceExpiryDate: _parseDate(personal?['insurance_expiry_date']),
+      passportExpiry: parseEmployeeProfileDate(personal?['passport_expiry']),
+      residencyIssueDate:
+          parseEmployeeProfileDate(personal?['residency_issue_date']),
+      residencyExpiryDate:
+          parseEmployeeProfileDate(personal?['residency_expiry_date']),
+      insuranceStartDate:
+          parseEmployeeProfileDate(personal?['insurance_start_date']),
+      insuranceExpiryDate:
+          parseEmployeeProfileDate(personal?['insurance_expiry_date']),
       insuranceProvider: personal?['insurance_provider']?.toString(),
       insurancePolicyNo: personal?['insurance_policy_no']?.toString(),
       educationLevel:
@@ -137,145 +119,26 @@ class EmployeeProfileDetails {
           employee['education']?.toString(),
       major: personal?['major']?.toString(),
       university: personal?['university']?.toString(),
-      basicSalary: _parseDouble(compensation?['basic_salary']),
-      housingAllowance: _parseDouble(compensation?['housing_allowance']),
-      transportAllowance: _parseDouble(compensation?['transport_allowance']),
-      otherAllowance: _parseDouble(compensation?['other_allowance']),
-      compensationHistory: compensationHistory
-          .map(EmployeeCompensationVersion.fromMap)
-          .toList(),
+      basicSalary: parseEmployeeProfileDouble(compensation?['basic_salary']),
+      housingAllowance:
+          parseEmployeeProfileDouble(compensation?['housing_allowance']),
+      transportAllowance:
+          parseEmployeeProfileDouble(compensation?['transport_allowance']),
+      otherAllowance: parseEmployeeProfileDouble(compensation?['other_allowance']),
+      compensationHistory:
+          compensationHistory.map(EmployeeCompensationVersion.fromMap).toList(),
       bankName: financial?['bank_name']?.toString(),
       iban: financial?['iban']?.toString(),
       accountNumber: financial?['account_number']?.toString(),
       paymentMethod: financial?['payment_method']?.toString(),
       contractType: contract?['contract_type']?.toString(),
-      contractStart: _parseDate(contract?['start_date']),
-      contractEnd: _parseDate(contract?['end_date']),
-      probationMonths: _parseInt(contract?['probation_months']),
+      contractStart: parseEmployeeProfileDate(contract?['start_date']),
+      contractEnd: parseEmployeeProfileDate(contract?['end_date']),
+      probationMonths: parseEmployeeProfileInt(contract?['probation_months']),
       contractFileUrl: contract?['file_url']?.toString(),
-      contractHistory: contractHistory
-          .map(EmployeeContractVersion.fromMap)
-          .toList(),
+      contractHistory:
+          contractHistory.map(EmployeeContractVersion.fromMap).toList(),
       documents: documents.map(EmployeeProfileDocument.fromMap).toList(),
-    );
-  }
-
-  static DateTime? _parseDate(dynamic value) {
-    if (value == null) return null;
-    return DateTime.tryParse(value.toString());
-  }
-
-  static double? _parseDouble(dynamic value) {
-    if (value == null) return null;
-    if (value is num) return value.toDouble();
-    return double.tryParse(value.toString());
-  }
-
-  static int? _parseInt(dynamic value) {
-    if (value == null) return null;
-    if (value is int) return value;
-    return int.tryParse(value.toString());
-  }
-}
-
-class EmployeeProfileDocument {
-  const EmployeeProfileDocument({
-    required this.id,
-    required this.docType,
-    required this.fileUrl,
-    this.issuedAt,
-    this.expiresAt,
-    this.createdAt,
-  });
-
-  final String id;
-  final String docType;
-  final String fileUrl;
-  final DateTime? issuedAt;
-  final DateTime? expiresAt;
-  final DateTime? createdAt;
-
-  factory EmployeeProfileDocument.fromMap(Map<String, dynamic> map) {
-    return EmployeeProfileDocument(
-      id: map['id'].toString(),
-      docType: (map['doc_type'] ?? 'other').toString(),
-      fileUrl: (map['file_url'] ?? '').toString(),
-      issuedAt: EmployeeProfileDetails._parseDate(map['issued_at']),
-      expiresAt: EmployeeProfileDetails._parseDate(map['expires_at']),
-      createdAt: EmployeeProfileDetails._parseDate(map['created_at']),
-    );
-  }
-}
-
-class EmployeeContractVersion {
-  const EmployeeContractVersion({
-    required this.id,
-    required this.contractType,
-    this.startDate,
-    this.endDate,
-    this.probationMonths,
-    this.fileUrl,
-    this.createdAt,
-  });
-
-  final String id;
-  final String contractType;
-  final DateTime? startDate;
-  final DateTime? endDate;
-  final int? probationMonths;
-  final String? fileUrl;
-  final DateTime? createdAt;
-
-  factory EmployeeContractVersion.fromMap(Map<String, dynamic> map) {
-    return EmployeeContractVersion(
-      id: map['id'].toString(),
-      contractType: (map['contract_type'] ?? 'full_time').toString(),
-      startDate: EmployeeProfileDetails._parseDate(map['start_date']),
-      endDate: EmployeeProfileDetails._parseDate(map['end_date']),
-      probationMonths: EmployeeProfileDetails._parseInt(map['probation_months']),
-      fileUrl: map['file_url']?.toString(),
-      createdAt: EmployeeProfileDetails._parseDate(map['created_at']),
-    );
-  }
-}
-
-class EmployeeCompensationVersion {
-  const EmployeeCompensationVersion({
-    required this.id,
-    required this.basicSalary,
-    required this.housingAllowance,
-    required this.transportAllowance,
-    required this.otherAllowance,
-    this.effectiveAt,
-    this.note,
-    this.createdAt,
-  });
-
-  final String id;
-  final double basicSalary;
-  final double housingAllowance;
-  final double transportAllowance;
-  final double otherAllowance;
-  final DateTime? effectiveAt;
-  final String? note;
-  final DateTime? createdAt;
-
-  double get total =>
-      basicSalary + housingAllowance + transportAllowance + otherAllowance;
-
-  factory EmployeeCompensationVersion.fromMap(Map<String, dynamic> map) {
-    return EmployeeCompensationVersion(
-      id: map['id'].toString(),
-      basicSalary: EmployeeProfileDetails._parseDouble(map['basic_salary']) ?? 0,
-      housingAllowance:
-          EmployeeProfileDetails._parseDouble(map['housing_allowance']) ?? 0,
-      transportAllowance:
-          EmployeeProfileDetails._parseDouble(map['transport_allowance']) ?? 0,
-      otherAllowance:
-          EmployeeProfileDetails._parseDouble(map['other_allowance']) ?? 0,
-      effectiveAt: EmployeeProfileDetails._parseDate(map['effective_at']),
-      note: map['note']?.toString(),
-      createdAt: EmployeeProfileDetails._parseDate(map['created_at']),
     );
   }
 }

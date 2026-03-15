@@ -1,0 +1,716 @@
+class _EmployeeProfileEditDialog extends StatefulWidget {
+  const _EmployeeProfileEditDialog({required this.profile});
+
+  final EmployeeProfileDetails profile;
+
+  @override
+  State<_EmployeeProfileEditDialog> createState() =>
+      _EmployeeProfileEditDialogState();
+}
+
+class _EmployeeProfileEditDialogState
+    extends State<_EmployeeProfileEditDialog> {
+  final _formKey = GlobalKey<FormState>();
+  late final TextEditingController _fullName;
+  late final TextEditingController _email;
+  late final TextEditingController _phone;
+  late final TextEditingController _photoUrl;
+  late final TextEditingController _nationality;
+  late final TextEditingController _maritalStatus;
+  late final TextEditingController _address;
+  late final TextEditingController _city;
+  late final TextEditingController _country;
+  late final TextEditingController _passportNo;
+  late final TextEditingController _insuranceProvider;
+  late final TextEditingController _insurancePolicyNo;
+  late final TextEditingController _educationLevel;
+  late final TextEditingController _major;
+  late final TextEditingController _university;
+  late final TextEditingController _bankName;
+  late final TextEditingController _iban;
+  late final TextEditingController _accountNumber;
+  late final TextEditingController _contractType;
+  late final TextEditingController _probationMonths;
+  late final TextEditingController _contractFileUrl;
+
+  late String _status;
+  late String _paymentMethod;
+  DateTime? _passportExpiry;
+  DateTime? _residencyIssueDate;
+  DateTime? _residencyExpiryDate;
+  DateTime? _insuranceStartDate;
+  DateTime? _insuranceExpiryDate;
+  DateTime? _contractStart;
+  DateTime? _contractEnd;
+  bool _pickingPhoto = false;
+  bool _saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final p = widget.profile;
+    _fullName = TextEditingController(text: p.fullName);
+    _email = TextEditingController(text: p.email);
+    _phone = TextEditingController(text: p.phone);
+    _photoUrl = TextEditingController(text: p.photoUrl ?? '');
+    _nationality = TextEditingController(text: p.nationality ?? '');
+    _maritalStatus = TextEditingController(text: p.maritalStatus ?? '');
+    _address = TextEditingController(text: p.address ?? '');
+    _city = TextEditingController(text: p.city ?? '');
+    _country = TextEditingController(text: p.country ?? '');
+    _passportNo = TextEditingController(text: p.passportNo ?? '');
+    _insuranceProvider = TextEditingController(text: p.insuranceProvider ?? '');
+    _insurancePolicyNo = TextEditingController(text: p.insurancePolicyNo ?? '');
+    _educationLevel = TextEditingController(text: p.educationLevel ?? '');
+    _major = TextEditingController(text: p.major ?? '');
+    _university = TextEditingController(text: p.university ?? '');
+    _bankName = TextEditingController(text: p.bankName ?? '');
+    _iban = TextEditingController(text: p.iban ?? '');
+    _accountNumber = TextEditingController(text: p.accountNumber ?? '');
+    _contractType = TextEditingController(text: p.contractType ?? 'full_time');
+    _probationMonths = TextEditingController(
+      text: p.probationMonths == null ? '' : '${p.probationMonths}',
+    );
+    _contractFileUrl = TextEditingController(text: p.contractFileUrl ?? '');
+    _status = p.status.isEmpty ? 'active' : p.status;
+    _paymentMethod = (p.paymentMethod ?? 'bank').isEmpty
+        ? 'bank'
+        : p.paymentMethod!;
+    _passportExpiry = p.passportExpiry;
+    _residencyIssueDate = p.residencyIssueDate;
+    _residencyExpiryDate = p.residencyExpiryDate;
+    _insuranceStartDate = p.insuranceStartDate;
+    _insuranceExpiryDate = p.insuranceExpiryDate;
+    _contractStart = p.contractStart;
+    _contractEnd = p.contractEnd;
+  }
+
+  @override
+  void dispose() {
+    _fullName.dispose();
+    _email.dispose();
+    _phone.dispose();
+    _photoUrl.dispose();
+    _nationality.dispose();
+    _maritalStatus.dispose();
+    _address.dispose();
+    _city.dispose();
+    _country.dispose();
+    _passportNo.dispose();
+    _insuranceProvider.dispose();
+    _insurancePolicyNo.dispose();
+    _educationLevel.dispose();
+    _major.dispose();
+    _university.dispose();
+    _bankName.dispose();
+    _iban.dispose();
+    _accountNumber.dispose();
+    _contractType.dispose();
+    _probationMonths.dispose();
+    _contractFileUrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(AppLocalizations.of(context)!.editEmployeeProfile),
+      content: SizedBox(
+        width: 720,
+        child: Form(
+          key: _formKey,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _field(_fullName, 'Full Name', required: true),
+                const SizedBox(height: 10),
+                _field(_email, 'Email', required: true),
+                const SizedBox(height: 10),
+                _field(_phone, 'Phone', required: true),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 24,
+                      backgroundImage: _resolvePhotoProvider(_photoUrl.text),
+                      child: _photoUrl.text.trim().isEmpty
+                          ? const Icon(Icons.person)
+                          : null,
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: (_saving || _pickingPhoto)
+                            ? null
+                            : _pickPhotoOnly,
+                        icon: const Icon(Icons.upload_outlined),
+                        label: Text(
+                          _pickingPhoto
+                              ? AppLocalizations.of(context)!.pickingPhoto
+                              : AppLocalizations.of(context)!.selectPhoto,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                if (_pickingPhoto) ...[
+                  const SizedBox(height: 8),
+                  const LinearProgressIndicator(),
+                  const SizedBox(height: 6),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      AppLocalizations.of(context)!.uploadingPhoto,
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: DropdownButtonFormField<String>(
+                        initialValue: _status,
+                        decoration: InputDecoration(
+                          labelText: AppLocalizations.of(context)!.status,
+                          border: const OutlineInputBorder(),
+                        ),
+                        items: [
+                          DropdownMenuItem(
+                            value: 'active',
+                            child: Text(AppLocalizations.of(context)!.active),
+                          ),
+                          DropdownMenuItem(
+                            value: 'inactive',
+                            child: Text(AppLocalizations.of(context)!.inactive),
+                          ),
+                        ],
+                        onChanged: (v) =>
+                            setState(() => _status = v ?? 'active'),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: DropdownButtonFormField<String>(
+                        initialValue: _paymentMethod,
+                        decoration: InputDecoration(
+                          labelText: AppLocalizations.of(
+                            context,
+                          )!.paymentMethod,
+                          border: const OutlineInputBorder(),
+                        ),
+                        items: [
+                          DropdownMenuItem(
+                            value: 'bank',
+                            child: Text(
+                              AppLocalizations.of(context)!.paymentMethodBank,
+                            ),
+                          ),
+                          DropdownMenuItem(
+                            value: 'cash',
+                            child: Text(
+                              AppLocalizations.of(context)!.paymentMethodCash,
+                            ),
+                          ),
+                        ],
+                        onChanged: (v) =>
+                            setState(() => _paymentMethod = v ?? 'bank'),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                _field(_nationality, AppLocalizations.of(context)!.nationality),
+                const SizedBox(height: 10),
+                _field(
+                  _maritalStatus,
+                  AppLocalizations.of(context)!.maritalStatus,
+                ),
+                const SizedBox(height: 10),
+                _field(_address, AppLocalizations.of(context)!.address),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _field(_city, AppLocalizations.of(context)!.city),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: _field(
+                        _country,
+                        AppLocalizations.of(context)!.country,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _field(
+                        _passportNo,
+                        AppLocalizations.of(context)!.passportNo,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: _pickPassportExpiry,
+                        icon: const Icon(Icons.event),
+                        label: Text(
+                          _passportExpiry == null
+                              ? AppLocalizations.of(context)!.passportExpiry
+                              : _fmt(_passportExpiry),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: _pickResidencyIssueDate,
+                        icon: const Icon(Icons.badge_outlined),
+                        label: Text(
+                          _residencyIssueDate == null
+                              ? AppLocalizations.of(context)!.residencyIssue
+                              : _fmt(_residencyIssueDate),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: _pickResidencyExpiryDate,
+                        icon: const Icon(Icons.badge),
+                        label: Text(
+                          _residencyExpiryDate == null
+                              ? AppLocalizations.of(context)!.residencyExpiry
+                              : _fmt(_residencyExpiryDate),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: _pickInsuranceStartDate,
+                        icon: const Icon(Icons.health_and_safety_outlined),
+                        label: Text(
+                          _insuranceStartDate == null
+                              ? AppLocalizations.of(context)!.insuranceStart
+                              : _fmt(_insuranceStartDate),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: _pickInsuranceExpiryDate,
+                        icon: const Icon(Icons.health_and_safety),
+                        label: Text(
+                          _insuranceExpiryDate == null
+                              ? AppLocalizations.of(context)!.insuranceExpiry
+                              : _fmt(_insuranceExpiryDate),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _field(
+                        _insuranceProvider,
+                        AppLocalizations.of(context)!.insuranceProvider,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: _field(
+                        _insurancePolicyNo,
+                        AppLocalizations.of(context)!.insurancePolicyNo,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _field(
+                        _educationLevel,
+                        AppLocalizations.of(context)!.educationLevel,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: _field(
+                        _major,
+                        AppLocalizations.of(context)!.major,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                _field(_university, AppLocalizations.of(context)!.university),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _field(
+                        _bankName,
+                        AppLocalizations.of(context)!.bankName,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: _field(_iban, AppLocalizations.of(context)!.iban),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                _field(
+                  _accountNumber,
+                  AppLocalizations.of(context)!.accountNumber,
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _field(
+                        _contractType,
+                        AppLocalizations.of(context)!.contractType,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: _field(
+                        _probationMonths,
+                        AppLocalizations.of(context)!.probationMonths,
+                        keyboardType: TextInputType.number,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: _pickContractStart,
+                        icon: const Icon(Icons.event_note),
+                        label: Text(
+                          _contractStart == null
+                              ? AppLocalizations.of(context)!.contractStart
+                              : _fmt(_contractStart),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: _pickContractEnd,
+                        icon: const Icon(Icons.event_busy),
+                        label: Text(
+                          _contractEnd == null
+                              ? AppLocalizations.of(context)!.contractEnd
+                              : _fmt(_contractEnd),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                _field(
+                  _contractFileUrl,
+                  AppLocalizations.of(context)!.contractFileUrl,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: (_saving || _pickingPhoto)
+              ? null
+              : () => Navigator.pop(context, false),
+          child: Text(AppLocalizations.of(context)!.cancel),
+        ),
+        ElevatedButton(
+          onPressed: (_saving || _pickingPhoto) ? null : _save,
+          child: Text(
+            _saving
+                ? AppLocalizations.of(context)!.saving
+                : AppLocalizations.of(context)!.save,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _field(
+    TextEditingController controller,
+    String label, {
+    bool required = false,
+    TextInputType? keyboardType,
+  }) {
+    return TextFormField(
+      controller: controller,
+      keyboardType: keyboardType,
+      decoration: InputDecoration(
+        labelText: label,
+        border: const OutlineInputBorder(),
+      ),
+      validator: required
+          ? (v) {
+              if ((v ?? '').trim().isEmpty) return '$label is required';
+              return null;
+            }
+          : null,
+    );
+  }
+
+  Future<void> _pickPassportExpiry() async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _passportExpiry ?? now,
+      firstDate: DateTime(now.year - 5, 1, 1),
+      lastDate: DateTime(now.year + 20, 12, 31),
+    );
+    if (picked != null) setState(() => _passportExpiry = picked);
+  }
+
+  Future<void> _pickResidencyIssueDate() async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _residencyIssueDate ?? now,
+      firstDate: DateTime(now.year - 15, 1, 1),
+      lastDate: DateTime(now.year + 15, 12, 31),
+    );
+    if (picked != null) setState(() => _residencyIssueDate = picked);
+  }
+
+  Future<void> _pickResidencyExpiryDate() async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _residencyExpiryDate ?? _residencyIssueDate ?? now,
+      firstDate: DateTime(now.year - 15, 1, 1),
+      lastDate: DateTime(now.year + 15, 12, 31),
+    );
+    if (picked != null) setState(() => _residencyExpiryDate = picked);
+  }
+
+  Future<void> _pickInsuranceStartDate() async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _insuranceStartDate ?? now,
+      firstDate: DateTime(now.year - 15, 1, 1),
+      lastDate: DateTime(now.year + 15, 12, 31),
+    );
+    if (picked != null) setState(() => _insuranceStartDate = picked);
+  }
+
+  Future<void> _pickInsuranceExpiryDate() async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _insuranceExpiryDate ?? _insuranceStartDate ?? now,
+      firstDate: DateTime(now.year - 15, 1, 1),
+      lastDate: DateTime(now.year + 15, 12, 31),
+    );
+    if (picked != null) setState(() => _insuranceExpiryDate = picked);
+  }
+
+  Future<void> _pickContractStart() async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _contractStart ?? now,
+      firstDate: DateTime(now.year - 10, 1, 1),
+      lastDate: DateTime(now.year + 10, 12, 31),
+    );
+    if (picked != null) setState(() => _contractStart = picked);
+  }
+
+  Future<void> _pickContractEnd() async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _contractEnd ?? _contractStart ?? now,
+      firstDate: DateTime(now.year - 10, 1, 1),
+      lastDate: DateTime(now.year + 10, 12, 31),
+    );
+    if (picked != null) setState(() => _contractEnd = picked);
+  }
+
+  Future<void> _pickPhotoOnly() async {
+    final t = AppLocalizations.of(context)!;
+    final file = await SafeFilePicker.openSingle(
+      context: context,
+      acceptedTypeGroups: const [
+        XTypeGroup(label: 'Images', extensions: ['png', 'jpg', 'jpeg', 'webp']),
+      ],
+    );
+    if (file == null) return;
+
+    setState(() => _pickingPhoto = true);
+    try {
+      final length = await file.length();
+      if (length > 5 * 1024 * 1024) {
+        throw Exception(t.photoTooLargeMax5Mb);
+      }
+      final bytes = await file.readAsBytes();
+      final client = AppDI.supabase;
+      final tenantId = await _fetchTenantId(client);
+      final ext = _extension(file.name);
+      final contentType = switch (ext) {
+        'png' => 'image/png',
+        'jpg' || 'jpeg' => 'image/jpeg',
+        'webp' => 'image/webp',
+        _ => 'application/octet-stream',
+      };
+      final displayName = _fullName.text.trim().isEmpty
+          ? widget.profile.fullName
+          : _fullName.text.trim();
+      final employeeSlug = _slugify(displayName);
+      final employeeFolder =
+          '${employeeSlug}_${widget.profile.id.substring(0, 8)}';
+      final fileName = '$employeeSlug.$ext';
+      final path = '$tenantId/$employeeFolder/$fileName';
+
+      await client.storage
+          .from('employee_photos')
+          .uploadBinary(
+            path,
+            bytes,
+            fileOptions: FileOptions(contentType: contentType, upsert: true),
+          )
+          .timeout(const Duration(minutes: 2));
+
+      final publicUrl = client.storage
+          .from('employee_photos')
+          .getPublicUrl(path);
+      _photoUrl.text = publicUrl;
+      if (!mounted) return;
+      setState(() {});
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context)!.photoUploadedSuccessfully,
+          ),
+        ),
+      );
+    } catch (e, st) {
+      debugPrint('PHOTO_UPLOAD_ERROR: $e');
+      debugPrint('PHOTO_UPLOAD_STACK: $st');
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context)!.photoUploadFailed(e.toString()),
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _pickingPhoto = false);
+    }
+  }
+
+  Future<String> _fetchTenantId(SupabaseClient client) async {
+    final uid = client.auth.currentUser?.id;
+    if (uid == null) throw Exception('Not authenticated');
+    final me = await client
+        .from('users')
+        .select('tenant_id')
+        .eq('id', uid)
+        .single();
+    return me['tenant_id'].toString();
+  }
+
+  String _extension(String fileName) {
+    final i = fileName.lastIndexOf('.');
+    if (i < 0 || i == fileName.length - 1) return 'jpg';
+    return fileName.substring(i + 1).toLowerCase();
+  }
+
+  String _slugify(String value) {
+    final normalized = value
+        .toLowerCase()
+        .replaceAll(RegExp(r'[^a-z0-9\u0600-\u06FF]+'), '_')
+        .replaceAll(RegExp(r'_+'), '_')
+        .replaceAll(RegExp(r'^_|_$'), '');
+    return normalized.isEmpty ? 'employee' : normalized;
+  }
+
+  Future<void> _save() async {
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+    setState(() => _saving = true);
+    try {
+      await AppDI.employeesRepo.updateEmployeeProfile(
+        employeeId: widget.profile.id,
+        fullName: _fullName.text.trim(),
+        email: _email.text.trim(),
+        phone: _phone.text.trim(),
+        photoUrl: _photoUrl.text.trim(),
+        status: _status,
+        nationality: _nationality.text.trim(),
+        maritalStatus: _maritalStatus.text.trim(),
+        address: _address.text.trim(),
+        city: _city.text.trim(),
+        country: _country.text.trim(),
+        passportNo: _passportNo.text.trim(),
+        passportExpiry: _passportExpiry,
+        residencyIssueDate: _residencyIssueDate,
+        residencyExpiryDate: _residencyExpiryDate,
+        insuranceStartDate: _insuranceStartDate,
+        insuranceExpiryDate: _insuranceExpiryDate,
+        insuranceProvider: _insuranceProvider.text.trim(),
+        insurancePolicyNo: _insurancePolicyNo.text.trim(),
+        educationLevel: _educationLevel.text.trim(),
+        major: _major.text.trim(),
+        university: _university.text.trim(),
+        bankName: _bankName.text.trim(),
+        iban: _iban.text.trim(),
+        accountNumber: _accountNumber.text.trim(),
+        paymentMethod: _paymentMethod,
+        contractType: _contractType.text.trim(),
+        contractStart: _contractStart,
+        contractEnd: _contractEnd,
+        probationMonths: int.tryParse(_probationMonths.text.trim()),
+        contractFileUrl: _contractFileUrl.text.trim(),
+      );
+      if (!mounted) return;
+      Navigator.pop(context, true);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _saving = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.saveFailed(e.toString())),
+        ),
+      );
+    }
+  }
+
+  String _fmt(DateTime? d) {
+    if (d == null) return '-';
+    return '${d.year.toString().padLeft(4, '0')}-'
+        '${d.month.toString().padLeft(2, '0')}-'
+        '${d.day.toString().padLeft(2, '0')}';
+  }
+}
+
+class _AddContractVersionDialog extends StatefulWidget {

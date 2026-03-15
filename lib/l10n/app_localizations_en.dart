@@ -1211,6 +1211,184 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reviewPendingApprovals => 'Review Pending Approvals';
 
   @override
+  String get pendingTaskReviews => 'Pending Task Reviews';
+
+  @override
+  String get pendingTaskQa => 'Pending Final QA';
+
+  @override
+  String get noPendingTaskReviews => 'No pending task reviews.';
+
+  @override
+  String get noPendingTaskQa => 'No tasks pending final QA.';
+
+  @override
+  String get requestManagerReview => 'Request Manager Review';
+
+  @override
+  String get reviewPending => 'Review Pending';
+
+  @override
+  String get reviewApproved => 'Review Approved';
+
+  @override
+  String get reviewRejected => 'Review Rejected';
+
+  @override
+  String get noActiveReview => 'No Active Review';
+
+  @override
+  String get reviewNote => 'Review Note';
+
+  @override
+  String get reviewNoteRequired => 'Review note is required';
+
+  @override
+  String get reviewRequestedAt => 'Review requested at';
+
+  @override
+  String get yourReviewNote => 'Your note';
+
+  @override
+  String get managerResponseNote => 'Manager response';
+
+  @override
+  String get reviewRequestSent => 'Review request sent';
+
+  @override
+  String get approveAndUpdate => 'Approve and Update';
+
+  @override
+  String get rejectReviewRequest => 'Reject Review Request';
+
+  @override
+  String get reviewApprovedAndTaskUpdated => 'Review approved and task updated';
+
+  @override
+  String get reviewRejectedAndReturned => 'Review rejected and task returned';
+
+  @override
+  String get taskEventReviewRequested => 'Review requested';
+
+  @override
+  String get taskEventReviewApproved => 'Review approved';
+
+  @override
+  String get taskEventReviewRejected => 'Review rejected';
+
+  @override
+  String get taskEventQaAccepted => 'QA accepted';
+
+  @override
+  String get taskEventQaRework => 'QA sent for rework';
+
+  @override
+  String get taskEventQaRejected => 'QA rejected';
+
+  @override
+  String get taskEventAttachmentAdded => 'Attachment added';
+
+  @override
+  String get taskEventTimeLogged => 'Time logged';
+
+  @override
+  String get send => 'Send';
+
+  @override
+  String get attachFile => 'Attach File';
+
+  @override
+  String get logHours => 'Log Hours';
+
+  @override
+  String get logHoursTitle => 'Log Hours';
+
+  @override
+  String get loggedHours => 'Logged Hours';
+
+  @override
+  String get invalidLoggedHours => 'Please enter a valid logged hours value.';
+
+  @override
+  String get hoursLoggedSuccessfully => 'Hours logged successfully';
+
+  @override
+  String get attachments => 'Attachments';
+
+  @override
+  String attachmentsCount(int count) {
+    return '$count attachments';
+  }
+
+  @override
+  String get allTasks => 'All Tasks';
+
+  @override
+  String get attachmentUploaded => 'Attachment uploaded';
+
+  @override
+  String get qaPending => 'QA Pending';
+
+  @override
+  String get qaAccepted => 'QA Accepted';
+
+  @override
+  String get qaRework => 'Needs Rework';
+
+  @override
+  String get qaRejected => 'QA Rejected';
+
+  @override
+  String get qaApprove => 'Approve';
+
+  @override
+  String get qaSendRework => 'Send Rework';
+
+  @override
+  String get qaReject => 'Reject';
+
+  @override
+  String get qaApprovedMessage => 'Task approved in final QA';
+
+  @override
+  String get qaReworkMessage => 'Task sent back for rework';
+
+  @override
+  String get qaRejectedMessage => 'Task rejected in final QA';
+
+  @override
+  String qaLabel(Object status) {
+    return 'QA: $status';
+  }
+
+  @override
+  String get employeeActionCenter => 'Action Center';
+
+  @override
+  String get employeeNotifications => 'Notifications';
+
+  @override
+  String get noEmployeeNotifications => 'No notifications right now.';
+
+  @override
+  String get taskDueSoon => 'Task due soon';
+
+  @override
+  String reviewPendingWithValue(int value) {
+    return 'Review pending: $value';
+  }
+
+  @override
+  String qaPendingWithValue(int value) {
+    return 'QA pending: $value';
+  }
+
+  @override
+  String dueSoonWithValue(int value) {
+    return 'Due soon: $value';
+  }
+
+  @override
   String get resolveExpiryAlerts => 'Resolve Expiry Alerts';
 
   @override
@@ -1567,6 +1745,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get taskTemplate => 'Task Template';
+
+  @override
   String get taskTypeGeneral => 'General';
 
   @override
@@ -1604,6 +1785,133 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get taskTypeEmployeeDocs => 'Employee Documents';
+
+  @override
+  String get templateLoginSignup => 'Login and signup delivery';
+
+  @override
+  String get templateLoginSignupDesc =>
+      'Build and complete the login and signup flow with validation, state handling, and final QA.';
+
+  @override
+  String get templateBugFixRelease => 'Release blocker bug fix';
+
+  @override
+  String get templateBugFixReleaseDesc =>
+      'Investigate the blocker, apply the fix, validate affected flows, and prepare the release notes.';
+
+  @override
+  String get templateRegressionTesting => 'Regression testing cycle';
+
+  @override
+  String get templateRegressionTestingDesc =>
+      'Run the assigned regression checklist, document findings, and retest the resolved issues.';
+
+  @override
+  String get templateTransferBatch => 'Transfer batch processing';
+
+  @override
+  String get templateTransferBatchDesc =>
+      'Process the assigned transfers, verify amounts, and log completion status for each transaction.';
+
+  @override
+  String get templateMonthlyFinanceReport => 'Monthly finance report';
+
+  @override
+  String get templateMonthlyFinanceReportDesc =>
+      'Prepare the monthly finance report, review the source numbers, and submit the final summary.';
+
+  @override
+  String get templateTaxSubmission => 'Tax submission package';
+
+  @override
+  String get templateTaxSubmissionDesc =>
+      'Prepare tax data, validate required documents, and submit the filing package before the deadline.';
+
+  @override
+  String get templateOnboardingPack => 'Employee onboarding pack';
+
+  @override
+  String get templateOnboardingPackDesc =>
+      'Collect, review, and complete the onboarding checklist and required employee documents.';
+
+  @override
+  String get templateDocumentAudit => 'Employee document audit';
+
+  @override
+  String get templateDocumentAuditDesc =>
+      'Review the employee document set, flag missing items, and update expiry-sensitive files.';
+
+  @override
+  String get templateRecruitmentFollowup => 'Recruitment follow-up';
+
+  @override
+  String get templateRecruitmentFollowupDesc =>
+      'Follow up on the assigned candidates, update statuses, and move the pipeline forward.';
+
+  @override
+  String get templateGeneralFollowup => 'General follow-up task';
+
+  @override
+  String get templateGeneralFollowupDesc =>
+      'Track the assigned work item, update the status, and close the task on time.';
+
+  @override
+  String get monthDepartmentOverview => 'Monthly Department Overview';
+
+  @override
+  String get monthTasksCreated => 'Tasks created this month';
+
+  @override
+  String get monthTasksCompleted => 'Tasks completed this month';
+
+  @override
+  String get monthOnTimeRate => 'On-time completion';
+
+  @override
+  String get monthDepartmentProductivity => 'Department productivity';
+
+  @override
+  String get monthCompletionRate => 'Completion rate';
+
+  @override
+  String get monthlyCompletionTrend => 'Monthly Completion Trend';
+
+  @override
+  String get lastSixMonths => 'Last 6 months';
+
+  @override
+  String get onTimeVsDelayed => 'On-time vs Delayed';
+
+  @override
+  String get taskTypeDistribution => 'Task Type Distribution';
+
+  @override
+  String get employeeWorkload => 'Employee Workload';
+
+  @override
+  String get currentMonthBreakdown => 'Current month breakdown';
+
+  @override
+  String get onTime => 'On-time';
+
+  @override
+  String get delayed => 'Delayed';
+
+  @override
+  String monthTasksWithValue(int value) {
+    return 'Month tasks: $value';
+  }
+
+  @override
+  String completedThisMonthWithValue(int value) {
+    return 'Completed this month: $value';
+  }
+
+  @override
+  String avgTaskProgressWithValue(Object value) {
+    return 'Avg progress: $value%';
+  }
 
   @override
   String get allStatuses => 'All Statuses';
@@ -1679,4 +1987,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noFileSelected => 'No file selected';
+
+  @override
+  String get notificationsTitle => 'Notifications';
+
+  @override
+  String get failedToLoadNotifications => 'Failed to load notifications';
+
+  @override
+  String get noNotificationsAvailable => 'No notifications available.';
 }

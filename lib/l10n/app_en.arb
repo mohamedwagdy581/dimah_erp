@@ -478,6 +478,95 @@
   "quickActions": "Quick Actions",
   "hrWorkflowBoard": "HR Workflow Board",
   "reviewPendingApprovals": "Review Pending Approvals",
+  "pendingTaskReviews": "Pending Task Reviews",
+  "pendingTaskQa": "Pending Final QA",
+  "noPendingTaskReviews": "No pending task reviews.",
+  "noPendingTaskQa": "No tasks pending final QA.",
+  "requestManagerReview": "Request Manager Review",
+  "reviewPending": "Review Pending",
+  "reviewApproved": "Review Approved",
+  "reviewRejected": "Review Rejected",
+  "noActiveReview": "No Active Review",
+  "reviewNote": "Review Note",
+  "reviewNoteRequired": "Review note is required",
+  "reviewRequestedAt": "Review requested at",
+  "yourReviewNote": "Your note",
+  "managerResponseNote": "Manager response",
+  "reviewRequestSent": "Review request sent",
+  "approveAndUpdate": "Approve and Update",
+  "rejectReviewRequest": "Reject Review Request",
+  "reviewApprovedAndTaskUpdated": "Review approved and task updated",
+  "reviewRejectedAndReturned": "Review rejected and task returned",
+  "taskEventReviewRequested": "Review requested",
+  "taskEventReviewApproved": "Review approved",
+  "taskEventReviewRejected": "Review rejected",
+  "taskEventQaAccepted": "QA accepted",
+  "taskEventQaRework": "QA sent for rework",
+  "taskEventQaRejected": "QA rejected",
+  "taskEventAttachmentAdded": "Attachment added",
+  "taskEventTimeLogged": "Time logged",
+  "send": "Send",
+  "attachFile": "Attach File",
+  "logHours": "Log Hours",
+  "logHoursTitle": "Log Hours",
+  "loggedHours": "Logged Hours",
+  "invalidLoggedHours": "Please enter a valid logged hours value.",
+  "hoursLoggedSuccessfully": "Hours logged successfully",
+  "attachments": "Attachments",
+  "attachmentsCount": "{count} attachments",
+  "@attachmentsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "allTasks": "All Tasks",
+  "attachmentUploaded": "Attachment uploaded",
+  "qaPending": "QA Pending",
+  "qaAccepted": "QA Accepted",
+  "qaRework": "Needs Rework",
+  "qaRejected": "QA Rejected",
+  "qaApprove": "Approve",
+  "qaSendRework": "Send Rework",
+  "qaReject": "Reject",
+  "qaApprovedMessage": "Task approved in final QA",
+  "qaReworkMessage": "Task sent back for rework",
+  "qaRejectedMessage": "Task rejected in final QA",
+  "qaLabel": "QA: {status}",
+  "@qaLabel": {
+    "placeholders": {
+      "status": {}
+    }
+  },
+  "employeeActionCenter": "Action Center",
+  "employeeNotifications": "Notifications",
+  "noEmployeeNotifications": "No notifications right now.",
+  "taskDueSoon": "Task due soon",
+  "reviewPendingWithValue": "Review pending: {value}",
+  "@reviewPendingWithValue": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "qaPendingWithValue": "QA pending: {value}",
+  "@qaPendingWithValue": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "dueSoonWithValue": "Due soon: {value}",
+  "@dueSoonWithValue": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
   "resolveExpiryAlerts": "Resolve Expiry Alerts",
   "completeEmployeeDocuments": "Complete Employee Documents",
   "documentCompliance": "Document Compliance",
@@ -647,6 +736,7 @@
       "department": {}
     }
   },
+  "taskTemplate": "Task Template",
   "taskTypeGeneral": "General",
   "taskTypeDevelopment": "Development",
   "taskTypeBugFix": "Bug Fix",
@@ -660,10 +750,64 @@
   "taskTypeRecruitment": "Recruitment",
   "taskTypeOnboarding": "Onboarding",
   "taskTypeEmployeeDocs": "Employee Documents",
-  "documents": "Documents",
+  "templateLoginSignup": "Login and signup delivery",
+  "templateLoginSignupDesc": "Build and complete the login and signup flow with validation, state handling, and final QA.",
+  "templateBugFixRelease": "Release blocker bug fix",
+  "templateBugFixReleaseDesc": "Investigate the blocker, apply the fix, validate affected flows, and prepare the release notes.",
+  "templateRegressionTesting": "Regression testing cycle",
+  "templateRegressionTestingDesc": "Run the assigned regression checklist, document findings, and retest the resolved issues.",
+  "templateTransferBatch": "Transfer batch processing",
+  "templateTransferBatchDesc": "Process the assigned transfers, verify amounts, and log completion status for each transaction.",
+  "templateMonthlyFinanceReport": "Monthly finance report",
+  "templateMonthlyFinanceReportDesc": "Prepare the monthly finance report, review the source numbers, and submit the final summary.",
+  "templateTaxSubmission": "Tax submission package",
+  "templateTaxSubmissionDesc": "Prepare tax data, validate required documents, and submit the filing package before the deadline.",
+  "templateOnboardingPack": "Employee onboarding pack",
+  "templateOnboardingPackDesc": "Collect, review, and complete the onboarding checklist and required employee documents.",
+  "templateDocumentAudit": "Employee document audit",
+  "templateDocumentAuditDesc": "Review the employee document set, flag missing items, and update expiry-sensitive files.",
+  "templateRecruitmentFollowup": "Recruitment follow-up",
+  "templateRecruitmentFollowupDesc": "Follow up on the assigned candidates, update statuses, and move the pipeline forward.",
+  "templateGeneralFollowup": "General follow-up task",
+  "templateGeneralFollowupDesc": "Track the assigned work item, update the status, and close the task on time.",
+  "monthDepartmentOverview": "Monthly Department Overview",
+  "monthTasksCreated": "Tasks created this month",
+  "monthTasksCompleted": "Tasks completed this month",
+  "monthOnTimeRate": "On-time completion",
+  "monthDepartmentProductivity": "Department productivity",
+  "monthCompletionRate": "Completion rate",
+  "monthlyCompletionTrend": "Monthly Completion Trend",
+  "lastSixMonths": "Last 6 months",
+  "onTimeVsDelayed": "On-time vs Delayed",
+  "taskTypeDistribution": "Task Type Distribution",
+  "employeeWorkload": "Employee Workload",
+  "currentMonthBreakdown": "Current month breakdown",
+  "onTime": "On-time",
+  "delayed": "Delayed",
+  "monthTasksWithValue": "Month tasks: {value}",
+  "@monthTasksWithValue": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "completedThisMonthWithValue": "Completed this month: {value}",
+  "@completedThisMonthWithValue": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "avgTaskProgressWithValue": "Avg progress: {value}%",
+  "@avgTaskProgressWithValue": {
+    "placeholders": {
+      "value": {}
+    }
+  },
   "allStatuses": "All Statuses",
   "uploadNewDocument": "Upload New Document",
-  "noEmployeesFound": "No employees found.",
   "idCard": "ID Card",
   "graduationCert": "Graduation Certificate",
   "nationalAddress": "National Address",
@@ -686,5 +830,8 @@
   "noExpiry": "No Expiry",
   "documentFile": "Document",
   "uploadFile": "Upload File",
-  "noFileSelected": "No file selected"
+  "noFileSelected": "No file selected",
+  "notificationsTitle": "Notifications",
+  "failedToLoadNotifications": "Failed to load notifications",
+  "noNotificationsAvailable": "No notifications available."
 }

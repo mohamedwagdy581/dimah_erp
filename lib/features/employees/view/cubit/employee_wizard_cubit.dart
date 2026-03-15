@@ -8,78 +8,50 @@ class EmployeeWizardCubit extends Cubit<EmployeeWizardState> {
 
   final EmployeesRepo _repo;
 
-  // =======================
-  // Personal setters
-  // =======================
+  void _emitPersonal(EmployeeWizardState Function() next) => emit(next());
+  void _emitJob(EmployeeWizardState Function() next) => emit(next());
+  void _emitCompensation(EmployeeWizardState Function() next) => emit(next());
+  void _emitAdditional(EmployeeWizardState Function() next) => emit(next());
 
-  void setEmployeeNumber(String v) => emit(state.copyWith(employeeNumber: v));
+  void setEmployeeNumber(String v) => _emitPersonal(() => state.copyWith(personal: state.personal.copyWith(employeeNumber: v)));
+  void setFullName(String v) => _emitPersonal(() => state.copyWith(personal: state.personal.copyWith(fullName: v)));
+  void setEmail(String v) => _emitPersonal(() => state.copyWith(personal: state.personal.copyWith(email: v)));
+  void setPhone(String v) => _emitPersonal(() => state.copyWith(personal: state.personal.copyWith(phone: v)));
+  void setPhotoUrl(String v) => _emitPersonal(() => state.copyWith(personal: state.personal.copyWith(photoUrl: v)));
+  void setNationalId(String v) => _emitPersonal(() => state.copyWith(personal: state.personal.copyWith(nationalId: v)));
+  void setGender(String? v) => _emitPersonal(() => state.copyWith(personal: state.personal.copyWith(gender: v)));
+  void setDateOfBirth(DateTime? v) => _emitPersonal(() => state.copyWith(personal: state.personal.copyWith(dateOfBirth: v)));
+  void setNationality(String? v) => _emitPersonal(() => state.copyWith(personal: state.personal.copyWith(nationality: v)));
 
-  void setFullName(String v) => emit(state.copyWith(fullName: v));
+  void setDepartmentId(String? v) => _emitJob(() => state.copyWith(job: state.job.copyWith(departmentId: v)));
+  void setManagerId(String? v) => _emitJob(() => state.copyWith(job: state.job.copyWith(managerId: v)));
+  void setJobTitleId(String? v) => _emitJob(() => state.copyWith(job: state.job.copyWith(jobTitleId: v)));
+  void setHireDate(DateTime? v) => _emitJob(() => state.copyWith(job: state.job.copyWith(hireDate: v)));
+  void setEmploymentType(String v) => _emitJob(() => state.copyWith(job: state.job.copyWith(employmentType: v)));
+  void setContractType(String v) => _emitJob(() => state.copyWith(job: state.job.copyWith(contractType: v)));
+  void setContractStart(DateTime? v) => _emitJob(() => state.copyWith(job: state.job.copyWith(contractStart: v)));
+  void setContractEnd(DateTime? v) => _emitJob(() => state.copyWith(job: state.job.copyWith(contractEnd: v)));
+  void setProbationMonths(int? v) => _emitJob(() => state.copyWith(job: state.job.copyWith(probationMonths: v)));
+  void setContractFileUrl(String v) => _emitJob(() => state.copyWith(job: state.job.copyWith(contractFileUrl: v)));
 
-  void setEmail(String v) => emit(state.copyWith(email: v));
+  void setMaritalStatus(String? v) => _emitAdditional(() => state.copyWith(additional: state.additional.copyWith(maritalStatus: v)));
+  void setAddress(String v) => _emitAdditional(() => state.copyWith(additional: state.additional.copyWith(address: v)));
+  void setCity(String v) => _emitAdditional(() => state.copyWith(additional: state.additional.copyWith(city: v)));
+  void setCountry(String v) => _emitAdditional(() => state.copyWith(additional: state.additional.copyWith(country: v)));
+  void setPassportNo(String v) => _emitAdditional(() => state.copyWith(additional: state.additional.copyWith(passportNo: v)));
+  void setPassportExpiry(DateTime? v) => _emitAdditional(() => state.copyWith(additional: state.additional.copyWith(passportExpiry: v)));
+  void setEducationLevel(String? v) => _emitAdditional(() => state.copyWith(additional: state.additional.copyWith(educationLevel: v)));
+  void setMajor(String v) => _emitAdditional(() => state.copyWith(additional: state.additional.copyWith(major: v)));
+  void setUniversity(String v) => _emitAdditional(() => state.copyWith(additional: state.additional.copyWith(university: v)));
 
-  void setPhone(String v) => emit(state.copyWith(phone: v));
-  void setPhotoUrl(String v) => emit(state.copyWith(photoUrl: v));
-
-  void setNationalId(String v) => emit(state.copyWith(nationalId: v));
-
-  void setGender(String? v) => emit(state.copyWith(gender: v));
-
-  void setDateOfBirth(DateTime? v) => emit(state.copyWith(dateOfBirth: v));
-  void setNationality(String? v) => emit(state.copyWith(nationality: v));
-
-  // =======================
-  // Job setters
-  // =======================
-
-  void setDepartmentId(String? v) => emit(state.copyWith(departmentId: v));
-  void setManagerId(String? v) => emit(state.copyWith(managerId: v));
-
-  void setJobTitleId(String? v) => emit(state.copyWith(jobTitleId: v));
-
-  void setHireDate(DateTime? v) => emit(state.copyWith(hireDate: v));
-
-  void setEmploymentType(String v) => emit(state.copyWith(employmentType: v));
-  void setContractType(String v) => emit(state.copyWith(contractType: v));
-  void setContractStart(DateTime? v) => emit(state.copyWith(contractStart: v));
-  void setContractEnd(DateTime? v) => emit(state.copyWith(contractEnd: v));
-  void setProbationMonths(int? v) => emit(state.copyWith(probationMonths: v));
-  void setContractFileUrl(String v) => emit(state.copyWith(contractFileUrl: v));
-
-  void setMaritalStatus(String? v) => emit(state.copyWith(maritalStatus: v));
-  void setAddress(String v) => emit(state.copyWith(address: v));
-  void setCity(String v) => emit(state.copyWith(city: v));
-  void setCountry(String v) => emit(state.copyWith(country: v));
-  void setPassportNo(String v) => emit(state.copyWith(passportNo: v));
-  void setPassportExpiry(DateTime? v) =>
-      emit(state.copyWith(passportExpiry: v));
-  void setEducationLevel(String? v) =>
-      emit(state.copyWith(educationLevel: v));
-  void setMajor(String v) => emit(state.copyWith(major: v));
-  void setUniversity(String v) => emit(state.copyWith(university: v));
-
-  // =======================
-  // Compensation setters
-  // =======================
-
-  void setBasicSalary(num? v) => emit(state.copyWith(basicSalary: v ?? 0));
-
-  void setHousingAllowance(num? v) =>
-      emit(state.copyWith(housingAllowance: v ?? 0));
-
-  void setTransportAllowance(num? v) =>
-      emit(state.copyWith(transportAllowance: v ?? 0));
-
-  void setOtherAllowance(num? v) =>
-      emit(state.copyWith(otherAllowance: v ?? 0));
-  void setBankName(String v) => emit(state.copyWith(bankName: v));
-  void setIban(String v) => emit(state.copyWith(iban: v));
-  void setAccountNumber(String v) => emit(state.copyWith(accountNumber: v));
-  void setPaymentMethod(String v) => emit(state.copyWith(paymentMethod: v));
-
-  // =======================
-  // Submit Employee
-  // =======================
+  void setBasicSalary(num? v) => _emitCompensation(() => state.copyWith(compensation: state.compensation.copyWith(basicSalary: v ?? 0)));
+  void setHousingAllowance(num? v) => _emitCompensation(() => state.copyWith(compensation: state.compensation.copyWith(housingAllowance: v ?? 0)));
+  void setTransportAllowance(num? v) => _emitCompensation(() => state.copyWith(compensation: state.compensation.copyWith(transportAllowance: v ?? 0)));
+  void setOtherAllowance(num? v) => _emitCompensation(() => state.copyWith(compensation: state.compensation.copyWith(otherAllowance: v ?? 0)));
+  void setBankName(String v) => _emitCompensation(() => state.copyWith(compensation: state.compensation.copyWith(bankName: v)));
+  void setIban(String v) => _emitCompensation(() => state.copyWith(compensation: state.compensation.copyWith(iban: v)));
+  void setAccountNumber(String v) => _emitCompensation(() => state.copyWith(compensation: state.compensation.copyWith(accountNumber: v)));
+  void setPaymentMethod(String v) => _emitCompensation(() => state.copyWith(compensation: state.compensation.copyWith(paymentMethod: v)));
 
   Future<void> submit() async {
     try {
@@ -154,7 +126,11 @@ class EmployeeWizardCubit extends Cubit<EmployeeWizardState> {
       );
       if (isClosed) return;
       emit(
-        state.copyWith(loading: false, success: true, employeeNumber: empNo),
+        state.copyWith(
+          loading: false,
+          success: true,
+          personal: state.personal.copyWith(employeeNumber: empNo),
+        ),
       );
     } catch (e) {
       if (isClosed) return;

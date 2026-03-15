@@ -12,6 +12,7 @@ class AppRoutes {
   static const employeeDocs = '/employee-docs';
   static const hrAlerts = '/hr-alerts';
   static const approvals = '/approvals';
+  static const notifications = '/notifications';
   static const myPortal = '/my';
   static const accounts = '/accounts';
   static const journal = '/journal';
