@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 
-import 'package:file_selector/file_selector.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../../core/di/app_di.dart';
@@ -17,11 +16,16 @@ class EmployeeProfilePhotoUploadService {
       displayName: displayName,
       employeeId: employeeId,
     );
-    await AppDI.supabase.storage.from('employee_photos').uploadBinary(
-      path,
-      bytes,
-      fileOptions: FileOptions(contentType: _contentType(fileName), upsert: true),
-    );
+    await AppDI.supabase.storage
+        .from('employee_photos')
+        .uploadBinary(
+          path,
+          bytes,
+          fileOptions: FileOptions(
+            contentType: _contentType(fileName),
+            upsert: true,
+          ),
+        );
     return AppDI.supabase.storage.from('employee_photos').getPublicUrl(path);
   }
 
@@ -32,7 +36,11 @@ class EmployeeProfilePhotoUploadService {
   }) async {
     final uid = AppDI.supabase.auth.currentUser?.id;
     if (uid == null) throw Exception('Not authenticated');
-    final me = await AppDI.supabase.from('users').select('tenant_id').eq('id', uid).single();
+    final me = await AppDI.supabase
+        .from('users')
+        .select('tenant_id')
+        .eq('id', uid)
+        .single();
     final slug = _slugify(displayName);
     final ext = _extension(fileName);
     return '${me['tenant_id']}/${slug}_${employeeId.substring(0, 8)}/$slug.$ext';
@@ -54,9 +62,9 @@ class EmployeeProfilePhotoUploadService {
   }
 
   String _contentType(String fileName) => switch (_extension(fileName)) {
-        'png' => 'image/png',
-        'jpg' || 'jpeg' => 'image/jpeg',
-        'webp' => 'image/webp',
-        _ => 'application/octet-stream',
-      };
+    'png' => 'image/png',
+    'jpg' || 'jpeg' => 'image/jpeg',
+    'webp' => 'image/webp',
+    _ => 'application/octet-stream',
+  };
 }

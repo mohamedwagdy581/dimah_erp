@@ -27,7 +27,7 @@ extension _LeavesFormDialogBuild on _LeavesFormDialogState {
                   items: _filtered
                       .map((e) => DropdownMenuItem(value: e.id, child: Text(e.fullName)))
                       .toList(),
-                  onChanged: (v) => setState(() => _employeeId = v),
+                  onChanged: _setEmployeeId,
                   decoration: const InputDecoration(
                     labelText: 'Employee',
                     border: OutlineInputBorder(),
@@ -47,7 +47,7 @@ extension _LeavesFormDialogBuild on _LeavesFormDialogState {
                   DropdownMenuItem(value: 'unpaid', child: Text('Unpaid')),
                   DropdownMenuItem(value: 'other', child: Text('Other')),
                 ],
-                onChanged: (v) => setState(() => _type = v ?? 'annual'),
+                onChanged: _setLeaveType,
                 decoration: const InputDecoration(
                   labelText: 'Leave Type',
                   border: OutlineInputBorder(),

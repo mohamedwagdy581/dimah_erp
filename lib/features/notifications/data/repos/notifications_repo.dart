@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/routing/app_routes.dart';
@@ -23,8 +23,14 @@ class NotificationsRepo {
     if (user.role == 'manager' || user.role == 'direct_manager') {
       return _fetchManagerNotifications(tenantId, user.employeeId, t);
     }
+    if (user.role == 'finance_manager') {
+      return _fetchFinanceManagerNotifications(tenantId, user.employeeId, t);
+    }
+    if (user.role == 'accountant') {
+      return _fetchAccountantNotifications(tenantId, user.employeeId, t);
+    }
     if (user.role == 'hr' || user.role == 'admin') {
-      return _fetchHrNotifications(tenantId, t);
+      return _fetchBackofficeNotifications(tenantId, user.role, t);
     }
     return const [];
   }
@@ -114,7 +120,111 @@ class NotificationsRepo {
     return items.take(20).toList();
   }
 
-  Future<List<NotificationItem>> _fetchHrNotifications(String tenantId, AppLocalizations t) async {
+  Future<List<NotificationItem>> _fetchFinanceManagerNotifications(
+    String tenantId,
+    String? employeeId,
+    AppLocalizations t,
+  ) async {
+    final items = <NotificationItem>[];
+    final payrollRows = await _client
+        .from('payroll_runs')
+        .select('period_start, period_end, status, disbursement_status, created_at')
+        .eq('tenant_id', tenantId)
+        .or('status.eq.pending_finance_manager,and(status.eq.approved,disbursement_status.eq.assigned_to_finance_manager)')
+        .order('created_at', ascending: false)
+        .limit(20);
+
+    for (final row in (payrollRows as List).cast<Map<String, dynamic>>()) {
+      final period = _payrollPeriodLabel(
+        row['period_start']?.toString(),
+        row['period_end']?.toString(),
+      );
+      final status = (row['status'] ?? '').toString();
+      final disbursementStatus = (row['disbursement_status'] ?? '').toString();
+      if (status == 'pending_finance_manager') {
+        items.add(
+          _item(
+            _txt(t, 'مسير رواتب بانتظار اعتمادك', 'Payroll waiting for your approval'),
+            period,
+            Icons.request_page_outlined,
+            Colors.orange,
+            AppRoutes.payroll,
+          ),
+        );
+      }
+      if (status == 'approved' && disbursementStatus == 'assigned_to_finance_manager') {
+        items.add(
+          _item(
+            _txt(t, 'تم إنشاء مهمة صرف الرواتب', 'Payroll disbursement task created'),
+            period,
+            Icons.payments_outlined,
+            Colors.deepPurple,
+            AppRoutes.payroll,
+          ),
+        );
+      }
+    }
+
+    if (employeeId != null && employeeId.isNotEmpty) {
+      final taskRows = await _client
+          .from('employee_tasks')
+          .select('title, updated_at, task_type')
+          .eq('tenant_id', tenantId)
+          .eq('employee_id', employeeId)
+          .eq('task_type', 'payroll')
+          .order('updated_at', ascending: false)
+          .limit(10);
+      for (final row in (taskRows as List).cast<Map<String, dynamic>>()) {
+        items.add(
+          _item(
+            _txt(t, 'تحديث على مهمة رواتب', 'Payroll task update'),
+            '${row['title'] ?? '-'} - ${_dateLabel(row['updated_at']?.toString())}',
+            Icons.assignment_outlined,
+            Colors.blue,
+            AppRoutes.myPortal,
+          ),
+        );
+      }
+    }
+
+    return items.take(20).toList();
+  }
+
+  Future<List<NotificationItem>> _fetchAccountantNotifications(
+    String tenantId,
+    String? employeeId,
+    AppLocalizations t,
+  ) async {
+    if (employeeId == null || employeeId.isEmpty) return const [];
+    final taskRows = await _client
+        .from('employee_tasks')
+        .select('title, updated_at, task_type, status')
+        .eq('tenant_id', tenantId)
+        .eq('employee_id', employeeId)
+        .eq('task_type', 'payroll')
+        .order('updated_at', ascending: false)
+        .limit(20);
+
+    return (taskRows as List)
+        .cast<Map<String, dynamic>>()
+        .map(
+          (row) => _item(
+            _txt(t, 'تم إسناد مهمة رواتب لك', 'Payroll task assigned'),
+            '${row['title'] ?? '-'} - ${_dateLabel(row['updated_at']?.toString())}',
+            Icons.payments_outlined,
+            Colors.blue,
+            AppRoutes.myPortal,
+          ),
+        )
+        .toList();
+  }
+
+  Future<List<NotificationItem>> _fetchBackofficeNotifications(
+    String tenantId,
+    String role,
+    AppLocalizations t,
+  ) async {
+    final items = <NotificationItem>[];
     final approvals = await _client
         .from('approval_requests')
         .select('request_type, created_at, status')
@@ -122,10 +232,66 @@ class NotificationsRepo {
         .eq('status', 'pending')
         .order('created_at', ascending: false)
         .limit(12);
-    return (approvals as List)
-        .cast<Map<String, dynamic>>()
-        .map((row) => _item(t.pendingApprovalsKpi, '${row['request_type'] ?? '-'} - ${_dateLabel(row['created_at']?.toString())}', Icons.approval_outlined, Colors.orange, AppRoutes.approvals))
-        .toList();
+    items.addAll(
+      (approvals as List)
+          .cast<Map<String, dynamic>>()
+          .map(
+            (row) => _item(
+              t.pendingApprovalsKpi,
+              '${row['request_type'] ?? '-'} - ${_dateLabel(row['created_at']?.toString())}',
+              Icons.approval_outlined,
+              Colors.orange,
+              AppRoutes.approvals,
+            ),
+          ),
+    );
+
+    if (role == 'hr') {
+      final payrollRows = await _client
+          .from('payroll_runs')
+          .select('period_start, period_end, status, reject_reason, created_at')
+          .eq('tenant_id', tenantId)
+          .inFilter('status', ['rejected_by_finance_manager', 'rejected_by_admin'])
+          .order('created_at', ascending: false)
+          .limit(10);
+      for (final row in (payrollRows as List).cast<Map<String, dynamic>>()) {
+        items.add(
+          _item(
+            _txt(t, 'تمت إعادة مسير الرواتب للمراجعة', 'Payroll returned for revision'),
+            '${_payrollPeriodLabel(row['period_start']?.toString(), row['period_end']?.toString())} - ${(row['reject_reason'] ?? '-').toString()}',
+            Icons.reply_outlined,
+            Colors.red,
+            AppRoutes.payroll,
+          ),
+        );
+      }
+    }
+
+    if (role == 'admin') {
+      final payrollRows = await _client
+          .from('payroll_runs')
+          .select('period_start, period_end, status, created_at')
+          .eq('tenant_id', tenantId)
+          .eq('status', 'pending_admin_approval')
+          .order('created_at', ascending: false)
+          .limit(10);
+      for (final row in (payrollRows as List).cast<Map<String, dynamic>>()) {
+        items.add(
+          _item(
+            _txt(t, 'مسير رواتب بانتظار الاعتماد النهائي', 'Payroll awaiting final approval'),
+            _payrollPeriodLabel(
+              row['period_start']?.toString(),
+              row['period_end']?.toString(),
+            ),
+            Icons.verified_user_outlined,
+            Colors.indigo,
+            AppRoutes.payroll,
+          ),
+        );
+      }
+    }
+
+    return items.take(20).toList();
   }
 
   NotificationItem _item(String title, String subtitle, IconData icon, Color color, String route) {
@@ -136,5 +302,15 @@ class NotificationsRepo {
     final date = DateTime.tryParse(raw ?? '');
     if (date == null) return '-';
     return '${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+  }
+
+  static String _payrollPeriodLabel(String? startRaw, String? endRaw) {
+    final start = _dateLabel(startRaw);
+    final end = _dateLabel(endRaw);
+    return '$start -> $end';
+  }
+
+  static String _txt(AppLocalizations t, String ar, String en) {
+    return t.localeName.startsWith('ar') ? ar : en;
   }
 }

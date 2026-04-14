@@ -164,8 +164,8 @@ class JobTitlesCubit extends Cubit<JobTitlesState> {
         ascending: true,
       );
       if (kDebugMode) {
-        print('[JobTitles] dept=$departmentId items=${res.items.length}');
-        print(res.items.map((e) => e.name).toList());
+        debugPrint('[JobTitles] dept=$departmentId items=${res.items.length}');
+        debugPrint('${res.items.map((e) => e.name).toList()}');
       }
       if (isClosed) return;
       emit(state.copyWith(loading: false, items: res.items, total: res.total));

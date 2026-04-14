@@ -1,13 +1,13 @@
 part of 'employee_repo_impl.dart';
 
 mixin _EmployeesRepoEmployeeLookupMixin on _EmployeesRepoEmployeesListMixin {
-  @override
   Future<List<EmployeeLookup>> fetchEmployeeLookup({
     String? search,
     int limit = 200,
   }) async {
     final tenantId = await _tenantId();
     final actor = await _currentUserIdentity();
+    final actorEmployeeId = actor.employeeId;
     final trimmedSearch = search?.trim();
 
     dynamic q = _client
@@ -18,11 +18,11 @@ mixin _EmployeesRepoEmployeeLookupMixin on _EmployeesRepoEmployeesListMixin {
         .limit(limit);
 
     if (_isManagerRole(actor.role) &&
-        actor.employeeId != null &&
-        actor.employeeId!.trim().isNotEmpty) {
+        actorEmployeeId != null &&
+        actorEmployeeId.trim().isNotEmpty) {
       final scopedIds = await _managerScopedEmployeeIds(
         tenantId: tenantId,
-        managerEmployeeId: actor.employeeId!,
+        managerEmployeeId: actorEmployeeId,
       );
       if (scopedIds.isEmpty) return const [];
       q = q.inFilter('id', scopedIds);

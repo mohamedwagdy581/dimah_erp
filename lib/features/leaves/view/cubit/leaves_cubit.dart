@@ -21,6 +21,7 @@ class LeavesCubit extends Cubit<LeavesState> {
 
   Future<void> load({bool resetPage = false}) async {
     try {
+      final scopedEmployeeId = employeeId;
       if (isClosed) return;
       emit(
         state.copyWith(
@@ -38,14 +39,14 @@ class LeavesCubit extends Cubit<LeavesState> {
         type: state.type,
         startDate: state.startDate,
         endDate: state.endDate,
-        employeeId: employeeId,
+        employeeId: scopedEmployeeId,
         sortBy: state.sortBy,
         ascending: state.ascending,
       );
       List<LeaveBalance> balances = const [];
-      if (employeeId != null && employeeId!.trim().isNotEmpty) {
+      if (scopedEmployeeId != null && scopedEmployeeId.trim().isNotEmpty) {
         balances = await _repo.fetchLeaveBalances(
-          employeeId: employeeId!,
+          employeeId: scopedEmployeeId,
           year: DateTime.now().year,
         );
       }

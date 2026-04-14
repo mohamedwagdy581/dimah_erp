@@ -25,6 +25,10 @@ String localizedNavLabel(BuildContext context, NavItem item) {
       return t.menuEmployeeDocs;
     case AppRoutes.hrAlerts:
       return t.menuHrAlerts;
+    case AppRoutes.hrForms:
+      return Localizations.localeOf(context).languageCode == 'ar'
+          ? 'النماذج'
+          : 'HR Forms';
     case AppRoutes.approvals:
       return t.menuApprovals;
     case AppRoutes.notifications:

@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../core/utils/app_error.dart';
+import '../../domain/models/payroll_item.dart';
+import '../../domain/models/payroll_run.dart';
 import '../../domain/repos/payroll_repo.dart';
 import 'payroll_run_state.dart';
 
@@ -13,17 +14,36 @@ class PayrollRunCubit extends Cubit<PayrollRunState> {
     try {
       if (isClosed) return;
       emit(state.copyWith(loading: true, error: null));
-      final items = await _repo.fetchRunItems(runId: runId);
-      if (isClosed) return;
-      emit(state.copyWith(loading: false, items: items, error: null));
-    } catch (e) {
-      if (AppError.isTransient(e)) {
-        if (isClosed) return;
-        emit(state.copyWith(loading: false, error: null));
-        return;
+
+      // Fetch items and all runs to find the specific one
+      final List<PayrollItem> items = await _repo.fetchRunItems(runId: runId);
+      final runsResult = await _repo.fetchRuns(
+        page: 0,
+        pageSize: 100,
+        sortBy: 'created_at',
+      );
+
+      final List<PayrollRun> allRuns = runsResult.items;
+      PayrollRun? currentRun;
+      for (final run in allRuns) {
+        if (run.id == runId) {
+          currentRun = run;
+          break;
+        }
       }
+
       if (isClosed) return;
-      emit(state.copyWith(loading: false, error: AppError.message(e)));
+      emit(
+        state.copyWith(
+          loading: false,
+          items: items,
+          run: currentRun,
+          error: null,
+        ),
+      );
+    } catch (e) {
+      if (isClosed) return;
+      emit(state.copyWith(loading: false, error: e.toString()));
     }
   }
 }

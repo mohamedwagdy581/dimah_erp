@@ -1,7 +1,6 @@
 part of 'leaves_repo_impl.dart';
 
 mixin _LeavesRepoBalancesMixin on _LeavesRepoSessionMixin {
-  @override
   Future<List<LeaveBalance>> fetchLeaveBalances({
     required String employeeId,
     int? year,

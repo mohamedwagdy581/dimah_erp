@@ -8,11 +8,15 @@ extension _AttendanceImportDialogPreview on _AttendanceImportDialogState {
     final overtimeCount = _rows.where((e) => e.overtimeMinutes > 0).length;
     final unmatchedCount = _rows.length - matchedCount;
 
+    // Use MediaQuery to adapt to screen height and avoid overflow
+    final screenHeight = MediaQuery.of(context).size.height;
+    final dialogHeight = screenHeight * 0.8;
+
     return AlertDialog(
       title: const Text('Import Attendance CSV'),
       content: SizedBox(
         width: 1180,
-        height: 640,
+        height: dialogHeight,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -66,7 +70,13 @@ extension _AttendanceImportDialogPreview on _AttendanceImportDialogState {
           label: Text(_sourceName == null ? 'Choose CSV File' : 'Change File'),
         ),
         if (_sourceName != null)
-          Text(_sourceName!, style: TextStyle(color: Colors.grey.shade600)),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: Text(
+              _sourceName!,
+              style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+            ),
+          ),
         if (_rows.isNotEmpty) ...[
           _smallStat('Rows', _rows.length.toString()),
           _smallStat('Matched', matchedCount.toString(), color: Colors.green),
@@ -87,7 +97,7 @@ extension _AttendanceImportDialogPreview on _AttendanceImportDialogState {
               ? null
               : (v) {
                   if (v == null) return;
-                  setState(() => _filter = v);
+                  _setFilter(v);
                 },
           items: const [
             DropdownMenuItem(value: _ImportFilter.all, child: Text('All')),
@@ -101,7 +111,7 @@ extension _AttendanceImportDialogPreview on _AttendanceImportDialogState {
           width: 260,
           child: TextField(
             enabled: !_parsing && !_saving,
-            onChanged: (v) => setState(() => _search = v),
+            onChanged: _setSearch,
             decoration: const InputDecoration(
               hintText: 'Search name/person id...',
               prefixIcon: Icon(Icons.search),
@@ -117,10 +127,13 @@ extension _AttendanceImportDialogPreview on _AttendanceImportDialogState {
   Widget _smallStat(String title, String value, {Color? color}) {
     return Chip(
       label: Text('$title: $value'),
-      side: BorderSide(color: color ?? Colors.transparent),
+      visualDensity: VisualDensity.compact,
+      side: BorderSide(color: color ?? Colors.grey.shade300),
+      backgroundColor: color?.withValues(alpha: 0.1) ?? Colors.grey.shade100,
       labelStyle: TextStyle(
-        color: color ?? Colors.white,
+        color: color ?? Colors.black87,
         fontWeight: FontWeight.w600,
+        fontSize: 12,
       ),
     );
   }

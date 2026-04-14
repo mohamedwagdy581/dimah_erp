@@ -1,7 +1,6 @@
 part of 'employee_repo_impl.dart';
 
 mixin _EmployeesRepoExpiryAlertsMixin on _EmployeesRepoExpiryAlertsHelpersMixin {
-  @override
   Future<List<ExpiryAlertItem>> fetchExpiryAlerts() async {
     final tenantId = await _tenantId();
     final today = DateTime.now();

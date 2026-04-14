@@ -9,11 +9,7 @@ extension _ManagerDashboardAssignHelpers on _ManagerDashboardState {
       firstDate: DateTime(now.year, now.month, now.day),
       lastDate: DateTime(now.year + 2, 12, 31),
     );
-    if (picked != null) {
-      setState(() {
-        _dueDate = picked;
-      });
-    }
+    if (picked != null) _setDueDate(picked);
   }
 
   Future<void> _assignTask() async {
@@ -28,9 +24,7 @@ extension _ManagerDashboardAssignHelpers on _ManagerDashboardState {
       ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.invalidEstimateHours)));
       return;
     }
-    setState(() {
-      _saving = true;
-    });
+    _setSaving(true);
     try {
       final client = Supabase.instance.client;
       final uid = client.auth.currentUser?.id;
@@ -46,6 +40,7 @@ extension _ManagerDashboardAssignHelpers on _ManagerDashboardState {
         employeeId: _employeeId!,
         taskType: _taskType,
       );
+      final dueDate = _dueDate;
       final inserted = await client.from('employee_tasks').insert({
         'tenant_id': tenantId,
         'employee_id': _employeeId,
@@ -58,12 +53,12 @@ extension _ManagerDashboardAssignHelpers on _ManagerDashboardState {
         'estimate_hours': estimate,
         'priority': _priority,
         'weight': autoWeight,
-        'due_date': _dueDate == null
+        'due_date': dueDate == null
             ? null
             : DateTime(
-                _dueDate!.year,
-                _dueDate!.month,
-                _dueDate!.day,
+                dueDate.year,
+                dueDate.month,
+                dueDate.day,
               ).toIso8601String().split('T').first,
         'status': 'todo',
         'progress': 0,
@@ -86,15 +81,11 @@ extension _ManagerDashboardAssignHelpers on _ManagerDashboardState {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.taskAssigned)));
-      setState(() {
-        _saving = false;
-        _future = _loadData();
-      });
+      _setSaving(false);
+      _refreshData();
     } catch (e) {
       if (!mounted) return;
-      setState(() {
-        _saving = false;
-      });
+      _setSaving(false);
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.assignFailed(e.toString()))));

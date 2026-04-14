@@ -1,5 +1,3 @@
-// ignore_for_file: deprecated_member_use
-
 import 'package:flutter/material.dart';
 import '../../../../l10n/app_localizations.dart';
 
@@ -38,7 +36,7 @@ class SidebarUserCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: cs.surface,
                     border: Border.all(
-                      color: cs.outlineVariant.withOpacity(.6),
+                      color: cs.outlineVariant.withValues(alpha: 0.6),
                     ),
                     borderRadius: BorderRadius.circular(14),
                   ),
@@ -64,7 +62,7 @@ class SidebarUserCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: cs.surface,
                     border: Border.all(
-                      color: cs.outlineVariant.withOpacity(.6),
+                      color: cs.outlineVariant.withValues(alpha: 0.6),
                     ),
                     borderRadius: BorderRadius.circular(14),
                   ),
@@ -93,7 +91,7 @@ class SidebarUserCard extends StatelessWidget {
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
                                 fontSize: 12,
-                                color: cs.onSurface.withOpacity(.7),
+                                color: cs.onSurface.withValues(alpha: 0.7),
                               ),
                             ),
                           ],
@@ -101,7 +99,7 @@ class SidebarUserCard extends StatelessWidget {
                       ),
                       Icon(
                         Icons.more_vert,
-                        color: cs.onSurface.withOpacity(.7),
+                        color: cs.onSurface.withValues(alpha: 0.7),
                       ),
                     ],
                   ),

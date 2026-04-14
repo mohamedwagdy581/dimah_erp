@@ -22,6 +22,24 @@ class _ManagerDashboardState extends State<_ManagerDashboard> {
   DateTime? _dueDate;
   late Future<_ManagerDashboardData> _future;
 
+  void _refreshData() {
+    setState(() {
+      _future = _loadData();
+    });
+  }
+
+  void _setDueDate(DateTime? value) {
+    setState(() {
+      _dueDate = value;
+    });
+  }
+
+  void _setSaving(bool value) {
+    setState(() {
+      _saving = value;
+    });
+  }
+
   @override
   void initState() {
     super.initState();

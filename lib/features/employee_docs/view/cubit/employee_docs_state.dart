@@ -16,6 +16,7 @@ class EmployeeDocsState extends Equatable {
     required this.expiryStatus,
     required this.sortBy,
     required this.ascending,
+    required this.fixedEmployeeId,
     this.error,
   });
 
@@ -31,6 +32,7 @@ class EmployeeDocsState extends Equatable {
   final String? expiryStatus;
   final String sortBy;
   final bool ascending;
+  final String? fixedEmployeeId;
   final String? error;
 
   static const Object _unset = Object();
@@ -56,6 +58,7 @@ class EmployeeDocsState extends Equatable {
     Object? expiryStatus = _unset,
     String? sortBy,
     bool? ascending,
+    Object? fixedEmployeeId = _unset,
     String? error,
     bool clearError = false,
   }) {
@@ -74,6 +77,9 @@ class EmployeeDocsState extends Equatable {
           : expiryStatus as String?,
       sortBy: sortBy ?? this.sortBy,
       ascending: ascending ?? this.ascending,
+      fixedEmployeeId: fixedEmployeeId == _unset
+          ? this.fixedEmployeeId
+          : fixedEmployeeId as String?,
       error: clearError ? null : (error ?? this.error),
     );
   }
@@ -91,6 +97,7 @@ class EmployeeDocsState extends Equatable {
     expiryStatus: null,
     sortBy: 'created_at',
     ascending: false,
+    fixedEmployeeId: null,
     error: null,
   );
 
@@ -108,6 +115,7 @@ class EmployeeDocsState extends Equatable {
         expiryStatus,
         sortBy,
         ascending,
+        fixedEmployeeId,
         error,
       ];
 }

@@ -29,7 +29,12 @@ extension _AttendanceFormDialogBuild on _AttendanceFormDialogState {
               DropdownButtonFormField<String>(
                 initialValue: _employeeId,
                 items: _filtered
-                    .map((e) => DropdownMenuItem(value: e.id, child: Text(e.fullName)))
+                    .map(
+                      (e) => DropdownMenuItem(
+                        value: e.id,
+                        child: Text(e.fullName),
+                      ),
+                    )
                     .toList(),
                 onChanged: (v) => setState(() => _employeeId = v),
                 decoration: const InputDecoration(
@@ -37,7 +42,9 @@ extension _AttendanceFormDialogBuild on _AttendanceFormDialogState {
                   border: OutlineInputBorder(),
                 ),
                 validator: (v) {
-                  if (v == null || v.trim().isEmpty) return 'Employee is required';
+                  if (v == null || v.trim().isEmpty) {
+                    return 'Employee is required';
+                  }
                   return null;
                 },
               ),
@@ -45,7 +52,10 @@ extension _AttendanceFormDialogBuild on _AttendanceFormDialogState {
                 const SizedBox(height: 6),
                 const Align(
                   alignment: Alignment.centerLeft,
-                  child: Text('No employees found', style: TextStyle(fontSize: 12)),
+                  child: Text(
+                    'No employees found',
+                    style: TextStyle(fontSize: 12),
+                  ),
                 ),
               ],
               const SizedBox(height: 12),
@@ -58,7 +68,10 @@ extension _AttendanceFormDialogBuild on _AttendanceFormDialogState {
                 const SizedBox(height: 6),
                 Align(
                   alignment: Alignment.centerLeft,
-                  child: Text(_dateError!, style: const TextStyle(color: Colors.red)),
+                  child: Text(
+                    _dateError!,
+                    style: const TextStyle(color: Colors.red),
+                  ),
                 ),
               ],
               const SizedBox(height: 12),
@@ -82,14 +95,22 @@ extension _AttendanceFormDialogBuild on _AttendanceFormDialogState {
                   Expanded(
                     child: OutlinedButton(
                       onPressed: () => _pickTime(true),
-                      child: Text(_checkIn == null ? 'Check In' : _checkIn!.format(context)),
+                      child: Text(
+                        _checkIn == null
+                            ? 'Check In'
+                            : _checkIn!.format(context),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: OutlinedButton(
                       onPressed: () => _pickTime(false),
-                      child: Text(_checkOut == null ? 'Check Out' : _checkOut!.format(context)),
+                      child: Text(
+                        _checkOut == null
+                            ? 'Check Out'
+                            : _checkOut!.format(context),
+                      ),
                     ),
                   ),
                 ],

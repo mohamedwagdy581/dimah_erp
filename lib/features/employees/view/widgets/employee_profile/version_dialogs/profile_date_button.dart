@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../../l10n/app_localizations.dart';
 import '../../../utils/employee_profile_utils.dart';
 
 class ProfileDateButton extends StatelessWidget {
@@ -19,7 +18,6 @@ class ProfileDateButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final t = AppLocalizations.of(context)!;
     return OutlinedButton.icon(
       onPressed: onPressed,
       icon: Icon(icon),

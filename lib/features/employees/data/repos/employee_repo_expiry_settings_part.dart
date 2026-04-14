@@ -1,7 +1,6 @@
 part of 'employee_repo_impl.dart';
 
 mixin _EmployeesRepoExpirySettingsMixin on _EmployeesRepoProfileUpdateMixin {
-  @override
   Future<ExpiryAlertSettings> fetchExpiryAlertSettings() async {
     final tenantId = await _tenantId();
     final row = await _client
@@ -31,8 +30,6 @@ mixin _EmployeesRepoExpirySettingsMixin on _EmployeesRepoProfileUpdateMixin {
       documentsAlertDays: asInt(row['documents_alert_days'], 90),
     );
   }
-
-  @override
   Future<void> upsertExpiryAlertSettings(ExpiryAlertSettings settings) async {
     final tenantId = await _tenantId();
     try {

@@ -13,6 +13,7 @@ mixin _AttendanceRepoFetchMixin on _AttendanceRepoHelpersMixin {
   }) async {
     final tenantId = await _tenantId();
     final actor = await _currentUserIdentity();
+    final actorEmployeeId = actor.employeeId;
     final from = page * pageSize;
     final to = from + pageSize - 1;
     final trimmedSearch = search?.trim();
@@ -27,11 +28,11 @@ mixin _AttendanceRepoFetchMixin on _AttendanceRepoHelpersMixin {
 
     if ((employeeId == null || employeeId.trim().isEmpty) &&
         _isManagerRole(actor.role) &&
-        actor.employeeId != null &&
-        actor.employeeId!.isNotEmpty) {
+        actorEmployeeId != null &&
+        actorEmployeeId.isNotEmpty) {
       final subordinateIds = await _subordinateEmployeeIds(
         tenantId: tenantId,
-        managerEmployeeId: actor.employeeId!,
+        managerEmployeeId: actorEmployeeId,
       );
       if (subordinateIds.isEmpty) {
         return (items: const <AttendanceRecord>[], total: 0);
@@ -61,11 +62,11 @@ mixin _AttendanceRepoFetchMixin on _AttendanceRepoHelpersMixin {
 
     if ((employeeId == null || employeeId.trim().isEmpty) &&
         _isManagerRole(actor.role) &&
-        actor.employeeId != null &&
-        actor.employeeId!.isNotEmpty) {
+        actorEmployeeId != null &&
+        actorEmployeeId.isNotEmpty) {
       final subordinateIds = await _subordinateEmployeeIds(
         tenantId: tenantId,
-        managerEmployeeId: actor.employeeId!,
+        managerEmployeeId: actorEmployeeId,
       );
       if (subordinateIds.isEmpty) {
         return (items: items, total: 0);

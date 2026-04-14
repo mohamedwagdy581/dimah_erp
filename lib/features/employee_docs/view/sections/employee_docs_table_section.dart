@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../l10n/app_localizations.dart';
 import '../cubit/employee_docs_cubit.dart';
 import '../cubit/employee_docs_state.dart';
 import '../widgets/employee_docs_pagination_bar.dart';
@@ -13,7 +12,6 @@ class EmployeeDocsTableSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final t = AppLocalizations.of(context)!;
     return BlocBuilder<EmployeeDocsCubit, EmployeeDocsState>(
       builder: (context, state) {
         final cubit = context.read<EmployeeDocsCubit>();

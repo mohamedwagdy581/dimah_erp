@@ -20,15 +20,19 @@ class EmployeeDocsCubit extends Cubit<EmployeeDocsState> {
     this._repo, {
     String? initialDocType,
     String? initialExpiryStatus,
+    String? initialEmployeeId,
   }) : super(
           EmployeeDocsState.initial.copyWith(
             docType: initialDocType,
             expiryStatus: initialExpiryStatus,
+            fixedEmployeeId: initialEmployeeId,
           ),
         );
 
   final EmployeeDocsRepo _repo;
   Timer? _debounce;
+
+  void _emitState(EmployeeDocsState next) => emit(next);
 
   @override
   Future<void> close() {

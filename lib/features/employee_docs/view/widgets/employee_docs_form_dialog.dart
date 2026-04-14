@@ -20,10 +20,18 @@ class EmployeeDocsFormDialog extends StatefulWidget {
   const EmployeeDocsFormDialog({
     super.key,
     this.initialEmployeeId,
+    this.initialDocType,
+    this.initialIssuedAt,
+    this.initialExpiresAt,
+    this.initialOldExpiresAt,
     this.initialDocument,
   });
 
   final String? initialEmployeeId;
+  final String? initialDocType;
+  final DateTime? initialIssuedAt;
+  final DateTime? initialExpiresAt;
+  final DateTime? initialOldExpiresAt;
   final EmployeeDocument? initialDocument;
 
   @override
@@ -44,6 +52,16 @@ class _EmployeeDocsFormDialogState extends State<EmployeeDocsFormDialog> {
   bool _saving = false;
   String _uploadedFileUrl = '';
 
+  void _setEmployeeId(String? value) => setState(() => _employeeId = value);
+
+  void _setIssuedAt(DateTime value) => setState(() => _issuedAt = value);
+
+  void _setExpiresAt(DateTime value) => setState(() => _expiresAt = value);
+
+  void _setUploading(bool value) => setState(() => _uploading = value);
+
+  void _setUploadedFileUrl(String value) => setState(() => _uploadedFileUrl = value);
+
   String get _selectedFileName {
     final raw = _uploadedFileUrl.trim();
     if (raw.isEmpty) return '';
@@ -57,9 +75,10 @@ class _EmployeeDocsFormDialogState extends State<EmployeeDocsFormDialog> {
   void initState() {
     super.initState();
     _employeeId = widget.initialEmployeeId ?? widget.initialDocument?.employeeId;
-    _docType.text = widget.initialDocument?.docType ?? 'id_card';
-    _issuedAt = widget.initialDocument?.issuedAt;
-    _expiresAt = widget.initialDocument?.expiresAt;
+    _docType.text =
+        widget.initialDocument?.docType ?? widget.initialDocType ?? 'id_card';
+    _issuedAt = widget.initialDocument?.issuedAt ?? widget.initialIssuedAt;
+    _expiresAt = widget.initialDocument?.expiresAt ?? widget.initialExpiresAt;
     _uploadedFileUrl = widget.initialDocument?.fileUrl ?? '';
     _loadEmployees();
   }
@@ -125,8 +144,8 @@ class _EmployeeDocsFormDialogState extends State<EmployeeDocsFormDialog> {
       Navigator.pop(context, true);
     } catch (e) {
       if (kDebugMode) {
-        print('EMPLOYEE_DOC_SAVE_ERROR: $e');
-        print('EMPLOYEE_DOC_SAVE_STACK: ${StackTrace.current}');
+        debugPrint('EMPLOYEE_DOC_SAVE_ERROR: $e');
+        debugPrint('EMPLOYEE_DOC_SAVE_STACK: ${StackTrace.current}');
       }
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(

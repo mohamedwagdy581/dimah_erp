@@ -84,9 +84,7 @@ extension _ManagerDashboardDialogHelpers on _ManagerDashboardState {
           ),
         ),
       );
-      setState(() {
-        _future = _loadData();
-      });
+      _refreshData();
     } finally {
       note.dispose();
     }

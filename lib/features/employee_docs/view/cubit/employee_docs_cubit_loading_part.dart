@@ -6,7 +6,7 @@ extension EmployeeDocsCubitLoadingX on EmployeeDocsCubit {
       if (isClosed) {
         return;
       }
-      emit(
+      _emitState(
         state.copyWith(
           loading: true,
           clearError: true,
@@ -14,33 +14,56 @@ extension EmployeeDocsCubitLoadingX on EmployeeDocsCubit {
         ),
       );
 
-      final result = await AppDI.employeesRepo.fetchEmployees(
-        page: resetPage ? 0 : state.page,
-        pageSize: state.pageSize,
-        search: state.search.trim().isEmpty ? null : state.search.trim(),
-        sortBy: 'full_name',
-        ascending: true,
+      final employeeResult = await _loadEmployeesForDocs(
+        resetPage: resetPage,
       );
-      final employeeLookups = result.items.map((employee) => employee.toLookup()).toList();
+      final employeeLookups = employeeResult.items;
       final docsMap = await _loadDocsForEmployees(employeeLookups);
 
       if (isClosed) {
         return;
       }
-      emit(
+      _emitState(
         state.copyWith(
           loading: false,
           employees: employeeLookups,
           docsMap: docsMap,
-          total: result.total,
+          total: employeeResult.total,
         ),
       );
     } catch (e) {
       if (isClosed) {
         return;
       }
-      emit(state.copyWith(loading: false, error: AppError.message(e)));
+      _emitState(state.copyWith(loading: false, error: AppError.message(e)));
     }
+  }
+
+  Future<({List<EmployeeLookup> items, int total})> _loadEmployeesForDocs({
+    required bool resetPage,
+  }) async {
+    final fixedEmployeeId = state.fixedEmployeeId;
+    if (fixedEmployeeId != null && fixedEmployeeId.trim().isNotEmpty) {
+      final profile = await AppDI.employeesRepo.fetchEmployeeProfile(
+        employeeId: fixedEmployeeId,
+      );
+      return (
+        items: [EmployeeLookup(id: profile.id, fullName: profile.fullName)],
+        total: 1,
+      );
+    }
+
+    final result = await AppDI.employeesRepo.fetchEmployees(
+      page: resetPage ? 0 : state.page,
+      pageSize: state.pageSize,
+      search: state.search.trim().isEmpty ? null : state.search.trim(),
+      sortBy: 'full_name',
+      ascending: true,
+    );
+    return (
+      items: result.items.map((employee) => employee.toLookup()).toList(),
+      total: result.total,
+    );
   }
 
   Future<Map<String, List<EmployeeDocument>>> _loadDocsForEmployees(
@@ -80,7 +103,7 @@ extension EmployeeDocsCubitLoadingX on EmployeeDocsCubit {
       }
       final newDocsMap = Map<String, List<EmployeeDocument>>.from(state.docsMap);
       newDocsMap[employeeId] = result.items;
-      emit(state.copyWith(docsMap: newDocsMap));
+      _emitState(state.copyWith(docsMap: newDocsMap));
     } catch (_) {}
   }
 
@@ -92,6 +115,6 @@ extension EmployeeDocsCubitLoadingX on EmployeeDocsCubit {
       newExpanded.add(employeeId);
       loadSingleEmployeeDocs(employeeId);
     }
-    emit(state.copyWith(expandedEmployeeIds: newExpanded));
+    _emitState(state.copyWith(expandedEmployeeIds: newExpanded));
   }
 }

@@ -1,5 +1,3 @@
-// ignore_for_file: unnecessary_underscores
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -18,6 +16,8 @@ import '../../features/employees/view/pages/employee_profile_page.dart';
 import '../../features/employees/view/pages/employee_wizard_page.dart';
 import '../../features/employees/view/pages/employees_page.dart';
 import '../../features/hr_alerts/view/pages/hr_alerts_page.dart';
+import '../../features/hr_forms/view/pages/hr_form_editor_page.dart';
+import '../../features/hr_forms/view/pages/hr_forms_page.dart';
 import '../../features/job_titles/presentation/pages/job_titles_page.dart';
 import '../../features/leaves/view/pages/leaves_page.dart';
 import '../../features/notifications/view/pages/notifications_page.dart';
@@ -44,11 +44,11 @@ class AppRouter {
     routes: [
       GoRoute(
         path: AppRoutes.splash,
-        pageBuilder: (_, __) => const MaterialPage(child: SplashPage()),
+        pageBuilder: (_, _) => const MaterialPage(child: SplashPage()),
       ),
       GoRoute(
         path: AppRoutes.login,
-        pageBuilder: (_, __) => const MaterialPage(child: LoginPage()),
+        pageBuilder: (_, _) => const MaterialPage(child: LoginPage()),
       ),
       ShellRoute(
         builder: (context, state, child) => ShellPage(child: child),

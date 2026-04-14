@@ -1,7 +1,6 @@
 part of 'employee_repo_impl.dart';
 
 mixin _EmployeesRepoProfileFetchMixin on _EmployeesRepoProfileFetchQueriesMixin {
-  @override
   Future<EmployeeProfileDetails> fetchEmployeeProfile({
     required String employeeId,
   }) async {

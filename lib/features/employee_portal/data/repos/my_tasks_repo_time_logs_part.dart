@@ -20,7 +20,7 @@ mixin _MyTasksRepoTimeLogsMixin on _MyTasksRepoHelpersMixin, _MyTasksRepoEventsM
       'employee_id': employeeId,
       'logged_by_user_id': auth['user_id'],
       'hours': normalizedHours,
-      'note': note?.trim().isEmpty ?? true ? null : note!.trim(),
+      'note': _trimOrNull(note),
     });
 
     final existing = await _client

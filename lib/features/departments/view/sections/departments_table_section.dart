@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../l10n/app_localizations.dart';
 import '../cubit/departments_cubit.dart';
 import '../cubit/departments_state.dart';
 import '../widgets/department_table.dart';
@@ -13,7 +12,6 @@ class DepartmentsTableSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final t = AppLocalizations.of(context)!;
     return BlocBuilder<DepartmentsCubit, DepartmentsState>(
       builder: (context, state) {
         final cubit = context.read<DepartmentsCubit>();

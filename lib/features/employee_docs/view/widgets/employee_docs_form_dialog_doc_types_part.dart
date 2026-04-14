@@ -83,7 +83,7 @@ extension _EmployeeDocsFormDialogDocTypes on _EmployeeDocsFormDialogState {
       firstDate: DateTime(now.year - 5, 1, 1),
       lastDate: DateTime(now.year + 5, 12, 31),
     );
-    if (picked != null) setState(() => _issuedAt = picked);
+    if (picked != null) _setIssuedAt(picked);
   }
 
   Future<void> _pickExpires() async {
@@ -94,6 +94,6 @@ extension _EmployeeDocsFormDialogDocTypes on _EmployeeDocsFormDialogState {
       firstDate: _issuedAt ?? DateTime(now.year - 5, 1, 1),
       lastDate: DateTime(now.year + 10, 12, 31),
     );
-    if (picked != null) setState(() => _expiresAt = picked);
+    if (picked != null) _setExpiresAt(picked);
   }
 }

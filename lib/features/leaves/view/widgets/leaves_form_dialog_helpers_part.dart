@@ -9,7 +9,7 @@ extension _LeavesFormDialogHelpers on _LeavesFormDialogState {
       firstDate: DateTime(now.year - 1, 1, 1),
       lastDate: DateTime(now.year + 2, 12, 31),
     );
-    if (picked != null) setState(() => _start = picked);
+    if (picked != null) _setStartDate(picked);
   }
 
   Future<void> _pickEnd() async {
@@ -20,7 +20,7 @@ extension _LeavesFormDialogHelpers on _LeavesFormDialogState {
       firstDate: _start ?? DateTime(now.year - 1, 1, 1),
       lastDate: DateTime(now.year + 2, 12, 31),
     );
-    if (picked != null) setState(() => _end = picked);
+    if (picked != null) _setEndDate(picked);
   }
 
   String _formatDate(DateTime? value, String fallback) {

@@ -1,5 +1,3 @@
-// ignore_for_file: deprecated_member_use
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/routing/app_routes.dart';
@@ -54,7 +52,9 @@ class SidebarSection extends StatelessWidget {
           decoration: BoxDecoration(
             color: cs.surface,
             border: Border(
-              right: BorderSide(color: cs.outlineVariant.withOpacity(.6)),
+              right: BorderSide(
+                color: cs.outlineVariant.withValues(alpha: 0.6),
+              ),
             ),
           ),
           child: SafeArea(

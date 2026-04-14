@@ -9,12 +9,7 @@ extension _AttendanceFormDialogHelpers on _AttendanceFormDialogState {
       firstDate: DateTime(now.year - 1, 1, 1),
       lastDate: DateTime(now.year + 1, 12, 31),
     );
-    if (picked != null) {
-      setState(() {
-        _date = picked;
-        _dateError = null;
-      });
-    }
+    if (picked != null) _setDate(picked);
   }
 
   Future<void> _pickTime(bool isCheckIn) async {
@@ -23,13 +18,7 @@ extension _AttendanceFormDialogHelpers on _AttendanceFormDialogState {
       initialTime: const TimeOfDay(hour: 9, minute: 0),
     );
     if (picked == null) return;
-    setState(() {
-      if (isCheckIn) {
-        _checkIn = picked;
-      } else {
-        _checkOut = picked;
-      }
-    });
+    _setTime(isCheckIn, picked);
   }
 
   DateTime? _merge(DateTime? date, TimeOfDay? time) {

@@ -1,7 +1,6 @@
 part of 'employee_repo_impl.dart';
 
 mixin _EmployeesRepoProfileUpdateMixin on _EmployeesRepoProfileFetchMixin {
-  @override
   Future<void> updateEmployeeProfile({
     required String employeeId,
     required String fullName,

@@ -3,23 +3,23 @@ part of 'app_router.dart';
 final List<RouteBase> _shellRoutes = [
   GoRoute(
     path: AppRoutes.dashboard,
-    pageBuilder: (_, __) => const MaterialPage(child: DashboardPage()),
+    pageBuilder: (_, _) => const MaterialPage(child: DashboardPage()),
   ),
   GoRoute(
     path: AppRoutes.departments,
-    pageBuilder: (_, __) => const MaterialPage(child: DepartmentsPage()),
+    pageBuilder: (_, _) => const MaterialPage(child: DepartmentsPage()),
   ),
   GoRoute(
     path: AppRoutes.employees,
-    pageBuilder: (_, __) => const MaterialPage(child: EmployeesPage()),
+    pageBuilder: (_, _) => const MaterialPage(child: EmployeesPage()),
   ),
   GoRoute(
     path: '/profile',
-    pageBuilder: (_, __) => const MaterialPage(child: ProfilePage()),
+    pageBuilder: (_, _) => const MaterialPage(child: ProfilePage()),
   ),
   GoRoute(
     path: '/change-password',
-    pageBuilder: (_, __) => const MaterialPage(child: ChangePasswordPage()),
+    pageBuilder: (_, _) => const MaterialPage(child: ChangePasswordPage()),
   ),
   GoRoute(
     path: AppRoutes.jobTitles,
@@ -46,16 +46,40 @@ final List<RouteBase> _shellRoutes = [
   ),
   GoRoute(
     path: AppRoutes.employeeDocs,
-    builder: (context, state) => EmployeeDocsPage(
-      initialDocType: state.uri.queryParameters['docType'],
-      initialExpiryStatus: state.uri.queryParameters['expiry'],
-    ),
+    builder: (context, state) {
+      final issuedAtRaw = state.uri.queryParameters['issuedAt'];
+      final expiresAtRaw = state.uri.queryParameters['expiresAt'];
+      final oldExpiresAtRaw = state.uri.queryParameters['oldExpiresAt'];
+      return EmployeeDocsPage(
+        initialEmployeeId: state.uri.queryParameters['employeeId'],
+        initialDocType: state.uri.queryParameters['docType'],
+        initialExpiryStatus: state.uri.queryParameters['expiry'],
+        autoOpenCreate: state.uri.queryParameters['openCreate'] == '1',
+        initialIssuedAt:
+            issuedAtRaw == null ? null : DateTime.tryParse(issuedAtRaw),
+        initialExpiresAt:
+            expiresAtRaw == null ? null : DateTime.tryParse(expiresAtRaw),
+        initialOldExpiresAt:
+            oldExpiresAtRaw == null ? null : DateTime.tryParse(oldExpiresAtRaw),
+      );
+    },
   ),
   GoRoute(
     path: AppRoutes.hrAlerts,
     builder: (context, state) => HrAlertsPage(
       initialTypeFilter: state.uri.queryParameters['type'],
     ),
+  ),
+  GoRoute(
+    path: AppRoutes.hrForms,
+    builder: (context, state) => const HrFormsPage(),
+  ),
+  GoRoute(
+    path: AppRoutes.hrFormTemplate,
+    builder: (context, state) {
+      final templateId = state.pathParameters['templateId'] ?? '';
+      return HrFormEditorPage(templateId: templateId);
+    },
   ),
   GoRoute(
     path: AppRoutes.approvals,
@@ -91,7 +115,19 @@ final List<RouteBase> _shellRoutes = [
     path: AppRoutes.employeeProfile,
     builder: (context, state) {
       final id = state.pathParameters['id'] ?? '';
-      return EmployeeProfilePage(employeeId: id);
+      final startRaw = state.uri.queryParameters['contractStart'];
+      final endRaw = state.uri.queryParameters['contractEnd'];
+      final oldEndRaw = state.uri.queryParameters['oldContractEnd'];
+      return EmployeeProfilePage(
+        employeeId: id,
+        autoOpenAddContract: state.uri.queryParameters['openAddContract'] == '1',
+        initialContractStartDate:
+            startRaw == null ? null : DateTime.tryParse(startRaw),
+        initialContractEndDate:
+            endRaw == null ? null : DateTime.tryParse(endRaw),
+        initialOldContractEndDate:
+            oldEndRaw == null ? null : DateTime.tryParse(oldEndRaw),
+      );
     },
   ),
 ];

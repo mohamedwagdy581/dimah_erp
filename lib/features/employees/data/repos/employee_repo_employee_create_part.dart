@@ -2,7 +2,6 @@ part of 'employee_repo_impl.dart';
 
 mixin _EmployeesRepoEmployeeCreateMixin
     on _EmployeesRepoEmployeeCreateRpcMixin, _EmployeesRepoCreateFallbackRequestMixin {
-  @override
   Future<String> createEmployee({
     required String fullName,
     required String email,

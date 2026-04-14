@@ -31,7 +31,7 @@ class EmployeeDocsTableSectionHeader extends StatelessWidget {
           runSpacing: 12,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
-            _EmployeeDocsSearchField(cubit: cubit),
+            if (state.fixedEmployeeId == null) _EmployeeDocsSearchField(cubit: cubit),
             _EmployeeDocsTypeFilter(cubit: cubit, state: state),
             _EmployeeDocsExpiryFilter(cubit: cubit, state: state),
             OutlinedButton.icon(

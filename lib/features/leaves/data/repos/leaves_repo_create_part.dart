@@ -1,7 +1,6 @@
 part of 'leaves_repo_impl.dart';
 
 mixin _LeavesRepoCreateMixin on _LeavesRepoFetchMixin {
-  @override
   Future<void> createLeave({
     required String employeeId,
     required String type,

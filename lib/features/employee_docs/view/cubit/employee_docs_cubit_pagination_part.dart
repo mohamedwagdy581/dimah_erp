@@ -2,7 +2,7 @@ part of 'employee_docs_cubit.dart';
 
 extension EmployeeDocsCubitPaginationX on EmployeeDocsCubit {
   Future<void> setEmployeeDocsPageSize(int value) async {
-    emit(state.copyWith(pageSize: value));
+    _emitState(state.copyWith(pageSize: value));
     await load(resetPage: true);
   }
 
@@ -10,7 +10,7 @@ extension EmployeeDocsCubitPaginationX on EmployeeDocsCubit {
     if (!state.canNext) {
       return;
     }
-    emit(state.copyWith(page: state.page + 1));
+    _emitState(state.copyWith(page: state.page + 1));
     await load();
   }
 
@@ -18,7 +18,7 @@ extension EmployeeDocsCubitPaginationX on EmployeeDocsCubit {
     if (!state.canPrev) {
       return;
     }
-    emit(state.copyWith(page: state.page - 1));
+    _emitState(state.copyWith(page: state.page - 1));
     await load();
   }
 }

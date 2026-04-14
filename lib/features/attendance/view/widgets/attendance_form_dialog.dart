@@ -34,6 +34,27 @@ class _AttendanceFormDialogState extends State<AttendanceFormDialog> {
   TimeOfDay? _checkIn;
   TimeOfDay? _checkOut;
 
+  void _setEmployeeId(String? value) => setState(() => _employeeId = value);
+
+  void _setStatus(String? value) => setState(() => _status = value ?? 'present');
+
+  void _setDate(DateTime picked) {
+    setState(() {
+      _date = picked;
+      _dateError = null;
+    });
+  }
+
+  void _setTime(bool isCheckIn, TimeOfDay picked) {
+    setState(() {
+      if (isCheckIn) {
+        _checkIn = picked;
+      } else {
+        _checkOut = picked;
+      }
+    });
+  }
+
   @override
   void initState() {
     super.initState();

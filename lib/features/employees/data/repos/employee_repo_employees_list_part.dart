@@ -1,7 +1,6 @@
 part of 'employee_repo_impl.dart';
 
 mixin _EmployeesRepoEmployeesListMixin on _EmployeesRepoAuthMixin {
-  @override
   Future<({List<Employee> items, int total})> fetchEmployees({
     required int page,
     required int pageSize,

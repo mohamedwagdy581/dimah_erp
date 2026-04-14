@@ -47,7 +47,7 @@ extension _ManagerDashboardReviewDialogSubmitHelpers on _ManagerDashboardState {
         'task_type': taskType,
         'due_date': dueDate == null
             ? null
-            : '${dueDate!.year.toString().padLeft(4, '0')}-${dueDate!.month.toString().padLeft(2, '0')}-${dueDate!.day.toString().padLeft(2, '0')}',
+            : '${dueDate.year.toString().padLeft(4, '0')}-${dueDate.month.toString().padLeft(2, '0')}-${dueDate.day.toString().padLeft(2, '0')}',
       });
     }
 
@@ -67,8 +67,6 @@ extension _ManagerDashboardReviewDialogSubmitHelpers on _ManagerDashboardState {
         ),
       ),
     );
-    setState(() {
-      _future = _loadData();
-    });
+    _refreshData();
   }
 }

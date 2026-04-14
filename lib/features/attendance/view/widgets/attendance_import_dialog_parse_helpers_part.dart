@@ -12,22 +12,88 @@ Map<String, Map<String, String>> _indexEmployeesByNormalizedName(
   return employeeByNorm;
 }
 
+DateTime? _parseFlexibleDateTime(String value) {
+  var d = DateTime.tryParse(value);
+  if (d != null) return d;
+
+  // Manual parsing for formats like "4-Mar-26 13:46" or "10-Oct-2023"
+  try {
+    final cleanValue = value.trim().replaceAll(RegExp(r'\s+'), ' ');
+    final parts = cleanValue.split(RegExp(r'[\s\-\/]'));
+    if (parts.length >= 3) {
+      int? day = int.tryParse(parts[0]);
+      int? year = int.tryParse(parts[2]);
+      int month = _monthToNum(parts[1]);
+
+      if (day != null && year != null && month > 0) {
+        if (year < 100) year += 2000; // Handle 2-digit year "26" -> 2026
+        
+        int hour = 0;
+        int minute = 0;
+        if (parts.length >= 4) {
+          final timeParts = parts[3].split(':');
+          hour = int.tryParse(timeParts[0]) ?? 0;
+          if (timeParts.length > 1) minute = int.tryParse(timeParts[1]) ?? 0;
+        }
+        return DateTime(year, month, day, hour, minute);
+      }
+    }
+  } catch (_) {}
+  return null;
+}
+
+int _monthToNum(String m) {
+  m = m.toLowerCase();
+  if (m.startsWith('jan')) return 1;
+  if (m.startsWith('feb')) return 2;
+  if (m.startsWith('mar')) return 3;
+  if (m.startsWith('apr')) return 4;
+  if (m.startsWith('may')) return 5;
+  if (m.startsWith('jun')) return 6;
+  if (m.startsWith('jul')) return 7;
+  if (m.startsWith('aug')) return 8;
+  if (m.startsWith('sep')) return 9;
+  if (m.startsWith('oct')) return 10;
+  if (m.startsWith('nov')) return 11;
+  if (m.startsWith('dec')) return 12;
+  return 0;
+}
+
 Map<String, Map<String, dynamic>> _groupAttendanceRows(
   List<String> lines,
   int idxPersonId,
   int idxName,
+  int idxDate,
   int idxTime,
   int idxType,
 ) {
   final grouped = <String, Map<String, dynamic>>{};
   for (var i = 1; i < lines.length; i++) {
     final cols = _parseCsvLineRaw(lines[i]);
-    if (cols.length <= idxType) continue;
+    
+    final personId = idxPersonId >= 0 && cols.length > idxPersonId 
+        ? cols[idxPersonId].replaceAll("'", '').trim() 
+        : '';
+    final sourceName = idxName >= 0 && cols.length > idxName 
+        ? cols[idxName].trim() 
+        : '';
+    
+    String? combinedTimeStr;
+    if (idxDate >= 0 && idxTime >= 0 && cols.length > idxDate && cols.length > idxTime) {
+       combinedTimeStr = '${cols[idxDate].trim()} ${cols[idxTime].trim()}';
+    } else if (idxTime >= 0 && cols.length > idxTime) {
+       combinedTimeStr = cols[idxTime].trim();
+    } else if (idxDate >= 0 && cols.length > idxDate) {
+       combinedTimeStr = cols[idxDate].trim();
+    }
 
-    final personId = cols[idxPersonId].replaceAll("'", '').trim();
-    final sourceName = cols[idxName].trim();
-    final time = DateTime.tryParse(cols[idxTime].trim());
-    final status = cols[idxType].trim().toLowerCase();
+    if (combinedTimeStr == null || combinedTimeStr.isEmpty) continue;
+    
+    final time = _parseFlexibleDateTime(combinedTimeStr);
+    final status = idxType >= 0 && cols.length > idxType 
+        ? cols[idxType].trim().toLowerCase() 
+        : '';
+    
     if (personId.isEmpty || sourceName.isEmpty || time == null) continue;
 
     final day = DateTime(time.year, time.month, time.day);
@@ -43,10 +109,13 @@ Map<String, Map<String, dynamic>> _groupAttendanceRows(
       },
     );
 
-    if (status.contains('check-in')) {
+    final isIn = status.contains('in') || status == '0' || status.contains('entry');
+    final isOut = status.contains('out') || status == '1' || status.contains('exit');
+
+    if (isIn) {
       final old = row['check_in'] == null ? null : DateTime.tryParse(row['check_in'] as String);
       if (old == null || time.isBefore(old)) row['check_in'] = time.toIso8601String();
-    } else if (status.contains('check-out')) {
+    } else if (isOut) {
       final old = row['check_out'] == null ? null : DateTime.tryParse(row['check_out'] as String);
       if (old == null || time.isAfter(old)) row['check_out'] = time.toIso8601String();
     }
@@ -64,9 +133,13 @@ List<Map<String, dynamic>> _buildPreviewMaps(
     final matched = _findMatchRaw(sourceName, employeeByNorm);
     final checkIn = row['check_in'] == null ? null : DateTime.parse(row['check_in'] as String);
     final checkOut = row['check_out'] == null ? null : DateTime.parse(row['check_out'] as String);
+    
+    final hasAnyPunch = checkIn != null || checkOut != null;
+    if (!hasAnyPunch) continue;
+
     final lateMinutes = _lateMinutesRaw(checkIn);
     final overtimeMinutes = _overtimeMinutesRaw(checkOut);
-    final hasAnyPunch = checkIn != null || checkOut != null;
+
     out.add({
       'source_person_id': row['person_id'],
       'source_name': sourceName,
@@ -77,7 +150,7 @@ List<Map<String, dynamic>> _buildPreviewMaps(
       'matched_employee_name': matched?['full_name'],
       'late_minutes': lateMinutes,
       'overtime_minutes': overtimeMinutes,
-      'status': hasAnyPunch ? (lateMinutes > 0 ? 'late' : 'present') : 'absent',
+      'status': lateMinutes > 0 ? 'late' : 'present',
       'notes': 'Imported from biometric CSV (Person ID: ${row['person_id'] as String})',
     });
   }

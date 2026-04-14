@@ -5,12 +5,15 @@ extension _AttendanceImportDialogParse on _AttendanceImportDialogState {
     List<int> bytes,
     List<EmployeeLookup> employees,
   ) async {
+    final csvText = _decodeCsvBytes(bytes);
     final employeeMaps = employees
         .map((e) => {'id': e.id, 'full_name': e.fullName})
         .toList();
+
     final raw = await Isolate.run(
-      () => _parseAttendanceCsvInIsolate(_decodeCsv(bytes), employeeMaps),
+      () => _parseAttendanceCsvInIsolate(csvText, employeeMaps),
     );
+
     return raw
         .map(
           (e) => _PreviewRow(
@@ -30,7 +33,7 @@ extension _AttendanceImportDialogParse on _AttendanceImportDialogState {
         .toList();
   }
 
-  String _decodeCsv(List<int> bytes) {
+  String _decodeCsvBytes(List<int> bytes) {
     try {
       return utf8.decode(bytes);
     } catch (_) {
@@ -50,15 +53,36 @@ List<Map<String, dynamic>> _parseAttendanceCsvInIsolate(
   if (lines.isEmpty) throw Exception('CSV file is empty.');
 
   final headers = _parseCsvLineRaw(lines.first);
-  final idxPersonId = headers.indexWhere((h) => h.trim() == 'Person ID');
-  final idxName = headers.indexWhere((h) => h.trim() == 'Name');
-  final idxTime = headers.indexWhere((h) => h.trim() == 'Time');
-  final idxType = headers.indexWhere((h) => h.trim() == 'Attendance Status');
-  if (idxPersonId < 0 || idxName < 0 || idxTime < 0 || idxType < 0) {
-    throw Exception('CSV header is invalid. Required: Person ID, Name, Time, Attendance Status.');
+  
+  // Try to find indices with more flexible naming
+  final idxPersonId = headers.indexWhere((h) => h.trim().toLowerCase() == 'person id');
+  final idxName = headers.indexWhere((h) => h.trim().toLowerCase() == 'name');
+  final idxType = headers.indexWhere((h) => h.trim().toLowerCase() == 'attendance status');
+  
+  // Check for split Date/Time or combined Time column
+  final idxDate = headers.indexWhere((h) => h.trim().toLowerCase() == 'date');
+  final idxTime = headers.indexWhere((h) => h.trim().toLowerCase() == 'time');
+
+  if (idxPersonId < 0 || idxName < 0 || idxType < 0) {
+    throw Exception('CSV header is invalid. Required: Person ID, Name, Attendance Status.');
+  }
+
+  // Ensure we have some form of time information
+  if (idxTime < 0 && idxDate < 0) {
+    throw Exception('CSV must have at least a "Time" column or "Date" and "Time" columns.');
   }
 
   final employeeByNorm = _indexEmployeesByNormalizedName(employees);
-  final grouped = _groupAttendanceRows(lines, idxPersonId, idxName, idxTime, idxType);
+  
+  // Use a modified grouping function that handles split columns
+  final grouped = _groupAttendanceRows(
+    lines, 
+    idxPersonId, 
+    idxName, 
+    idxDate, 
+    idxTime, 
+    idxType
+  );
+
   return _buildPreviewMaps(grouped, employeeByNorm);
 }

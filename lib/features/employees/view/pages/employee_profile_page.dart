@@ -15,9 +15,20 @@ import '../widgets/employee_profile/employee_profile_header.dart';
 import '../widgets/employee_profile/employee_profile_sections.dart';
 
 class EmployeeProfilePage extends StatefulWidget {
-  const EmployeeProfilePage({super.key, required this.employeeId});
+  const EmployeeProfilePage({
+    super.key,
+    required this.employeeId,
+    this.autoOpenAddContract = false,
+    this.initialContractStartDate,
+    this.initialContractEndDate,
+    this.initialOldContractEndDate,
+  });
 
   final String employeeId;
+  final bool autoOpenAddContract;
+  final DateTime? initialContractStartDate;
+  final DateTime? initialContractEndDate;
+  final DateTime? initialOldContractEndDate;
 
   @override
   State<EmployeeProfilePage> createState() => _EmployeeProfilePageState();
@@ -25,6 +36,7 @@ class EmployeeProfilePage extends StatefulWidget {
 
 class _EmployeeProfilePageState extends State<EmployeeProfilePage> {
   late Future<EmployeeProfileDetails> _future;
+  bool _didAutoOpenContract = false;
 
   @override
   void initState() {
@@ -60,6 +72,20 @@ class _EmployeeProfilePageState extends State<EmployeeProfilePage> {
           }
 
           final profile = snapshot.data!;
+          if (widget.autoOpenAddContract && !_didAutoOpenContract) {
+            _didAutoOpenContract = true;
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (!mounted) return;
+              _openDialog(
+                AddContractVersionDialog(
+                  profile: profile,
+                  initialStartDate: widget.initialContractStartDate,
+                  initialEndDate: widget.initialContractEndDate,
+                  initialOldEndDate: widget.initialOldContractEndDate,
+                ),
+              );
+            });
+          }
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [

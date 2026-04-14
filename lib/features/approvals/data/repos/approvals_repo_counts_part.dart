@@ -4,6 +4,7 @@ mixin _ApprovalsRepoCountsMixin on _ApprovalsRepoFetchMixin {
   Future<int> fetchPendingCount({String? employeeId}) async {
     final tenantId = await _tenantId();
     final actor = await _currentActor();
+    final actorEmployeeId = actor.employeeId;
 
     dynamic q = _client
         .from('approval_requests')
@@ -16,11 +17,11 @@ mixin _ApprovalsRepoCountsMixin on _ApprovalsRepoFetchMixin {
     } else {
       q = q.eq('current_approver_role', actor.role);
       if (actor.role == 'manager' &&
-          actor.employeeId != null &&
-          actor.employeeId!.isNotEmpty) {
+          actorEmployeeId != null &&
+          actorEmployeeId.isNotEmpty) {
         final subordinateIds = await _subordinateEmployeeIds(
           tenantId: tenantId,
-          managerEmployeeId: actor.employeeId!,
+          managerEmployeeId: actorEmployeeId,
         );
         if (subordinateIds.isEmpty) return 0;
         q = q.inFilter('employee_id', subordinateIds);

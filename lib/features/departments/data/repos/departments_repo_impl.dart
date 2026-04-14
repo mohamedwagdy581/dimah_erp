@@ -100,10 +100,10 @@ class DepartmentsRepoImpl implements DepartmentsRepo {
     await _client.from('departments').insert({
       'tenant_id': tenantId,
       'name': name.trim(),
-      'code': (code?.trim().isEmpty ?? true) ? null : code!.trim(),
-      'description': (description?.trim().isEmpty ?? true)
+      'code': (code == null || code.trim().isEmpty) ? null : code.trim(),
+      'description': (description == null || description.trim().isEmpty)
           ? null
-          : description!.trim(),
+          : description.trim(),
       // manager_id اختياري (لو موجود في الجدول)
       if (managerId != null && managerId.trim().isNotEmpty)
         'manager_id': managerId.trim(),
@@ -127,10 +127,10 @@ class DepartmentsRepoImpl implements DepartmentsRepo {
         .from('departments')
         .update({
           'name': name.trim(),
-          'code': (code?.trim().isEmpty ?? true) ? null : code!.trim(),
-          'description': (description?.trim().isEmpty ?? true)
+          'code': (code == null || code.trim().isEmpty) ? null : code.trim(),
+          'description': (description == null || description.trim().isEmpty)
               ? null
-              : description!.trim(),
+              : description.trim(),
           'manager_id': (managerId == null || managerId.trim().isEmpty)
               ? null
               : managerId.trim(),

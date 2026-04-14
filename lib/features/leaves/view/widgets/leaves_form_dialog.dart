@@ -48,6 +48,16 @@ class _LeavesFormDialogState extends State<LeavesFormDialog> {
   bool _saving = false;
   Timer? _debounce;
 
+  void _setEmployeeId(String? value) => setState(() => _employeeId = value);
+
+  void _setLeaveType(String? value) => setState(() => _type = value ?? 'annual');
+
+  void _setStartDate(DateTime value) => setState(() => _start = value);
+
+  void _setEndDate(DateTime value) => setState(() => _end = value);
+
+  void _setUploading(bool value) => setState(() => _uploading = value);
+
   @override
   void initState() {
     super.initState();

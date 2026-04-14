@@ -1,4 +1,4 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
+﻿import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/di/app_di.dart';
 
@@ -8,7 +8,12 @@ class ShellNotificationsRepo {
   final SupabaseClient _client;
 
   bool showNotificationBadge(String role) {
-    return role == 'admin' || role == 'hr' || role == 'manager' || role == 'employee';
+    return role == 'admin' ||
+        role == 'hr' ||
+        role == 'manager' ||
+        role == 'employee' ||
+        role == 'finance_manager' ||
+        role == 'accountant';
   }
 
   Future<int> fetchCount(String role, String? employeeId) async {
@@ -23,8 +28,17 @@ class ShellNotificationsRepo {
     if (role == 'manager' || role == 'direct_manager') {
       return _fetchManagerCount(tenantId, employeeId);
     }
-    if (role == 'admin' || role == 'hr') {
-      return AppDI.approvalsRepo.fetchPendingCount();
+    if (role == 'finance_manager') {
+      return _fetchFinanceManagerCount(tenantId, employeeId);
+    }
+    if (role == 'accountant') {
+      return _fetchAccountantCount(tenantId, employeeId);
+    }
+    if (role == 'admin') {
+      return _fetchAdminCount(tenantId);
+    }
+    if (role == 'hr') {
+      return _fetchHrCount(tenantId);
     }
     return 0;
   }
@@ -87,5 +101,57 @@ class ShellNotificationsRepo {
       }
     }
     return count;
+  }
+
+  Future<int> _fetchFinanceManagerCount(String tenantId, String? employeeId) async {
+    var count = 0;
+    final payrollRows = await _client
+        .from('payroll_runs')
+        .select('id')
+        .eq('tenant_id', tenantId)
+        .or('status.eq.pending_finance_manager,and(status.eq.approved,disbursement_status.eq.assigned_to_finance_manager)');
+    count += (payrollRows as List).length;
+
+    if (employeeId != null && employeeId.isNotEmpty) {
+      final taskRows = await _client
+          .from('employee_tasks')
+          .select('id')
+          .eq('tenant_id', tenantId)
+          .eq('employee_id', employeeId)
+          .eq('task_type', 'payroll');
+      count += (taskRows as List).length;
+    }
+    return count;
+  }
+
+  Future<int> _fetchAccountantCount(String tenantId, String? employeeId) async {
+    if (employeeId == null || employeeId.isEmpty) return 0;
+    final taskRows = await _client
+        .from('employee_tasks')
+        .select('id')
+        .eq('tenant_id', tenantId)
+        .eq('employee_id', employeeId)
+        .eq('task_type', 'payroll');
+    return (taskRows as List).length;
+  }
+
+  Future<int> _fetchAdminCount(String tenantId) async {
+    final approvalsCount = await AppDI.approvalsRepo.fetchPendingCount();
+    final payrollRows = await _client
+        .from('payroll_runs')
+        .select('id')
+        .eq('tenant_id', tenantId)
+        .eq('status', 'pending_admin_approval');
+    return approvalsCount + (payrollRows as List).length;
+  }
+
+  Future<int> _fetchHrCount(String tenantId) async {
+    final approvalsCount = await AppDI.approvalsRepo.fetchPendingCount();
+    final payrollRows = await _client
+        .from('payroll_runs')
+        .select('id')
+        .eq('tenant_id', tenantId)
+        .inFilter('status', ['rejected_by_finance_manager', 'rejected_by_admin']);
+    return approvalsCount + (payrollRows as List).length;
   }
 }

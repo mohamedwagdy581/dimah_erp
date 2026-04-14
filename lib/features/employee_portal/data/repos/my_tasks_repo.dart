@@ -23,5 +23,6 @@ class MyTasksRepo
         _MyTasksRepoTimerMixin {
   MyTasksRepo(this._client);
 
+  @override
   final SupabaseClient _client;
 }

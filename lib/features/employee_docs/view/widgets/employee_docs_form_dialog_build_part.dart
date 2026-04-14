@@ -4,6 +4,12 @@ extension _EmployeeDocsFormDialogBuild on _EmployeeDocsFormDialogState {
   Widget buildEmployeeDocsFormDialog(BuildContext context) {
     final t = AppLocalizations.of(context)!;
     final isEdit = widget.initialDocument != null;
+    final isRenewFlow =
+        !isEdit &&
+        widget.initialEmployeeId != null &&
+        widget.initialDocType != null &&
+        widget.initialOldExpiresAt != null &&
+        widget.initialExpiresAt != null;
 
     return AlertDialog(
       title: Text(isEdit ? t.editDocument : t.addDocument),
@@ -15,6 +21,10 @@ extension _EmployeeDocsFormDialogBuild on _EmployeeDocsFormDialogState {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                if (isRenewFlow) ...[
+                  _buildRenewHint(context),
+                  const SizedBox(height: 12),
+                ],
                 _buildEmployeeSelector(t),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
@@ -44,6 +54,43 @@ extension _EmployeeDocsFormDialogBuild on _EmployeeDocsFormDialogState {
         ),
       ),
       actions: _buildDialogActions(t),
+    );
+  }
+
+  Widget _buildRenewHint(BuildContext context) {
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+    final oldDate = _formatDate(widget.initialOldExpiresAt, '-');
+    final newDate = _formatDate(widget.initialExpiresAt, '-');
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.25),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            isArabic ? 'تجديد مستند من تنبيه' : 'Document renewal from alert',
+            style: const TextStyle(fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            isArabic
+                ? 'تاريخ الانتهاء السابق: $oldDate'
+                : 'Previous expiry date: $oldDate',
+          ),
+          Text(
+            isArabic
+                ? 'تاريخ الانتهاء الجديد المقترح: $newDate'
+                : 'Suggested new expiry date: $newDate',
+          ),
+        ],
+      ),
     );
   }
 

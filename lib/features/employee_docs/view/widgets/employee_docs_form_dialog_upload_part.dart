@@ -15,13 +15,21 @@ extension _EmployeeDocsFormDialogUpload on _EmployeeDocsFormDialogState {
         ],
       );
       if (file == null) return;
-      setState(() => _uploading = true);
+      _setUploading(true);
 
       final bytes = await file.readAsBytes();
       final client = Supabase.instance.client;
       final tenantId = await _fetchTenantId(client);
       final employeeId = _employeeId ?? 'unknown';
-      final path = '$tenantId/$employeeId/${DateTime.now().millisecondsSinceEpoch}_${file.name}';
+
+      // Sanitize filename to avoid "Invalid Key" error (spaces and Arabic chars can be problematic)
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      // We keep it simple: timestamp + extension, or a cleaned version of the name
+      final safeName = file.name
+          .replaceAll(RegExp(r'[^\x00-\x7F]+'), 'doc') // Replace non-ascii with 'doc'
+          .replaceAll(' ', '_');
+      
+      final path = '$tenantId/$employeeId/${timestamp}_$safeName';
 
       await client.storage
           .from('employee_docs')
@@ -33,26 +41,25 @@ extension _EmployeeDocsFormDialogUpload on _EmployeeDocsFormDialogState {
           .timeout(const Duration(minutes: 2));
 
       final url = client.storage.from('employee_docs').getPublicUrl(path);
-      setState(() => _uploadedFileUrl = url);
+      _setUploadedFileUrl(url);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(t.fileUploadedSuccessfully)),
       );
     } catch (e) {
-      print('EMPLOYEE_DOC_UPLOAD_ERROR: $e');
-      print('EMPLOYEE_DOC_UPLOAD_STACK: ${StackTrace.current}');
+      debugPrint('EMPLOYEE_DOC_UPLOAD_ERROR: $e');
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
             e is StorageException && e.statusCode == '403'
-                ? t.employeeDocsStorageUnauthorized
+                ? (t.employeeDocsStorageUnauthorized ?? 'Storage Unauthorized')
                 : t.fileUploadFailed(e.toString()),
           ),
         ),
       );
     } finally {
-      if (mounted) setState(() => _uploading = false);
+      if (mounted) _setUploading(false);
     }
   }
 
@@ -75,9 +82,8 @@ extension _EmployeeDocsFormDialogUpload on _EmployeeDocsFormDialogState {
   }
 
   Future<String> _fetchTenantId(SupabaseClient client) async {
-    final t = AppLocalizations.of(context)!;
     final uid = client.auth.currentUser?.id;
-    if (uid == null) throw Exception(t.notAuthenticated);
+    if (uid == null) throw Exception('Not authenticated');
     final me = await client
         .from('users')
         .select('tenant_id')

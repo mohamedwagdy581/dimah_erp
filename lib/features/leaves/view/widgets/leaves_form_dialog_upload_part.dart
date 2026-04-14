@@ -11,7 +11,7 @@ extension _LeavesFormDialogUpload on _LeavesFormDialogState {
         ],
       );
       if (file == null) return;
-      setState(() => _uploading = true);
+      _setUploading(true);
 
       final length = await file.length();
       if (length > _LeavesFormDialogState._maxFileBytes) {
@@ -48,7 +48,7 @@ extension _LeavesFormDialogUpload on _LeavesFormDialogState {
         SnackBar(content: Text('File upload failed: $e')),
       );
     } finally {
-      if (mounted) setState(() => _uploading = false);
+      if (mounted) _setUploading(false);
     }
   }
 

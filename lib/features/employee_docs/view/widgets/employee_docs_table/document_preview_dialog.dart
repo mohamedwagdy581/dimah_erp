@@ -14,7 +14,6 @@ class DocumentPreviewDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final t = AppLocalizations.of(context)!;
     return Dialog(
       insetPadding: const EdgeInsets.all(24),
       child: SizedBox(
@@ -45,9 +44,9 @@ class DocumentPreviewDialog extends StatelessWidget {
                   child: Image.network(
                     fileUrl,
                     fit: BoxFit.contain,
-                    errorBuilder: (_, __, ___) => Padding(
+                    errorBuilder: (_, _, _) => Padding(
                       padding: const EdgeInsets.all(24),
-                      child: Text(t.unableOpenFile),
+                      child: Text(AppLocalizations.of(context)!.unableOpenFile),
                     ),
                   ),
                 ),

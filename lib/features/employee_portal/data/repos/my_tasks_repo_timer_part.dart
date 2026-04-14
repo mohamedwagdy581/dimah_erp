@@ -65,7 +65,7 @@ mixin _MyTasksRepoTimerMixin on _MyTasksRepoHelpersMixin, _MyTasksRepoEventsMixi
       'employee_id': employeeId,
       'logged_by_user_id': auth['user_id'],
       'hours': normalizedHours <= 0 ? 0.01 : normalizedHours,
-      'note': note?.trim().isEmpty ?? true ? null : note!.trim(),
+      'note': _trimOrNull(note),
     });
     await _client.from('employee_tasks').update({
       'active_timer_started_at': null,

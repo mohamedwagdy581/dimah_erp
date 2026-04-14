@@ -21,7 +21,7 @@ extension _EmployeeDocsFormDialogFields on _EmployeeDocsFormDialogState {
             items: _filtered
                 .map((e) => DropdownMenuItem(value: e.id, child: Text(e.fullName)))
                 .toList(),
-            onChanged: (v) => setState(() => _employeeId = v),
+            onChanged: _setEmployeeId,
             decoration: InputDecoration(
               labelText: t.employee,
               border: const OutlineInputBorder(),

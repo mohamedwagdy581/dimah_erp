@@ -1,7 +1,6 @@
 part of 'employee_repo_impl.dart';
 
 mixin _EmployeesRepoVersionsMixin on _EmployeesRepoExpiryAlertsMixin {
-  @override
   Future<void> addEmployeeContractVersion({
     required String employeeId,
     required String contractType,
@@ -23,8 +22,6 @@ mixin _EmployeesRepoVersionsMixin on _EmployeesRepoExpiryAlertsMixin {
       'file_url': _normalizeOptionalText(fileUrl),
     });
   }
-
-  @override
   Future<void> addEmployeeCompensationVersion({
     required String employeeId,
     required double basicSalary,

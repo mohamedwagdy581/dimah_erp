@@ -245,6 +245,7 @@ class _MyTasksSectionState extends State<MyTasksSection> {
 
   Future<void> _pickAttachment(String taskId) async {
     final t = AppLocalizations.of(context)!;
+    final messenger = ScaffoldMessenger.of(context);
     try {
       final file = await SafeFilePicker.openSingle(
         context: context,
@@ -260,13 +261,13 @@ class _MyTasksSectionState extends State<MyTasksSection> {
         mimeType: contentTypeFor(file.name),
       );
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t.attachmentUploaded)));
+      messenger.showSnackBar(SnackBar(content: Text(t.attachmentUploaded)));
       await _reload();
     } catch (e) {
-      print('TASK_ATTACHMENT_UPLOAD_ERROR: $e');
-      print('TASK_ATTACHMENT_UPLOAD_STACK: ${StackTrace.current}');
+      debugPrint('TASK_ATTACHMENT_UPLOAD_ERROR: $e');
+      debugPrint('TASK_ATTACHMENT_UPLOAD_STACK: ${StackTrace.current}');
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t.fileUploadFailed(e.toString()))));
+      messenger.showSnackBar(SnackBar(content: Text(t.fileUploadFailed(e.toString()))));
     }
   }
 

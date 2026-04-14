@@ -11,6 +11,8 @@ class AppRoutes {
   static const payrollRun = '/payroll/:runId';
   static const employeeDocs = '/employee-docs';
   static const hrAlerts = '/hr-alerts';
+  static const hrForms = '/hr-forms';
+  static const hrFormTemplate = '/hr-forms/:templateId';
   static const approvals = '/approvals';
   static const notifications = '/notifications';
   static const myPortal = '/my';

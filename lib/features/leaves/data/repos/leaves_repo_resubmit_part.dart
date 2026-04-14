@@ -1,7 +1,6 @@
 part of 'leaves_repo_impl.dart';
 
 mixin _LeavesRepoResubmitMixin on _LeavesRepoCreateMixin {
-  @override
   Future<void> resubmitLeave({
     required String leaveId,
     required String employeeId,

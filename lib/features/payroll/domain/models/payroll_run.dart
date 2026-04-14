@@ -8,6 +8,13 @@ class PayrollRun {
     required this.totalEmployees,
     required this.totalAmount,
     required this.createdAt,
+    this.rejectReason,
+    this.disbursementStatus,
+    this.disbursementTaskId,
+    this.disbursementAssigneeEmployeeId,
+    this.hrApprovedAt,
+    this.financeManagerApprovedAt,
+    this.adminApprovedAt,
   });
 
   final String id;
@@ -18,6 +25,13 @@ class PayrollRun {
   final int totalEmployees;
   final num totalAmount;
   final DateTime createdAt;
+  final String? rejectReason;
+  final String? disbursementStatus;
+  final String? disbursementTaskId;
+  final String? disbursementAssigneeEmployeeId;
+  final DateTime? hrApprovedAt;
+  final DateTime? financeManagerApprovedAt;
+  final DateTime? adminApprovedAt;
 
   factory PayrollRun.fromMap(Map<String, dynamic> map) {
     return PayrollRun(
@@ -32,6 +46,15 @@ class PayrollRun {
       createdAt:
           DateTime.tryParse(map['created_at']?.toString() ?? '') ??
           DateTime.fromMillisecondsSinceEpoch(0),
+      rejectReason: map['reject_reason']?.toString(),
+      disbursementStatus: map['disbursement_status']?.toString(),
+      disbursementTaskId: map['disbursement_task_id']?.toString(),
+      disbursementAssigneeEmployeeId: map['disbursement_assignee_employee_id']?.toString(),
+      hrApprovedAt: DateTime.tryParse(map['hr_approved_at']?.toString() ?? ''),
+      financeManagerApprovedAt: DateTime.tryParse(
+        map['finance_manager_approved_at']?.toString() ?? '',
+      ),
+      adminApprovedAt: DateTime.tryParse(map['admin_approved_at']?.toString() ?? ''),
     );
   }
 }
