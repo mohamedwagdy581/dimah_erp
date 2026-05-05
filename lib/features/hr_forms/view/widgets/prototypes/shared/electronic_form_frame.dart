@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import 'electronic_form_decorations.dart';
+import 'electronic_form_theme.dart';
+
 class ElectronicFormFrame extends StatelessWidget {
   const ElectronicFormFrame({
     super.key,
@@ -7,129 +10,99 @@ class ElectronicFormFrame extends StatelessWidget {
     required this.subtitle,
     required this.actions,
     required this.child,
+    this.showDecoration = true,
+    this.headerLogo,
   });
 
   final String title;
   final String subtitle;
   final List<Widget> actions;
   final Widget child;
+  final bool showDecoration;
+  final Widget? headerLogo;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 980,
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(28),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x12000000),
-            blurRadius: 26,
-            offset: Offset(0, 12),
-          ),
-        ],
-        border: Border.all(color: const Color(0xFFB9D7CF)),
+    final card = Container(
+      width: ElectronicFormDimensions.cardWidth,
+      padding: const EdgeInsets.symmetric(
+        horizontal: ElectronicFormDimensions.cardHorizontalPadding,
+        vertical: ElectronicFormDimensions.cardVerticalPadding,
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      decoration: ElectronicFormDecorations.cardDecoration,
+      child: Stack(
+        clipBehavior: Clip.none,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.w900,
-                        color: Color(0xFF2E7D68),
+          if (showDecoration) const ElectronicHeaderDecoration(),
+          if (headerLogo != null)
+            Positioned(
+              top: 8,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: Container(
+                  width: ElectronicFormDimensions.headerLogoSize,
+                  height: ElectronicFormDimensions.headerLogoSize,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.12),
+                        blurRadius: 16,
+                        offset: const Offset(0, 8),
                       ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      subtitle,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Color(0xFF58766F),
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
+                  padding: const EdgeInsets.all(
+                    ElectronicFormDimensions.headerLogoPadding,
+                  ),
+                  child: headerLogo,
                 ),
               ),
-              Wrap(spacing: 10, runSpacing: 10, children: actions),
+            ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const SizedBox(height: ElectronicFormDimensions.headerTopSpacing),
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(title, style: ElectronicFormTextStyles.title),
+                        const SizedBox(
+                          height: ElectronicFormDimensions.textSpacing,
+                        ),
+                        Text(
+                          subtitle,
+                          style: ElectronicFormTextStyles.subtitle,
+                        ),
+                      ],
+                    ),
+                  ),
+                  Wrap(
+                    spacing: ElectronicFormDimensions.actionSpacing,
+                    runSpacing: ElectronicFormDimensions.actionSpacing,
+                    children: actions,
+                  ),
+                ],
+              ),
+              const SizedBox(height: ElectronicFormDimensions.sectionSpacing),
+              child,
+              if (showDecoration)
+                const SizedBox(height: ElectronicFormDimensions.sectionSpacing),
+              if (showDecoration) const ElectronicFooterDecoration(),
             ],
           ),
-          const SizedBox(height: 20),
-          child,
         ],
       ),
     );
-  }
-}
 
-class ElectronicSectionCard extends StatelessWidget {
-  const ElectronicSectionCard({
-    super.key,
-    required this.title,
-    required this.child,
-    this.hint,
-  });
-
-  final String title;
-  final String? hint;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 18),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: const Color(0xFFC9E0DA)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-            decoration: const BoxDecoration(
-              color: Color(0xFF3B8D72),
-              borderRadius: BorderRadius.vertical(top: Radius.circular(21)),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    title,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ),
-                if (hint != null)
-                  Text(
-                    hint!,
-                    style: const TextStyle(
-                      color: Color(0xFFE4F2EE),
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(18),
-            child: child,
-          ),
-        ],
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [Center(child: card)],
     );
   }
 }

@@ -1,9 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 
 import '../../domain/models/hr_form_template_def.dart';
-import '../widgets/hr_acknowledgment_form_editor.dart';
-import '../widgets/hr_email_request_form_editor.dart';
-import '../widgets/hr_leave_application_form_editor.dart';
 import '../widgets/prototypes/electronic_acknowledgment_form_editor.dart';
 import '../widgets/prototypes/electronic_leave_request_form_editor.dart';
 
@@ -23,12 +20,6 @@ class HrFormEditorPage extends StatelessWidget {
     }
 
     switch (templateId) {
-      case emailRequestTemplateId:
-        return const HrEmailRequestFormEditor();
-      case acknowledgmentTemplateId:
-        return const HrAcknowledgmentFormEditor();
-      case leaveApplicationTemplateId:
-        return const HrLeaveApplicationFormEditor();
       case acknowledgmentPrototypeTemplateId:
         return const ElectronicAcknowledgmentFormEditor();
       case leavePrototypeTemplateId:

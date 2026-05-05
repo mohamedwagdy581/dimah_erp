@@ -23,5 +23,6 @@ class ApprovalsRepoImpl
     implements ApprovalsRepo {
   ApprovalsRepoImpl(this._client);
 
+  @override
   final SupabaseClient _client;
 }

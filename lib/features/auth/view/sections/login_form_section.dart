@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/ui/app_assets.dart';
+import '../../../../core/ui/app_spacing.dart';
 import '../../bloc/auth_bloc.dart';
 import '../../bloc/auth_event.dart';
 import '../../bloc/auth_state.dart';
@@ -41,7 +42,7 @@ class _LoginFormSectionState extends State<LoginFormSection> {
 
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(18),
+        padding: const EdgeInsets.all(AppSpacing.s16),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -51,16 +52,16 @@ class _LoginFormSectionState extends State<LoginFormSection> {
               errorBuilder: (_, _, _) =>
                   Image.asset(AppAssets.fullLogo, height: 60),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.s12),
             const Text(
               'تسجيل الدخول',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
             ),
-            const SizedBox(height: 18),
+            const SizedBox(height: AppSpacing.s18),
             EmailField(controller: _email, onSubmit: _submit),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.s12),
             PasswordField(controller: _pass, onSubmit: _submit),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.s16),
             PrimaryButton(
               label: loading ? 'جاري الدخول...' : 'دخول',
               onPressed: loading ? null : _submit,

@@ -51,7 +51,8 @@ extension _ManagerDashboardTimelineDialogHelpers on _ManagerDashboardState {
               ? Center(child: Text(t.noTasksAssignedYet))
               : ListView.separated(
                   itemCount: tasks.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 8),
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(height: 8),
                   itemBuilder: (context, index) {
                     final task = tasks[index];
                     final taskId = task['id']?.toString() ?? '';
