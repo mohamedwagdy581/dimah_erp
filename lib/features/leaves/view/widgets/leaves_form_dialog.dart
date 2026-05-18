@@ -7,6 +7,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/di/app_di.dart';
 import '../../../../core/utils/safe_file_picker.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../employees/domain/models/employee_lookup.dart';
 import '../../domain/models/leave_request.dart';
 import '../cubit/leaves_cubit.dart';
@@ -68,7 +69,9 @@ class _LeavesFormDialogState extends State<LeavesFormDialog> {
       _end = widget.initialLeave!.endDate;
       _notes.text = widget.initialLeave!.notes ?? '';
       _fileUrl = widget.initialLeave!.fileUrl;
-      _fileName.value = (_fileUrl == null || _fileUrl!.isEmpty) ? '' : 'Attached file';
+      _fileName.value = (_fileUrl == null || _fileUrl!.isEmpty)
+          ? ''
+          : _fileUrl!.split('/').last;
     }
     if (widget.employeeId == null && widget.initialLeave == null) {
       _loadEmployees();
@@ -148,8 +151,9 @@ class _LeavesFormDialogState extends State<LeavesFormDialog> {
       Navigator.pop(context, true);
     } catch (e) {
       if (!mounted) return;
+      final t = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Save failed: $e')),
+        SnackBar(content: Text(t.saveFailed('$e'))),
       );
       setState(() => _saving = false);
     }

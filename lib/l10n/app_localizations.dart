@@ -374,6 +374,12 @@ abstract class AppLocalizations {
   /// **'Employees'**
   String get menuEmployees;
 
+  /// No description provided for @menuSettlements.
+  ///
+  /// In en, this message translates to:
+  /// **'Settlements'**
+  String get menuSettlements;
+
   /// No description provided for @menuAttendance.
   ///
   /// In en, this message translates to:
@@ -385,6 +391,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Leaves'**
   String get menuLeaves;
+
+  /// No description provided for @profileLeaveBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave Balance'**
+  String get profileLeaveBalance;
+
+  /// No description provided for @leaveBalanceLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load leave balance.'**
+  String get leaveBalanceLoadFailed;
+
+  /// No description provided for @annualLeaveEligibleSince.
+  ///
+  /// In en, this message translates to:
+  /// **'Annual leave entitlement is available since {date}.'**
+  String annualLeaveEligibleSince(Object date);
+
+  /// No description provided for @annualLeaveAvailableOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Annual leave becomes available on {date} after completing 11 months of service.'**
+  String annualLeaveAvailableOn(Object date);
 
   /// No description provided for @menuPayroll.
   ///
@@ -866,6 +896,12 @@ abstract class AppLocalizations {
   /// **'Search name, email, or phone...'**
   String get searchEmployeesHint;
 
+  /// No description provided for @searchSettlementsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search employee, code, or job title...'**
+  String get searchSettlementsHint;
+
   /// No description provided for @all.
   ///
   /// In en, this message translates to:
@@ -967,6 +1003,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No employees found.'**
   String get noEmployeesFound;
+
+  /// No description provided for @noSettlementsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No settlements found.'**
+  String get noSettlementsFound;
 
   /// No description provided for @totalWithValue.
   ///
@@ -1447,6 +1489,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add Leave'**
   String get addLeave;
+
+  /// No description provided for @resubmitLeave.
+  ///
+  /// In en, this message translates to:
+  /// **'Resubmit Leave'**
+  String get resubmitLeave;
 
   /// No description provided for @noLeaveRequestsFound.
   ///
@@ -1939,6 +1987,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Employee Profile'**
   String get employeeProfileTitle;
+
+  /// No description provided for @profileSettlements.
+  ///
+  /// In en, this message translates to:
+  /// **'Settlements History'**
+  String get profileSettlements;
+
+  /// No description provided for @settlementsTabHint.
+  ///
+  /// In en, this message translates to:
+  /// **'This tab shows inactive employees and employees who already have recorded settlements.'**
+  String get settlementsTabHint;
+
+  /// No description provided for @addSettlement.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Settlement'**
+  String get addSettlement;
+
+  /// No description provided for @noSettlementHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'No settlement history.'**
+  String get noSettlementHistory;
+
+  /// No description provided for @settlementDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Settlement Date'**
+  String get settlementDate;
+
+  /// No description provided for @finalWorkingDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Final Working Date'**
+  String get finalWorkingDate;
+
+  /// No description provided for @grossAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Gross Amount'**
+  String get grossAmount;
+
+  /// No description provided for @deductionsAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Deductions'**
+  String get deductionsAmount;
+
+  /// No description provided for @netAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Net Amount'**
+  String get netAmount;
+
+  /// No description provided for @settlementCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Settlements'**
+  String get settlementCount;
+
+  /// No description provided for @latestSettlementDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Latest Settlement'**
+  String get latestSettlementDate;
 
   /// No description provided for @failedToLoadEmployeeProfile.
   ///
@@ -2605,6 +2719,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Attach File'**
   String get attachFile;
+
+  /// No description provided for @attachedFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Attached file'**
+  String get attachedFile;
+
+  /// No description provided for @uploadingAttachment.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading attachment...'**
+  String get uploadingAttachment;
+
+  /// No description provided for @savingLeaveRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving leave request...'**
+  String get savingLeaveRequest;
 
   /// No description provided for @logHours.
   ///

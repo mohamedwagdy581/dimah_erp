@@ -89,6 +89,25 @@ mixin _EmployeesRepoProfileFetchMixin on _EmployeesRepoProfileFetchQueriesMixin 
         .eq('employee_id', employeeId)
         .order('created_at', ascending: false)
         .limit(30);
+    List<Map<String, dynamic>> settlements = [];
+    try {
+      final settlementsRes = await _client
+          .from('employee_settlements')
+          .select(
+            'id, final_working_date, settlement_date, gross_amount, '
+            'deductions_amount, notes, created_at',
+          )
+          .eq('tenant_id', tenantId)
+          .eq('employee_id', employeeId)
+          .order('settlement_date', ascending: false)
+          .order('created_at', ascending: false)
+          .limit(30);
+      settlements = (settlementsRes as List)
+          .map((e) => Map<String, dynamic>.from(e as Map))
+          .toList();
+    } catch (_) {
+      settlements = [];
+    }
 
     final contractsFallbackRes = contracts.isEmpty
         ? await _client
@@ -132,6 +151,7 @@ mixin _EmployeesRepoProfileFetchMixin on _EmployeesRepoProfileFetchQueriesMixin 
       contractHistory: (contracts.isNotEmpty ? contractHistory : contractHistoryFallback)
           .map((e) => Map<String, dynamic>.from(e as Map))
           .toList(),
+      settlements: settlements,
       documents: (docsRes as List).map((e) => e as Map<String, dynamic>).toList(),
     );
   }

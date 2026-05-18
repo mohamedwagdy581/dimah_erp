@@ -76,6 +76,22 @@ mixin _LeavesRepoHelpersMixin on _LeavesRepoSessionMixin, _LeavesRepoBalancesMix
   }) async {
     if (type != 'annual' && type != 'sick' && type != 'other') return;
 
+    if (type == 'annual') {
+      final tenantId = await _tenantId();
+      final hireDate = await _fetchEmployeeHireDate(
+        tenantId: tenantId,
+        employeeId: employeeId,
+      );
+      final eligibilityDate = _annualLeaveEligibilityDate(hireDate);
+      final leaveStartDate = DateTime(startDate.year, startDate.month, startDate.day);
+      if (eligibilityDate != null && leaveStartDate.isBefore(eligibilityDate)) {
+        throw Exception(
+          'Annual leave becomes available on ${_toDateOnly(eligibilityDate)} '
+          'after completing 11 months of service.',
+        );
+      }
+    }
+
     final balances = await fetchLeaveBalances(
       employeeId: employeeId,
       year: startDate.year,

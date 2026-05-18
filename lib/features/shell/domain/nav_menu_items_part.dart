@@ -40,6 +40,14 @@ const _allNavItems = <NavItem>[
     keywords: ['employee', 'employees', 'staff', 'موظف', 'الموظفين'],
   ),
   NavItem(
+    path: AppRoutes.settlements,
+    label: 'Settlements',
+    icon: Icons.receipt_long_outlined,
+    allowedRoles: ['admin', 'hr'],
+    section: _hrSection,
+    keywords: ['settlement', 'settlements', 'clearance', 'final', 'exit', 'mukhalasa'],
+  ),
+  NavItem(
     path: AppRoutes.attendance,
     label: 'Attendance',
     icon: Icons.calendar_month_outlined,

@@ -1,4 +1,5 @@
 import '../models/employee.dart';
+import '../models/employee_settlement_summary.dart';
 import '../models/expiry_alert.dart';
 import '../models/employee_profile_details.dart';
 import '../models/employee_lookup.dart';
@@ -72,6 +73,21 @@ abstract class EmployeesRepo {
 
   Future<EmployeeProfileDetails> fetchEmployeeProfile({
     required String employeeId,
+  });
+
+  Future<({List<EmployeeSettlementSummary> items, int total})> fetchSettlements({
+    required int page,
+    required int pageSize,
+    String? search,
+  });
+
+  Future<void> addEmployeeSettlement({
+    required String employeeId,
+    required DateTime finalWorkingDate,
+    required DateTime settlementDate,
+    required double grossAmount,
+    required double deductionsAmount,
+    String? notes,
   });
 
   Future<void> updateEmployeeProfile({

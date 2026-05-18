@@ -51,8 +51,23 @@
   "menuDepartments": "Departments",
   "menuJobTitles": "Job Titles",
   "menuEmployees": "Employees",
+  "menuSettlements": "Settlements",
   "menuAttendance": "Attendance",
   "menuLeaves": "Leaves",
+  "profileLeaveBalance": "Leave Balance",
+  "leaveBalanceLoadFailed": "Failed to load leave balance.",
+  "annualLeaveEligibleSince": "Annual leave entitlement is available since {date}.",
+  "@annualLeaveEligibleSince": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "annualLeaveAvailableOn": "Annual leave becomes available on {date} after completing 11 months of service.",
+  "@annualLeaveAvailableOn": {
+    "placeholders": {
+      "date": {}
+    }
+  },
   "menuPayroll": "Payroll",
   "menuEmployeeDocs": "Employee Documents",
   "menuHrAlerts": "HR Alerts",
@@ -150,6 +165,7 @@
     }
   },
   "searchEmployeesHint": "Search name, email, or phone...",
+  "searchSettlementsHint": "Search employee, code, or job title...",
   "all": "All",
   "active": "Active",
   "inactive": "Inactive",
@@ -167,6 +183,7 @@
   "actions": "Actions",
   "openProfile": "Open Profile",
   "noEmployeesFound": "No employees found.",
+  "noSettlementsFound": "No settlements found.",
   "totalWithValue": "Total: {total}",
   "@totalWithValue": {
     "placeholders": {
@@ -284,6 +301,7 @@
   "startDesc": "Start (Desc)",
   "sortStart": "Sort Start",
   "addLeave": "Add Leave",
+  "resubmitLeave": "Resubmit Leave",
   "noLeaveRequestsFound": "No leave requests found.",
   "type": "Type",
   "start": "Start",
@@ -376,6 +394,17 @@
   "newJournalEntry": "New Journal Entry",
   "pickDate": "Pick date",
   "employeeProfileTitle": "Employee Profile",
+  "profileSettlements": "Settlements History",
+  "settlementsTabHint": "This tab shows inactive employees and employees who already have recorded settlements.",
+  "addSettlement": "Add Settlement",
+  "noSettlementHistory": "No settlement history.",
+  "settlementDate": "Settlement Date",
+  "finalWorkingDate": "Final Working Date",
+  "grossAmount": "Gross Amount",
+  "deductionsAmount": "Deductions",
+  "netAmount": "Net Amount",
+  "settlementCount": "Settlements",
+  "latestSettlementDate": "Latest Settlement",
   "failedToLoadEmployeeProfile": "Failed to load employee profile",
   "editProfile": "Edit Profile",
   "personal": "Personal",
@@ -507,6 +536,9 @@
   "taskEventTimeLogged": "Time logged",
   "send": "Send",
   "attachFile": "Attach File",
+  "attachedFile": "Attached file",
+  "uploadingAttachment": "Uploading attachment...",
+  "savingLeaveRequest": "Saving leave request...",
   "logHours": "Log Hours",
   "logHoursTitle": "Log Hours",
   "loggedHours": "Logged Hours",

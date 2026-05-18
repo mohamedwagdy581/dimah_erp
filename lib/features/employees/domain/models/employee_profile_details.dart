@@ -2,6 +2,7 @@ part 'employee_profile_details_parsers.dart';
 part 'employee_profile_document.dart';
 part 'employee_contract_version.dart';
 part 'employee_compensation_version.dart';
+part 'employee_settlement.dart';
 
 class EmployeeProfileDetails {
   const EmployeeProfileDetails({
@@ -48,6 +49,7 @@ class EmployeeProfileDetails {
     this.probationMonths,
     this.contractFileUrl,
     this.contractHistory = const [],
+    this.settlements = const [],
     this.documents = const [],
   });
 
@@ -66,6 +68,7 @@ class EmployeeProfileDetails {
   final List<EmployeeCompensationVersion> compensationHistory;
   final int? probationMonths;
   final List<EmployeeContractVersion> contractHistory;
+  final List<EmployeeSettlement> settlements;
   final List<EmployeeProfileDocument> documents;
 
   factory EmployeeProfileDetails.fromMaps({
@@ -76,6 +79,7 @@ class EmployeeProfileDetails {
     Map<String, dynamic>? financial,
     Map<String, dynamic>? contract,
     List<Map<String, dynamic>> contractHistory = const [],
+    List<Map<String, dynamic>> settlements = const [],
     List<Map<String, dynamic>> documents = const [],
   }) {
     final department = employee['department'];
@@ -138,6 +142,7 @@ class EmployeeProfileDetails {
       contractFileUrl: contract?['file_url']?.toString(),
       contractHistory:
           contractHistory.map(EmployeeContractVersion.fromMap).toList(),
+      settlements: settlements.map(EmployeeSettlement.fromMap).toList(),
       documents: documents.map(EmployeeProfileDocument.fromMap).toList(),
     );
   }

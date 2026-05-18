@@ -23,7 +23,7 @@ class LeavesBalanceCards extends StatelessWidget {
       runSpacing: 10,
       children: balances.map((balance) {
         return _BalanceCard(
-          title: balance.type.toUpperCase(),
+          title: _leaveTitle(t, balance.type),
           entitlement: balance.entitlement,
           used: balance.used,
           remaining: balance.remaining,
@@ -31,6 +31,19 @@ class LeavesBalanceCards extends StatelessWidget {
         );
       }).toList(),
     );
+  }
+
+  String _leaveTitle(AppLocalizations t, String type) {
+    switch (type) {
+      case 'annual':
+        return t.leaveTypeAnnual;
+      case 'sick':
+        return t.leaveTypeSick;
+      case 'other':
+        return t.leaveTypeOther;
+      default:
+        return type;
+    }
   }
 }
 

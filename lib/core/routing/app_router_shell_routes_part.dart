@@ -14,6 +14,10 @@ final List<RouteBase> _shellRoutes = [
     pageBuilder: (_, _) => const MaterialPage(child: EmployeesPage()),
   ),
   GoRoute(
+    path: AppRoutes.settlements,
+    pageBuilder: (_, _) => const MaterialPage(child: EmployeeSettlementsPage()),
+  ),
+  GoRoute(
     path: '/profile',
     pageBuilder: (_, _) => const MaterialPage(child: ProfilePage()),
   ),

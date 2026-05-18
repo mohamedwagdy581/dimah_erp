@@ -7,6 +7,7 @@ import '../../../../core/config/env.dart';
 import '../../domain/models/employee.dart';
 import '../../domain/models/employee_lookup.dart';
 import '../../domain/models/employee_profile_details.dart';
+import '../../domain/models/employee_settlement_summary.dart';
 import '../../domain/models/expiry_alert.dart';
 import '../../domain/repos/employee_repo.dart';
 
@@ -28,6 +29,7 @@ part 'employee_repo_profile_fetch_part.dart';
 part 'employee_repo_profile_update_part.dart';
 part 'employee_repo_session_part.dart';
 part 'employee_repo_versions_part.dart';
+part 'employee_repo_settlements_part.dart';
 
 class EmployeesRepoImpl
     with
@@ -48,7 +50,8 @@ class EmployeesRepoImpl
         _EmployeesRepoExpirySettingsMixin,
         _EmployeesRepoExpiryAlertsHelpersMixin,
         _EmployeesRepoExpiryAlertsMixin,
-        _EmployeesRepoVersionsMixin
+        _EmployeesRepoVersionsMixin,
+        _EmployeesRepoSettlementsMixin
     implements EmployeesRepo {
   EmployeesRepoImpl(this._client);
 

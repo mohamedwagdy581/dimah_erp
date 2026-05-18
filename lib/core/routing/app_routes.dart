@@ -4,6 +4,7 @@ class AppRoutes {
   static const dashboard = '/';
   static const departments = '/departments';
   static const employees = '/employees';
+  static const settlements = '/settlements';
   static const jobTitles = '/job-titles';
   static const attendance = '/attendance';
   static const leaves = '/leaves';

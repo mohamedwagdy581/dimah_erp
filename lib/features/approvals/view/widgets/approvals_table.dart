@@ -53,7 +53,7 @@ class ApprovalsTable extends StatelessWidget {
                   return DataRow(
                     cells: [
                       DataCell(Text(r.employeeName)),
-                      DataCell(Text(r.requestType)),
+                      DataCell(Text(_approvalTypeLabel(r.requestType, t))),
                       DataCell(
                         ApprovalStatusChip(status: r.status, t: t),
                       ),
@@ -85,5 +85,16 @@ class ApprovalsTable extends StatelessWidget {
         },
       ),
     );
+  }
+
+  String _approvalTypeLabel(String requestType, AppLocalizations t) {
+    switch (requestType.toLowerCase()) {
+      case 'leave':
+        return t.leave;
+      case 'payroll_run':
+        return t.menuPayroll;
+      default:
+        return requestType;
+    }
   }
 }

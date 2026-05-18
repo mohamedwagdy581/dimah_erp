@@ -15,6 +15,7 @@ class EmployeeProfileSections extends StatelessWidget {
     required this.canEdit,
     required this.onAddCompensationVersion,
     required this.onAddContractVersion,
+    required this.onAddSettlement,
     required this.onOpenUrl,
   });
 
@@ -22,6 +23,7 @@ class EmployeeProfileSections extends StatelessWidget {
   final bool canEdit;
   final VoidCallback onAddCompensationVersion;
   final VoidCallback onAddContractVersion;
+  final VoidCallback onAddSettlement;
   final ValueChanged<String> onOpenUrl;
 
   @override
@@ -76,6 +78,7 @@ class EmployeeProfileSections extends StatelessWidget {
           profile: p,
           canEdit: canEdit,
           onAddContractVersion: onAddContractVersion,
+          onAddSettlement: onAddSettlement,
           onOpenUrl: onOpenUrl,
         ),
       ],

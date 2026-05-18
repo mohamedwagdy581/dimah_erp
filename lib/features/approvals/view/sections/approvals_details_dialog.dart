@@ -48,8 +48,14 @@ void showApprovalDetailsDialog(BuildContext context, ApprovalRequest req) {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _InfoRow(label: t.type, value: req.requestType.toUpperCase()),
-                  _InfoRow(label: t.status, value: req.status.toUpperCase()),
+                  _InfoRow(
+                    label: t.type,
+                    value: _approvalTypeLabel(req.requestType, t),
+                  ),
+                  _InfoRow(
+                    label: t.status,
+                    value: _approvalStatusLabel(req.status, t),
+                  ),
                   const Divider(),
 
                   if (isPayroll) ...[
@@ -177,6 +183,30 @@ Future<Map<String, dynamic>> _loadLeaveExtras(String? leaveId) async {
       .eq('id', leaveId)
       .maybeSingle();
   return data ?? {};
+}
+
+String _approvalTypeLabel(String requestType, AppLocalizations t) {
+  switch (requestType.toLowerCase()) {
+    case 'leave':
+      return t.leave;
+    case 'payroll_run':
+      return t.menuPayroll;
+    default:
+      return requestType;
+  }
+}
+
+String _approvalStatusLabel(String status, AppLocalizations t) {
+  switch (status.toLowerCase()) {
+    case 'pending':
+      return t.statusPending;
+    case 'approved':
+      return t.statusApproved;
+    case 'rejected':
+      return t.statusRejected;
+    default:
+      return status;
+  }
 }
 
 Future<void> _openAttachment(BuildContext context, String url) async {

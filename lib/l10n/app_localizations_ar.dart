@@ -149,10 +149,29 @@ class AppLocalizationsAr extends AppLocalizations {
   String get menuEmployees => 'الموظفون';
 
   @override
+  String get menuSettlements => 'التسويات';
+
+  @override
   String get menuAttendance => 'الحضور';
 
   @override
   String get menuLeaves => 'الإجازات';
+
+  @override
+  String get profileLeaveBalance => 'رصيد الإجازات';
+
+  @override
+  String get leaveBalanceLoadFailed => 'تعذر تحميل رصيد الإجازات.';
+
+  @override
+  String annualLeaveEligibleSince(Object date) {
+    return 'استحقاق الإجازة السنوية متاح منذ $date.';
+  }
+
+  @override
+  String annualLeaveAvailableOn(Object date) {
+    return 'تستحق الإجازة السنوية في $date بعد إكمال 11 شهر خدمة.';
+  }
 
   @override
   String get menuPayroll => 'الرواتب';
@@ -401,6 +420,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get searchEmployeesHint => 'ابحث بالاسم أو البريد أو الجوال...';
 
   @override
+  String get searchSettlementsHint =>
+      'ابحث باسم الموظف أو الكود أو المسمى الوظيفي...';
+
+  @override
   String get all => 'الكل';
 
   @override
@@ -450,6 +473,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get noEmployeesFound => 'لم يتم العثور على موظفين.';
+
+  @override
+  String get noSettlementsFound => 'لا توجد تسويات.';
 
   @override
   String totalWithValue(int total) {
@@ -706,6 +732,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get addLeave => 'إضافة إجازة';
 
   @override
+  String get resubmitLeave => 'إعادة إرسال الإجازة';
+
+  @override
   String get noLeaveRequestsFound => 'لا توجد طلبات إجازة.';
 
   @override
@@ -954,6 +983,40 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get employeeProfileTitle => 'ملف الموظف';
+
+  @override
+  String get profileSettlements => 'سجل التسويات';
+
+  @override
+  String get settlementsTabHint =>
+      'يعرض هذا التبويب الموظفين غير النشطين والموظفين الذين لديهم تسويات مسجلة بالفعل.';
+
+  @override
+  String get addSettlement => 'إضافة تسوية';
+
+  @override
+  String get noSettlementHistory => 'لا يوجد سجل تسويات.';
+
+  @override
+  String get settlementDate => 'تاريخ التسوية';
+
+  @override
+  String get finalWorkingDate => 'آخر يوم عمل';
+
+  @override
+  String get grossAmount => 'إجمالي المستحق';
+
+  @override
+  String get deductionsAmount => 'الاستقطاعات';
+
+  @override
+  String get netAmount => 'صافي المستحق';
+
+  @override
+  String get settlementCount => 'التسويات';
+
+  @override
+  String get latestSettlementDate => 'آخر تسوية';
 
   @override
   String get failedToLoadEmployeeProfile => 'فشل تحميل ملف الموظف';
@@ -1298,6 +1361,15 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get attachFile => 'إرفاق ملف';
+
+  @override
+  String get attachedFile => 'ملف مرفق';
+
+  @override
+  String get uploadingAttachment => 'جارٍ رفع المرفق...';
+
+  @override
+  String get savingLeaveRequest => 'جارٍ حفظ طلب الإجازة...';
 
   @override
   String get logHours => 'تسجيل ساعات';

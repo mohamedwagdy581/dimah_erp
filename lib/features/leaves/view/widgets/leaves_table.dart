@@ -47,7 +47,7 @@ class LeavesTable extends StatelessWidget {
                   return DataRow(
                     cells: [
                       DataCell(Text(r.employeeName)),
-                      DataCell(Text(r.type)),
+                      DataCell(Text(_leaveTypeLabel(r.type, t))),
                       DataCell(Text(_formatDate(r.startDate))),
                       DataCell(Text(_formatDate(r.endDate))),
                       DataCell(_LeaveStatusBadge(status: r.status, t: t)),
@@ -76,6 +76,21 @@ class LeavesTable extends StatelessWidget {
     return '${d.year.toString().padLeft(4, '0')}-'
         '${d.month.toString().padLeft(2, '0')}-'
         '${d.day.toString().padLeft(2, '0')}';
+  }
+
+  String _leaveTypeLabel(String type, AppLocalizations t) {
+    switch (type.toLowerCase()) {
+      case 'annual':
+        return t.leaveTypeAnnual;
+      case 'sick':
+        return t.leaveTypeSick;
+      case 'unpaid':
+        return t.leaveTypeUnpaid;
+      case 'other':
+        return t.leaveTypeOther;
+      default:
+        return type;
+    }
   }
 }
 

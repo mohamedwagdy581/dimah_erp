@@ -2,9 +2,11 @@ class Employee {
   const Employee({
     required this.id,
     required this.tenantId,
+    this.employeeNumber,
     required this.fullName,
     required this.email,
     required this.phone,
+    this.photoUrl,
     required this.status,
     required this.hireDate,
     required this.createdAt,
@@ -16,9 +18,11 @@ class Employee {
 
   final String id;
   final String tenantId;
+  final String? employeeNumber;
   final String fullName;
   final String email;
   final String phone;
+  final String? photoUrl;
   final String status;
   final DateTime? hireDate;
   final DateTime createdAt;
@@ -34,9 +38,11 @@ class Employee {
     return Employee(
       id: map['id'].toString(),
       tenantId: map['tenant_id'].toString(),
+      employeeNumber: map['employee_number']?.toString(),
       fullName: (map['full_name'] ?? '').toString(),
       email: (map['email'] ?? '').toString(),
       phone: (map['phone'] ?? '').toString(),
+      photoUrl: map['photo_url']?.toString(),
       status: (map['status'] ?? 'active').toString(),
       hireDate: map['hire_date'] == null
           ? null

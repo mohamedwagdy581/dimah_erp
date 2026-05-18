@@ -149,10 +149,29 @@ class AppLocalizationsEn extends AppLocalizations {
   String get menuEmployees => 'Employees';
 
   @override
+  String get menuSettlements => 'Settlements';
+
+  @override
   String get menuAttendance => 'Attendance';
 
   @override
   String get menuLeaves => 'Leaves';
+
+  @override
+  String get profileLeaveBalance => 'Leave Balance';
+
+  @override
+  String get leaveBalanceLoadFailed => 'Failed to load leave balance.';
+
+  @override
+  String annualLeaveEligibleSince(Object date) {
+    return 'Annual leave entitlement is available since $date.';
+  }
+
+  @override
+  String annualLeaveAvailableOn(Object date) {
+    return 'Annual leave becomes available on $date after completing 11 months of service.';
+  }
 
   @override
   String get menuPayroll => 'Payroll';
@@ -401,6 +420,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get searchEmployeesHint => 'Search name, email, or phone...';
 
   @override
+  String get searchSettlementsHint => 'Search employee, code, or job title...';
+
+  @override
   String get all => 'All';
 
   @override
@@ -450,6 +472,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noEmployeesFound => 'No employees found.';
+
+  @override
+  String get noSettlementsFound => 'No settlements found.';
 
   @override
   String totalWithValue(int total) {
@@ -706,6 +731,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addLeave => 'Add Leave';
 
   @override
+  String get resubmitLeave => 'Resubmit Leave';
+
+  @override
   String get noLeaveRequestsFound => 'No leave requests found.';
 
   @override
@@ -954,6 +982,40 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get employeeProfileTitle => 'Employee Profile';
+
+  @override
+  String get profileSettlements => 'Settlements History';
+
+  @override
+  String get settlementsTabHint =>
+      'This tab shows inactive employees and employees who already have recorded settlements.';
+
+  @override
+  String get addSettlement => 'Add Settlement';
+
+  @override
+  String get noSettlementHistory => 'No settlement history.';
+
+  @override
+  String get settlementDate => 'Settlement Date';
+
+  @override
+  String get finalWorkingDate => 'Final Working Date';
+
+  @override
+  String get grossAmount => 'Gross Amount';
+
+  @override
+  String get deductionsAmount => 'Deductions';
+
+  @override
+  String get netAmount => 'Net Amount';
+
+  @override
+  String get settlementCount => 'Settlements';
+
+  @override
+  String get latestSettlementDate => 'Latest Settlement';
 
   @override
   String get failedToLoadEmployeeProfile => 'Failed to load employee profile';
@@ -1296,6 +1358,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get attachFile => 'Attach File';
+
+  @override
+  String get attachedFile => 'Attached file';
+
+  @override
+  String get uploadingAttachment => 'Uploading attachment...';
+
+  @override
+  String get savingLeaveRequest => 'Saving leave request...';
 
   @override
   String get logHours => 'Log Hours';

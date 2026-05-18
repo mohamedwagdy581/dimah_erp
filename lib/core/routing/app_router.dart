@@ -13,6 +13,7 @@ import '../../features/employee_docs/view/pages/employee_docs_page.dart';
 import '../../features/employee_portal/view/pages/employee_portal_page.dart';
 import '../../features/employees/view/cubit/employee_wizard_cubit.dart';
 import '../../features/employees/view/pages/employee_profile_page.dart';
+import '../../features/employees/view/pages/employee_settlements_page.dart';
 import '../../features/employees/view/pages/employee_wizard_page.dart';
 import '../../features/employees/view/pages/employees_page.dart';
 import '../../features/hr_alerts/view/pages/hr_alerts_page.dart';

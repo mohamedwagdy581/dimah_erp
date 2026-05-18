@@ -19,7 +19,8 @@ mixin _EmployeesRepoEmployeesListMixin on _EmployeesRepoAuthMixin {
     dynamic listQ = _client
         .from('employees')
         .select(
-          'id, tenant_id, full_name, email, phone, status, hire_date, created_at, '
+          'id, tenant_id, employee_number, full_name, email, phone, photo_url, '
+          'status, hire_date, created_at, '
           'department_id, job_title_id, '
           'department:departments!employees_department_id_fkey(name), '
           'job_title:job_titles(name)',

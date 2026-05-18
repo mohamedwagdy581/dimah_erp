@@ -2,8 +2,10 @@ part of 'leaves_form_dialog.dart';
 
 extension _LeavesFormDialogBuild on _LeavesFormDialogState {
   Widget buildLeavesFormDialog(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
+
     return AlertDialog(
-      title: Text(widget.initialLeave == null ? 'Add Leave' : 'Resubmit Leave'),
+      title: Text(widget.initialLeave == null ? t.addLeave : t.resubmitLeave),
       content: SizedBox(
         width: 460,
         child: Form(
@@ -14,10 +16,10 @@ extension _LeavesFormDialogBuild on _LeavesFormDialogState {
               if (widget.employeeId == null) ...[
                 TextField(
                   controller: _search,
-                  decoration: const InputDecoration(
-                    labelText: 'Search employee',
+                  decoration: InputDecoration(
+                    labelText: t.searchEmployeeHint,
                     border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.search),
+                    prefixIcon: const Icon(Icons.search),
                   ),
                   onChanged: _filter,
                 ),
@@ -28,12 +30,12 @@ extension _LeavesFormDialogBuild on _LeavesFormDialogState {
                       .map((e) => DropdownMenuItem(value: e.id, child: Text(e.fullName)))
                       .toList(),
                   onChanged: _setEmployeeId,
-                  decoration: const InputDecoration(
-                    labelText: 'Employee',
+                  decoration: InputDecoration(
+                    labelText: t.employee,
                     border: OutlineInputBorder(),
                   ),
                   validator: (v) {
-                    if (v == null || v.trim().isEmpty) return 'Employee is required';
+                    if (v == null || v.trim().isEmpty) return t.employeeRequired;
                     return null;
                   },
                 ),
@@ -41,15 +43,15 @@ extension _LeavesFormDialogBuild on _LeavesFormDialogState {
               ],
               DropdownButtonFormField<String>(
                 initialValue: _type,
-                items: const [
-                  DropdownMenuItem(value: 'annual', child: Text('Annual')),
-                  DropdownMenuItem(value: 'sick', child: Text('Sick')),
-                  DropdownMenuItem(value: 'unpaid', child: Text('Unpaid')),
-                  DropdownMenuItem(value: 'other', child: Text('Other')),
+                items: [
+                  DropdownMenuItem(value: 'annual', child: Text(t.leaveTypeAnnual)),
+                  DropdownMenuItem(value: 'sick', child: Text(t.leaveTypeSick)),
+                  DropdownMenuItem(value: 'unpaid', child: Text(t.leaveTypeUnpaid)),
+                  DropdownMenuItem(value: 'other', child: Text(t.leaveTypeOther)),
                 ],
                 onChanged: _setLeaveType,
-                decoration: const InputDecoration(
-                  labelText: 'Leave Type',
+                decoration: InputDecoration(
+                  labelText: t.type,
                   border: OutlineInputBorder(),
                 ),
               ),
@@ -60,7 +62,7 @@ extension _LeavesFormDialogBuild on _LeavesFormDialogState {
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    _uploading ? 'Uploading attachment...' : 'Saving leave request...',
+                    _uploading ? t.uploadingAttachment : t.savingLeaveRequest,
                     style: const TextStyle(fontSize: 12),
                   ),
                 ),
@@ -72,7 +74,7 @@ extension _LeavesFormDialogBuild on _LeavesFormDialogState {
                     child: OutlinedButton.icon(
                       onPressed: (_uploading || _saving) ? null : _pickFile,
                       icon: const Icon(Icons.attach_file),
-                      label: const Text('Attach PDF'),
+                      label: Text(t.uploadPdf),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -81,7 +83,7 @@ extension _LeavesFormDialogBuild on _LeavesFormDialogState {
                       valueListenable: _fileName,
                       builder: (context, name, _) {
                         return Text(
-                          name.isEmpty ? 'No file' : name,
+                          name.isEmpty ? t.noFileSelected : name,
                           overflow: TextOverflow.ellipsis,
                         );
                       },
@@ -96,7 +98,7 @@ extension _LeavesFormDialogBuild on _LeavesFormDialogState {
                     child: OutlinedButton.icon(
                       onPressed: (_uploading || _saving) ? null : _pickStart,
                       icon: const Icon(Icons.event),
-                      label: Text(_formatDate(_start, 'Start Date')),
+                      label: Text(_formatDate(_start, t.startDate)),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -104,7 +106,7 @@ extension _LeavesFormDialogBuild on _LeavesFormDialogState {
                     child: OutlinedButton.icon(
                       onPressed: (_uploading || _saving) ? null : _pickEnd,
                       icon: const Icon(Icons.event_available),
-                      label: Text(_formatDate(_end, 'End Date')),
+                      label: Text(_formatDate(_end, t.endDate)),
                     ),
                   ),
                 ],
@@ -113,8 +115,8 @@ extension _LeavesFormDialogBuild on _LeavesFormDialogState {
               TextFormField(
                 controller: _notes,
                 maxLines: 3,
-                decoration: const InputDecoration(
-                  labelText: 'Notes',
+                decoration: InputDecoration(
+                  labelText: t.notes,
                   border: OutlineInputBorder(),
                 ),
               ),
@@ -125,11 +127,15 @@ extension _LeavesFormDialogBuild on _LeavesFormDialogState {
       actions: [
         TextButton(
           onPressed: (_uploading || _saving) ? null : () => Navigator.pop(context, false),
-          child: const Text('Cancel'),
+          child: Text(t.cancel),
         ),
         ElevatedButton(
           onPressed: (_uploading || _saving) ? null : _submit,
-          child: Text(_saving ? 'Saving...' : (widget.initialLeave == null ? 'Save' : 'Resubmit')),
+          child: Text(
+            _saving
+                ? t.saving
+                : (widget.initialLeave == null ? t.save : t.resubmit),
+          ),
         ),
       ],
     );

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../../domain/models/employee_profile_details.dart';
 import '../../utils/employee_profile_utils.dart';
+import 'employee_profile_leave_section.dart';
+import 'employee_profile_settlement_section.dart';
 import 'profile_kv_row.dart';
 import 'profile_section_card.dart';
 
@@ -12,12 +14,14 @@ class EmployeeProfileWorkSections extends StatelessWidget {
     required this.profile,
     required this.canEdit,
     required this.onAddContractVersion,
+    required this.onAddSettlement,
     required this.onOpenUrl,
   });
 
   final EmployeeProfileDetails profile;
   final bool canEdit;
   final VoidCallback onAddContractVersion;
+  final VoidCallback onAddSettlement;
   final ValueChanged<String> onOpenUrl;
 
   @override
@@ -78,6 +82,12 @@ class EmployeeProfileWorkSections extends StatelessWidget {
                 ),
               ),
           ],
+        ),
+        EmployeeProfileLeaveSection(profile: p),
+        EmployeeProfileSettlementSection(
+          profile: p,
+          canEdit: canEdit,
+          onAddSettlement: onAddSettlement,
         ),
         ProfileSectionCard(
           title: t.documents,

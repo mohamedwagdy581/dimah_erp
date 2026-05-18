@@ -9,6 +9,7 @@ import '../../domain/models/employee_profile_details.dart';
 import '../services/employee_profile_report_service.dart';
 import '../widgets/employee_profile/add_compensation_version_dialog.dart';
 import '../widgets/employee_profile/add_contract_version_dialog.dart';
+import '../widgets/employee_profile/add_employee_settlement_dialog.dart';
 import '../widgets/employee_profile/employee_profile_edit_dialog.dart';
 import '../widgets/employee_profile/employee_profile_error_view.dart';
 import '../widgets/employee_profile/employee_profile_header.dart';
@@ -101,6 +102,7 @@ class _EmployeeProfilePageState extends State<EmployeeProfilePage> {
                 canEdit: canEdit,
                 onAddCompensationVersion: () => _openDialog(AddCompensationVersionDialog(profile: profile)),
                 onAddContractVersion: () => _openDialog(AddContractVersionDialog(profile: profile)),
+                onAddSettlement: () => _openDialog(AddEmployeeSettlementDialog(profile: profile)),
                 onOpenUrl: _openUrl,
               ),
             ],

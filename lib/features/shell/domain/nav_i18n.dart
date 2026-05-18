@@ -15,6 +15,8 @@ String localizedNavLabel(BuildContext context, NavItem item) {
       return t.menuJobTitles;
     case AppRoutes.employees:
       return t.menuEmployees;
+    case AppRoutes.settlements:
+      return t.menuSettlements;
     case AppRoutes.attendance:
       return t.menuAttendance;
     case AppRoutes.leaves:

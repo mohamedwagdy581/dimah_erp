@@ -51,8 +51,23 @@
   "menuDepartments": "الأقسام",
   "menuJobTitles": "المسميات الوظيفية",
   "menuEmployees": "الموظفون",
+  "menuSettlements": "التسويات",
   "menuAttendance": "الحضور",
   "menuLeaves": "الإجازات",
+  "profileLeaveBalance": "رصيد الإجازات",
+  "leaveBalanceLoadFailed": "تعذر تحميل رصيد الإجازات.",
+  "annualLeaveEligibleSince": "استحقاق الإجازة السنوية متاح منذ {date}.",
+  "@annualLeaveEligibleSince": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "annualLeaveAvailableOn": "تستحق الإجازة السنوية في {date} بعد إكمال 11 شهر خدمة.",
+  "@annualLeaveAvailableOn": {
+    "placeholders": {
+      "date": {}
+    }
+  },
   "menuPayroll": "الرواتب",
   "menuEmployeeDocs": "مستندات الموظفين",
   "menuHrAlerts": "تنبيهات الموارد البشرية",
@@ -150,6 +165,7 @@
     }
   },
   "searchEmployeesHint": "ابحث بالاسم أو البريد أو الجوال...",
+  "searchSettlementsHint": "ابحث باسم الموظف أو الكود أو المسمى الوظيفي...",
   "all": "الكل",
   "active": "نشط",
   "inactive": "غير نشط",
@@ -167,6 +183,7 @@
   "actions": "الإجراءات",
   "openProfile": "فتح الملف",
   "noEmployeesFound": "لم يتم العثور على موظفين.",
+  "noSettlementsFound": "لا توجد تسويات.",
   "totalWithValue": "الإجمالي: {total}",
   "@totalWithValue": {
     "placeholders": {
@@ -284,6 +301,7 @@
   "startDesc": "البداية (تنازلي)",
   "sortStart": "ترتيب البداية",
   "addLeave": "إضافة إجازة",
+  "resubmitLeave": "إعادة إرسال الإجازة",
   "noLeaveRequestsFound": "لا توجد طلبات إجازة.",
   "type": "النوع",
   "start": "البداية",
@@ -376,6 +394,17 @@
   "newJournalEntry": "قيد يومية جديد",
   "pickDate": "اختر التاريخ",
   "employeeProfileTitle": "ملف الموظف",
+  "profileSettlements": "سجل التسويات",
+  "settlementsTabHint": "يعرض هذا التبويب الموظفين غير النشطين والموظفين الذين لديهم تسويات مسجلة بالفعل.",
+  "addSettlement": "إضافة تسوية",
+  "noSettlementHistory": "لا يوجد سجل تسويات.",
+  "settlementDate": "تاريخ التسوية",
+  "finalWorkingDate": "آخر يوم عمل",
+  "grossAmount": "إجمالي المستحق",
+  "deductionsAmount": "الاستقطاعات",
+  "netAmount": "صافي المستحق",
+  "settlementCount": "التسويات",
+  "latestSettlementDate": "آخر تسوية",
   "failedToLoadEmployeeProfile": "فشل تحميل ملف الموظف",
   "editProfile": "تعديل الملف",
   "personal": "شخصي",
@@ -779,6 +808,9 @@
   "uploadFile": "رفع ملف",
   "noFileSelected": "لم يتم اختيار ملف",
   "attachFile": "إرفاق ملف",
+  "attachedFile": "ملف مرفق",
+  "uploadingAttachment": "جارٍ رفع المرفق...",
+  "savingLeaveRequest": "جارٍ حفظ طلب الإجازة...",
   "logHours": "تسجيل ساعات",
   "logHoursTitle": "تسجيل ساعات العمل",
   "loggedHours": "الساعات المسجلة",
