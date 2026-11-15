@@ -28,13 +28,10 @@ class _HrDashboardState extends State<_HrDashboard> {
       future: _future,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          return const AppLoadingState();
         }
         if (snapshot.hasError) {
-          return _HrDashboardErrorView(
-            message: snapshot.error!,
-            onRetry: _refresh,
-          );
+          return AppFailureState(error: snapshot.error, onRetry: _refresh);
         }
 
         return _HrDashboardBody(

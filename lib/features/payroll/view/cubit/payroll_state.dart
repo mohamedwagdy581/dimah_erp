@@ -59,8 +59,7 @@ class PayrollState extends Equatable {
       page: page ?? this.page,
       pageSize: pageSize ?? this.pageSize,
       status: status == _unset ? this.status : status as String?,
-      startDate:
-          startDate == _unset ? this.startDate : startDate as DateTime?,
+      startDate: startDate == _unset ? this.startDate : startDate as DateTime?,
       endDate: endDate == _unset ? this.endDate : endDate as DateTime?,
       sortBy: sortBy ?? this.sortBy,
       ascending: ascending ?? this.ascending,

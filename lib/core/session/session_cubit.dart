@@ -19,17 +19,26 @@ class SessionReady extends SessionState {
   final AppUser user;
 }
 
+class SessionFailed extends SessionState {
+  const SessionFailed();
+}
+
 class SessionCubit extends Cubit<SessionState> {
   SessionCubit(this._repo) : super(const SessionLoading());
   final SessionRepo _repo;
 
   Future<void> load() async {
     emit(const SessionLoading());
-    final user = await _repo.getCurrentAppUser();
-    if (user == null) {
-      emit(const SessionUnauthed());
-    } else {
-      emit(SessionReady(user));
+    try {
+      final user = await _repo.getCurrentAppUser();
+      if (isClosed) return;
+      if (user == null) {
+        emit(const SessionUnauthed());
+      } else {
+        emit(SessionReady(user));
+      }
+    } catch (_) {
+      if (!isClosed) emit(const SessionFailed());
     }
   }
 }

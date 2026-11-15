@@ -1,4 +1,5 @@
-﻿import 'dart:typed_data';
+import 'package:erp_sys/core/ui/app_data_state.dart';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 
@@ -9,16 +10,16 @@ import '../../domain/models/government_alert_item.dart';
 import '../../domain/models/government_alerts_summary.dart';
 import '../../domain/models/hr_alert_state_info.dart';
 import '../../domain/models/hr_alerts_data.dart';
-import '../../domain/models/hr_alerts_summary.dart';
 import '../widgets/government_alerts/government_alert_dialog.dart';
 import '../widgets/government_alerts/government_alerts_table.dart';
-import '../widgets/hr_alerts/hr_alerts_filters.dart';
 import '../widgets/hr_alerts/hr_alerts_settings_dialog.dart';
 import '../widgets/hr_alerts/hr_alerts_summary_card.dart';
-import '../widgets/hr_alerts/hr_alerts_table.dart';
+import '../widgets/hr_alerts/hr_expiry_alerts_view.dart';
 
 class HrAlertsPage extends StatefulWidget {
-  const HrAlertsPage({super.key, this.initialTypeFilter});
+  const HrAlertsPage({super.key, this.initialTypeFilter, this.repo});
+
+  final HrAlertsRepo? repo;
 
   final String? initialTypeFilter;
 
@@ -28,18 +29,17 @@ class HrAlertsPage extends StatefulWidget {
 
 class _HrAlertsPageState extends State<HrAlertsPage>
     with SingleTickerProviderStateMixin {
-  final HrAlertsRepo _repo = HrAlertsRepo();
+  late final HrAlertsRepo _repo;
   late Future<HrAlertsData> _future;
   late TabController _tabController;
-  String? _typeFilter;
-  String _statusFilter = 'active';
+  String _statusFilter = 'all';
   String _sortBy = 'urgency';
 
   @override
   void initState() {
     super.initState();
-    _typeFilter = widget.initialTypeFilter;
-    _future = _repo.load(includeHidden: _shouldIncludeHidden);
+    _repo = widget.repo ?? HrAlertsRepo();
+    _future = _repo.load(includeHidden: true);
     _tabController = TabController(length: 2, vsync: this);
     _tabController.addListener(() {
       if (mounted) {
@@ -56,11 +56,9 @@ class _HrAlertsPageState extends State<HrAlertsPage>
 
   void _reload() {
     setState(() {
-      _future = _repo.load(includeHidden: _shouldIncludeHidden);
+      _future = _repo.load(includeHidden: true);
     });
   }
-
-  bool get _shouldIncludeHidden => _statusFilter != 'active';
 
   @override
   Widget build(BuildContext context) {
@@ -69,59 +67,56 @@ class _HrAlertsPageState extends State<HrAlertsPage>
     return FutureBuilder<HrAlertsData>(
       future: _future,
       builder: (context, snap) {
-        if (snap.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+        if (snap.connectionState == ConnectionState.waiting && !snap.hasData) {
+          return const AppLoadingState();
         }
         if (snap.hasError) {
-          return _HrAlertsError(onRetry: _reload);
+          return AppFailureState(error: snap.error, onRetry: _reload);
         }
 
         final data = snap.data!;
-        final filteredItems = data.items.where((item) {
-          if (_typeFilter == null) return true;
-          if (_typeFilter == 'document') return item.type.startsWith('document:');
-          return item.type == _typeFilter;
-        }).where((item) {
-          final state = data.employeeStates[_employeeStateKey(item)];
-          return _matchesStatusFilter(state);
-        }).toList()
-          ..sort(_compareEmployeeAlerts);
         final filteredGovernmentItems = data.governmentItems.where((item) {
           final state = data.governmentStates[item.id];
           return _matchesStatusFilter(state);
-        }).toList()
-          ..sort(_compareGovernmentAlerts);
+        }).toList()..sort(_compareGovernmentAlerts);
         final governmentAllCount = data.governmentItems.length;
         final governmentActiveCount = data.governmentItems
-            .where((item) => _matchesStatusFilterFor('active', data.governmentStates[item.id]))
+            .where(
+              (item) => _matchesStatusFilterFor(
+                'active',
+                data.governmentStates[item.id],
+              ),
+            )
             .length;
         final governmentSnoozedCount = data.governmentItems
-            .where((item) => _matchesStatusFilterFor('snoozed', data.governmentStates[item.id]))
+            .where(
+              (item) => _matchesStatusFilterFor(
+                'snoozed',
+                data.governmentStates[item.id],
+              ),
+            )
             .length;
         final governmentHandledCount = data.governmentItems
-            .where((item) => _matchesStatusFilterFor('handled', data.governmentStates[item.id]))
+            .where(
+              (item) => _matchesStatusFilterFor(
+                'handled',
+                data.governmentStates[item.id],
+              ),
+            )
             .length;
-        final typeScopedEmployeeItems = data.items.where((item) {
-          if (_typeFilter == null) return true;
-          if (_typeFilter == 'document') return item.type.startsWith('document:');
-          return item.type == _typeFilter;
-        }).toList();
-        final allCount = typeScopedEmployeeItems.length;
-        final activeCount = typeScopedEmployeeItems
-            .where((item) => _matchesStatusFilterFor('active', data.employeeStates[_employeeStateKey(item)]))
-            .length;
-        final snoozedCount = typeScopedEmployeeItems
-            .where((item) => _matchesStatusFilterFor('snoozed', data.employeeStates[_employeeStateKey(item)]))
-            .length;
-        final handledCount = typeScopedEmployeeItems
-            .where((item) => _matchesStatusFilterFor('handled', data.employeeStates[_employeeStateKey(item)]))
-            .length;
-        final employeeSummary = HrAlertsSummary.fromItems(filteredItems);
-        final governmentSummary = GovernmentAlertsSummary.fromItems(filteredGovernmentItems);
+        final governmentSummary = GovernmentAlertsSummary.fromItems(
+          filteredGovernmentItems,
+        );
         final onGovernmentTab = _tabController.index == 1;
 
-        return Padding(
+        return Container(
+          margin: const EdgeInsets.all(20),
           padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(color: const Color(0xFFECE6F4)),
+            borderRadius: BorderRadius.circular(10),
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -129,7 +124,7 @@ class _HrAlertsPageState extends State<HrAlertsPage>
                 onRefresh: _reload,
                 onSettings: () => _openSettings(data),
                 onAddGovernmentAlert: _openGovernmentAlertDialog,
-                showSettings: !onGovernmentTab,
+                showSettings: false,
                 showAddGovernmentAlert: onGovernmentTab,
               ),
               const SizedBox(height: 12),
@@ -137,7 +132,7 @@ class _HrAlertsPageState extends State<HrAlertsPage>
                 controller: _tabController,
                 isScrollable: true,
                 tabs: [
-                  Tab(text: t.hrAlertsTitle),
+                  Tab(text: isArabic ? 'تنبيهات الانتهاء' : 'Expiry alerts'),
                   Tab(text: isArabic ? 'تنبيهات الجهات' : 'Government Alerts'),
                 ],
               ),
@@ -146,90 +141,29 @@ class _HrAlertsPageState extends State<HrAlertsPage>
                 child: TabBarView(
                   controller: _tabController,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        HrAlertsFilters(
-                          typeFilter: _typeFilter,
-                          statusFilter: _statusFilter,
-                          allCount: allCount,
-                          activeCount: activeCount,
-                          snoozedCount: snoozedCount,
-                          handledCount: handledCount,
-                          onTypeChanged: (value) {
-                            setState(() {
-                              _typeFilter = value;
-                            });
-                          },
-                          onStatusChanged: (value) {
-                            setState(() {
-                              _statusFilter = value;
-                              _future = _repo.load(includeHidden: _shouldIncludeHidden);
-                            });
-                          },
-                        ),
-                        const SizedBox(height: 12),
-                        _AlertsSortBar(
-                          value: _sortBy,
-                          onChanged: (value) {
-                            setState(() {
-                              _sortBy = value;
-                            });
-                          },
-                        ),
-                        const SizedBox(height: 12),
-                        Wrap(
-                          spacing: 12,
-                          runSpacing: 12,
-                          children: [
-                            HrAlertsSummaryCard(
-                              label: t.hrAlertsTotal,
-                              value: '${employeeSummary.total}',
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                            HrAlertsSummaryCard(
-                              label: t.hrBandExpired,
-                              value: '${employeeSummary.expired}',
-                              color: Colors.red.shade700,
-                            ),
-                            HrAlertsSummaryCard(
-                              label: t.hrBandUrgent,
-                              value: '${employeeSummary.urgent}',
-                              color: Colors.orange.shade700,
-                            ),
-                            HrAlertsSummaryCard(
-                              label: t.hrTypeDocument,
-                              value: '${employeeSummary.documents}',
-                              color: Colors.indigo.shade700,
-                            ),
-                            HrAlertsSummaryCard(
-                              label: t.hrTypeContract,
-                              value: '${employeeSummary.contracts}',
-                              color: Colors.teal.shade700,
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        Expanded(
-                          child: HrAlertsTable(
-                            items: filteredItems,
-                            stateByKey: data.employeeStates,
-                            onHandled: _handleEmployeeAlert,
-                            onSnooze: _snoozeEmployeeAlert,
-                            onRestore: _restoreEmployeeAlert,
-                          ),
-                        ),
-                      ],
+                    HrExpiryAlertsView(
+                      data: data,
+                      initialType: widget.initialTypeFilter,
+                      onSaveSettings: (settings) async {
+                        await _repo.saveSettings(settings);
+                        if (mounted) _reload();
+                      },
+                      onAdvancedSettings: () => _openSettings(data),
+                      onHandled: _handleEmployeeAlert,
+                      onSnooze: _snoozeEmployeeAlert,
+                      onRestore: _restoreEmployeeAlert,
                     ),
                     Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Wrap(
                           spacing: 12,
                           runSpacing: 12,
                           children: [
                             HrAlertsSummaryCard(
-                              label: isArabic ? 'إجمالي التنبيهات' : 'Total Alerts',
+                              label: isArabic
+                                  ? 'إجمالي التنبيهات'
+                                  : 'Total Alerts',
                               value: '${governmentSummary.total}',
                               color: Theme.of(context).colorScheme.primary,
                             ),
@@ -260,7 +194,7 @@ class _HrAlertsPageState extends State<HrAlertsPage>
                           onSelected: (value) {
                             setState(() {
                               _statusFilter = value;
-                              _future = _repo.load(includeHidden: _shouldIncludeHidden);
+                              _future = _repo.load(includeHidden: true);
                             });
                           },
                         ),
@@ -276,6 +210,10 @@ class _HrAlertsPageState extends State<HrAlertsPage>
                         const SizedBox(height: 12),
                         Expanded(
                           child: GovernmentAlertsTable(
+                            filtered: _statusFilter != 'all',
+                            onClear: _statusFilter != 'all'
+                                ? () => setState(() => _statusFilter = 'all')
+                                : null,
                             items: filteredGovernmentItems,
                             stateById: data.governmentStates,
                             onEdit: _editGovernmentAlert,
@@ -307,16 +245,16 @@ class _HrAlertsPageState extends State<HrAlertsPage>
       if (!mounted) return;
       _reload();
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(t.hrAlertsSettingsSaved)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(t.hrAlertsSettingsSaved)));
     } catch (e, st) {
       debugPrint('HR_ALERT_SETTINGS_SAVE_ERROR: $e');
       debugPrint('HR_ALERT_SETTINGS_SAVE_STACK: $st');
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(t.saveFailed('$e'))),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(t.saveFailed('$e'))));
     }
   }
 
@@ -333,7 +271,9 @@ class _HrAlertsPageState extends State<HrAlertsPage>
         endDate: draft.endDate,
         description: draft.description,
         fileName: draft.fileName,
-        fileBytes: draft.fileBytes == null ? null : Uint8List.fromList(draft.fileBytes!),
+        fileBytes: draft.fileBytes == null
+            ? null
+            : Uint8List.fromList(draft.fileBytes!),
         mimeType: draft.mimeType,
       );
       if (!mounted) return;
@@ -353,7 +293,9 @@ class _HrAlertsPageState extends State<HrAlertsPage>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            isArabic ? 'فشل حفظ التنبيه الحكومي' : 'Failed to save government alert',
+            isArabic
+                ? 'فشل حفظ التنبيه الحكومي'
+                : 'Failed to save government alert',
           ),
         ),
       );
@@ -388,13 +330,17 @@ class _HrAlertsPageState extends State<HrAlertsPage>
         existingFileName: item.fileName,
         existingFileUrl: item.fileUrl,
         fileName: draft.fileName,
-        fileBytes: draft.fileBytes == null ? null : Uint8List.fromList(draft.fileBytes!),
+        fileBytes: draft.fileBytes == null
+            ? null
+            : Uint8List.fromList(draft.fileBytes!),
         mimeType: draft.mimeType,
       );
       if (!mounted) return;
       _reload();
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(isArabic ? 'تم تحديث التنبيه' : 'Alert updated')),
+        SnackBar(
+          content: Text(isArabic ? 'تم تحديث التنبيه' : 'Alert updated'),
+        ),
       );
     } catch (e, st) {
       debugPrint('GOV_ALERT_UPDATE_ERROR: $e');
@@ -435,7 +381,9 @@ class _HrAlertsPageState extends State<HrAlertsPage>
         endDate: draft.endDate,
         description: draft.description,
         fileName: draft.fileName,
-        fileBytes: draft.fileBytes == null ? null : Uint8List.fromList(draft.fileBytes!),
+        fileBytes: draft.fileBytes == null
+            ? null
+            : Uint8List.fromList(draft.fileBytes!),
         mimeType: draft.mimeType,
       );
       if (!mounted) return;
@@ -443,7 +391,9 @@ class _HrAlertsPageState extends State<HrAlertsPage>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            isArabic ? 'تم إنشاء نسخة مجددة من التنبيه' : 'Renewed alert created',
+            isArabic
+                ? 'تم إنشاء نسخة مجددة من التنبيه'
+                : 'Renewed alert created',
           ),
         ),
       );
@@ -463,7 +413,8 @@ class _HrAlertsPageState extends State<HrAlertsPage>
 
   Future<void> _deleteGovernmentAlert(GovernmentAlertItem item) async {
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
-    final confirmed = await showDialog<bool>(
+    final confirmed =
+        await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
             title: Text(isArabic ? 'حذف التنبيه' : 'Delete Alert'),
@@ -517,7 +468,9 @@ class _HrAlertsPageState extends State<HrAlertsPage>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            isArabic ? 'تم إخفاء التنبيه بعد التعامل معه' : 'Alert marked as handled',
+            isArabic
+                ? 'تم إخفاء التنبيه بعد التعامل معه'
+                : 'Alert marked as handled',
           ),
         ),
       );
@@ -528,7 +481,9 @@ class _HrAlertsPageState extends State<HrAlertsPage>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            isArabic ? 'فشل تحديث حالة التنبيه' : 'Failed to update alert state',
+            isArabic
+                ? 'فشل تحديث حالة التنبيه'
+                : 'Failed to update alert state',
           ),
         ),
       );
@@ -571,7 +526,9 @@ class _HrAlertsPageState extends State<HrAlertsPage>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            isArabic ? 'تم إخفاء التنبيه بعد التعامل معه' : 'Alert marked as handled',
+            isArabic
+                ? 'تم إخفاء التنبيه بعد التعامل معه'
+                : 'Alert marked as handled',
           ),
         ),
       );
@@ -582,7 +539,9 @@ class _HrAlertsPageState extends State<HrAlertsPage>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            isArabic ? 'فشل تحديث حالة التنبيه' : 'Failed to update alert state',
+            isArabic
+                ? 'فشل تحديث حالة التنبيه'
+                : 'Failed to update alert state',
           ),
         ),
       );
@@ -624,9 +583,7 @@ class _HrAlertsPageState extends State<HrAlertsPage>
       _reload();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            isArabic ? 'تمت استعادة التنبيه' : 'Alert restored',
-          ),
+          content: Text(isArabic ? 'تمت استعادة التنبيه' : 'Alert restored'),
         ),
       );
     } catch (e, st) {
@@ -651,9 +608,7 @@ class _HrAlertsPageState extends State<HrAlertsPage>
       _reload();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            isArabic ? 'تمت استعادة التنبيه' : 'Alert restored',
-          ),
+          content: Text(isArabic ? 'تمت استعادة التنبيه' : 'Alert restored'),
         ),
       );
     } catch (e, st) {
@@ -685,31 +640,6 @@ class _HrAlertsPageState extends State<HrAlertsPage>
       case 'active':
       default:
         return !(state?.isHandled ?? false) && !(state?.isSnoozed ?? false);
-    }
-  }
-
-  String _employeeStateKey(ExpiryAlertItem item) {
-    final date = DateTime(
-      item.expiryDate.year,
-      item.expiryDate.month,
-      item.expiryDate.day,
-    ).toIso8601String().split('T').first;
-    return '${item.employeeId}|${item.type}|$date';
-  }
-
-  int _compareEmployeeAlerts(ExpiryAlertItem a, ExpiryAlertItem b) {
-    switch (_sortBy) {
-      case 'expiry_desc':
-        return b.expiryDate.compareTo(a.expiryDate);
-      case 'name':
-        return a.employeeName.toLowerCase().compareTo(b.employeeName.toLowerCase());
-      case 'expiry_asc':
-        return a.expiryDate.compareTo(b.expiryDate);
-      case 'urgency':
-      default:
-        final byDays = a.daysLeft.compareTo(b.daysLeft);
-        if (byDays != 0) return byDays;
-        return a.employeeName.toLowerCase().compareTo(b.employeeName.toLowerCase());
     }
   }
 
@@ -751,11 +681,28 @@ class _HrAlertsHeader extends StatelessWidget {
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
     return Row(
       children: [
-        Text(
-          t.hrAlertsTitle,
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                isArabic ? 'تنبيهات الانتهاء' : 'Expiry alerts',
+                style: const TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF21194E),
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                isArabic
+                    ? 'متابعة المستندات والعقود التي قاربت على الانتهاء'
+                    : 'Monitor expiring documents and contracts',
+                style: const TextStyle(fontSize: 13, color: Color(0xFF77738C)),
+              ),
+            ],
+          ),
         ),
-        const Spacer(),
         if (showSettings) ...[
           OutlinedButton.icon(
             onPressed: onSettings,
@@ -772,37 +719,12 @@ class _HrAlertsHeader extends StatelessWidget {
           ),
           const SizedBox(width: 8),
         ],
-        OutlinedButton.icon(
+        IconButton(
           onPressed: onRefresh,
-          icon: const Icon(Icons.refresh),
-          label: Text(t.refresh),
+          tooltip: t.refresh,
+          icon: const Icon(Icons.refresh, color: Color(0xFF8654BC)),
         ),
       ],
-    );
-  }
-}
-
-class _HrAlertsError extends StatelessWidget {
-  const _HrAlertsError({required this.onRetry});
-
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    final t = AppLocalizations.of(context)!;
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(t.hrAlertsLoadFailed, style: const TextStyle(color: Colors.red)),
-          const SizedBox(height: 12),
-          ElevatedButton.icon(
-            onPressed: onRetry,
-            icon: const Icon(Icons.refresh),
-            label: Text(t.retry),
-          ),
-        ],
-      ),
     );
   }
 }
@@ -828,11 +750,7 @@ class _StatusScopeChips extends StatelessWidget {
   Widget build(BuildContext context) {
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
     final options = <({String key, String label, int count})>[
-      (
-        key: 'all',
-        label: isArabic ? 'كل الحالات' : 'All',
-        count: allCount,
-      ),
+      (key: 'all', label: isArabic ? 'كل الحالات' : 'All', count: allCount),
       (
         key: 'active',
         label: isArabic ? 'النشطة' : 'Active',
@@ -865,10 +783,7 @@ class _StatusScopeChips extends StatelessWidget {
 }
 
 class _AlertsSortBar extends StatelessWidget {
-  const _AlertsSortBar({
-    required this.value,
-    required this.onChanged,
-  });
+  const _AlertsSortBar({required this.value, required this.onChanged});
 
   final String value;
   final ValueChanged<String> onChanged;

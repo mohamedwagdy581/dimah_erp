@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../services/hr_form_preview_service.dart';
+import '../../services/hr_form_file_service.dart';
+import '../../services/hr_portal_form_pdf.dart';
 import '../hr_form_shell.dart';
 import 'electronic_leave_request/electronic_leave_request_form_body.dart';
 import 'electronic_leave_request/electronic_leave_request_form_controller.dart';
@@ -50,8 +51,8 @@ class _ElectronicLeaveRequestFormEditorState
               readOnly: false,
               onClear: _controller.clear,
               onOpenPreview: () => _openDesignPreview(context, isArabic),
-              onSelectEmployee: _controller.loadingEmployees ||
-                      _controller.fillingEmployee
+              onSelectEmployee:
+                  _controller.loadingEmployees || _controller.fillingEmployee
                   ? null
                   : _handleSelectEmployee,
               onClearSelection: _controller.fillingEmployee
@@ -80,21 +81,48 @@ class _ElectronicLeaveRequestFormEditorState
   }
 
   Future<void> _openDesignPreview(BuildContext context, bool isArabic) async {
-    await HrFormPreviewService.openDesignPreview(
+    String tr(String ar, String en) => isArabic ? ar : en;
+    final draft = HrPortalFormDraft(
+      isArabic: isArabic,
+      isLeave: true,
+      employeeName: _controller.employeeName.text,
+      employeeNumber: _controller.employeeId.text,
+      department: _controller.hrDepartment.text,
+      jobTitle: _controller.position.text,
+      date: _controller.applicationDate.text,
+      agreed: false,
+      fields: {
+        tr('نوع الإجازة', 'Leave type'): _controller.leaveType.text,
+        tr('من تاريخ', 'From'): _controller.fromDate.text,
+        tr('إلى تاريخ', 'To'): _controller.toDate.text,
+        tr('المدة', 'Duration'): _controller.days.text,
+        tr('الموظف البديل', 'Replacement'): _controller.replacement.text,
+        tr('سبب الإجازة / الملاحظات', 'Reason / notes'): _controller.notes.text,
+        tr('العنوان أثناء الإجازة', 'Address during leave'):
+            _controller.addressDuringLeave.text,
+        tr('التواصل أثناء الإجازة', 'Contact during leave'):
+            _controller.contactDuringLeave.text,
+        tr('اسم الموقّع', 'Signatory'): _controller.applicantSignature.text,
+        tr('توقيع البديل', 'Replacement signature'):
+            _controller.replacementSignature.text,
+        tr('توقيع المدير المباشر', 'Line manager signature'):
+            _controller.lineManagerSignature.text,
+        tr('تاريخ الالتحاق', 'Joining date'): _controller.joiningDate.text,
+        tr('الرصيد السابق', 'Previous balance'):
+            _controller.previousBalance.text,
+        tr('الرصيد الجديد', 'New balance'): _controller.newBalance.text,
+        tr('توقيع مدير الموارد البشرية', 'HR manager signature'):
+            _controller.hrManagerSignature.text,
+        tr('توقيع مدير القسم', 'Department manager signature'):
+            _controller.departmentManagerSignature.text,
+      },
+    );
+    await HrFormFileService.openPdfPreview(
       context,
       title: isArabic
           ? 'معاينة تصميم طلب إجازة إلكتروني'
           : 'Electronic Leave Request Preview',
-      child: AnimatedBuilder(
-        animation: _controller,
-        builder: (context, _) {
-          return ElectronicLeaveRequestFormBody(
-            controller: _controller,
-            isArabic: isArabic,
-            readOnly: true,
-          );
-        },
-      ),
+      buildBytes: () => buildHrPortalFormPdf(draft),
     );
   }
 }

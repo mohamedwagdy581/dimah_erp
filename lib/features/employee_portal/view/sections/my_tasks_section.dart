@@ -1,3 +1,4 @@
+import 'package:erp_sys/core/ui/app_data_state.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -11,11 +12,20 @@ import '../widgets/my_tasks/task_filters_bar.dart';
 import '../widgets/my_tasks/task_formatters.dart';
 import '../widgets/my_tasks/task_filters_utils.dart';
 import '../widgets/my_tasks/task_review_dialog.dart';
+import '../widgets/my_tasks/employee_tasks_view.dart';
+import '../widgets/my_tasks/employee_task_details.dart';
 
 class MyTasksSection extends StatefulWidget {
-  const MyTasksSection({super.key, required this.employeeId});
+  const MyTasksSection({
+    super.key,
+    required this.employeeId,
+    this.employeeDesign = false,
+    this.repo,
+  });
 
   final String employeeId;
+  final bool employeeDesign;
+  final MyTasksRepo? repo;
 
   @override
   State<MyTasksSection> createState() => _MyTasksSectionState();
@@ -25,38 +35,253 @@ class _MyTasksSectionState extends State<MyTasksSection> {
   late final MyTasksRepo _repo;
   late Future<List<Map<String, dynamic>>> _future;
   String _statusFilter = 'all';
+  final _selectedTask = ValueNotifier<Map<String, dynamic>>({});
+  final _actionBusy = ValueNotifier<bool>(false);
 
   @override
   void initState() {
     super.initState();
-    _repo = MyTasksRepo(Supabase.instance.client);
-    _future = _repo.loadTasks(widget.employeeId);
+    _repo = widget.repo ?? MyTasksRepo(Supabase.instance.client);
+    _future = _repo.loadTasks(
+      widget.employeeId,
+      loadAll: widget.employeeDesign,
+    );
   }
 
   Future<void> _reload() async {
     setState(() {
-      _future = _repo.loadTasks(widget.employeeId);
+      _future = _repo.loadTasks(
+        widget.employeeId,
+        loadAll: widget.employeeDesign,
+      );
     });
+    final tasks = await _future;
+    if (!mounted) return;
+    final selectedId = _selectedTask.value['id'];
+    for (final task in tasks) {
+      if (task['id'] == selectedId) _selectedTask.value = task;
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant MyTasksSection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.employeeId != oldWidget.employeeId) {
+      _selectedTask.value = {};
+      _future = _repo.loadTasks(
+        widget.employeeId,
+        loadAll: widget.employeeDesign,
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _selectedTask.dispose();
+    _actionBusy.dispose();
+    super.dispose();
+  }
+
+  Future<void> _runAction(Future<void> Function() action) async {
+    if (_actionBusy.value) return;
+    _actionBusy.value = true;
+    try {
+      await action();
+    } catch (_) {
+      if (!mounted) return;
+      final ar = Localizations.localeOf(context).languageCode == 'ar';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            ar
+                ? 'تعذّر تنفيذ العملية؛ حاول مجددًا'
+                : 'Unable to complete the action. Try again.',
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) _actionBusy.value = false;
+    }
+  }
+
+  Widget _taskCard(Map<String, dynamic> task) => TaskCard(
+    employeeLayout: widget.employeeDesign,
+    key: ValueKey('${task['id']}:${task['status']}:${task['progress']}'),
+    task: task,
+    onStatusChanged: (value) => _runAction(
+      () => _updateTask(task, value, (task['progress'] as num?)?.toInt() ?? 0),
+    ),
+    onProgressChanged: (value) => _runAction(
+      () => _updateTask(
+        task,
+        value >= 100 ? 'done' : (task['status'] ?? 'todo').toString(),
+        value,
+      ),
+    ),
+    onRequestReview: () => _runAction(() => _requestReview(task)),
+    onAttachFile: () =>
+        _runAction(() => _pickAttachment(task['id'].toString())),
+    onLogHours: () => _runAction(() => _logHours(task)),
+    onStartTimer: () => _runAction(() => _startTimer(task)),
+    onStopTimer: () => _runAction(() => _stopTimer(task)),
+    onOpenAttachment: (url) => _runAction(() => _openAttachment(url)),
+  );
+
+  Future<void> _openTask(Map<String, dynamic> task) async {
+    _selectedTask.value = task;
+    if (widget.employeeDesign) return;
+    final t = AppLocalizations.of(context)!;
+    await showDialog<void>(
+      context: context,
+      builder: (context) => Dialog(
+        insetPadding: const EdgeInsets.all(16),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: 720,
+            maxHeight: MediaQuery.sizeOf(context).height * .85,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsetsDirectional.fromSTEB(20, 12, 8, 0),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        t.myTasks,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      tooltip: MaterialLocalizations.of(
+                        context,
+                      ).closeButtonTooltip,
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: const Icon(Icons.close),
+                    ),
+                  ],
+                ),
+              ),
+              Flexible(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(12),
+                  child: ValueListenableBuilder<Map<String, dynamic>>(
+                    valueListenable: _selectedTask,
+                    builder: (context, current, _) =>
+                        ValueListenableBuilder<bool>(
+                          valueListenable: _actionBusy,
+                          builder: (context, busy, _) => Column(
+                            children: [
+                              if (busy) const LinearProgressIndicator(),
+                              AbsorbPointer(
+                                absorbing: busy,
+                                child: _taskCard(current),
+                              ),
+                            ],
+                          ),
+                        ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    if (!widget.employeeDesign) return _buildTasks(context);
+    return ValueListenableBuilder<Map<String, dynamic>>(
+      valueListenable: _selectedTask,
+      builder: (context, current, _) {
+        return Stack(
+          fit: StackFit.expand,
+          children: [
+            Offstage(
+              offstage: current.isNotEmpty,
+              child: TickerMode(
+                enabled: current.isEmpty,
+                child: _buildTasks(context),
+              ),
+            ),
+            if (current.isNotEmpty)
+              Positioned.fill(
+                child: ValueListenableBuilder<bool>(
+                  valueListenable: _actionBusy,
+                  builder: (context, busy, _) => EmployeeTaskDetails(
+                    task: current,
+                    busy: busy,
+                    onBack: () => _selectedTask.value = {},
+                    onStatusChanged: (value) => _runAction(
+                      () => _updateTask(
+                        current,
+                        value,
+                        (current['progress'] as num?)?.toInt() ?? 0,
+                      ),
+                    ),
+                    onProgressChanged: (value) => _runAction(
+                      () => _updateTask(
+                        current,
+                        value >= 100
+                            ? 'done'
+                            : (current['status'] ?? 'todo').toString(),
+                        value,
+                      ),
+                    ),
+                    onRequestReview: () =>
+                        _runAction(() => _requestReview(current)),
+                    onAttachFile: () => _runAction(
+                      () => _pickAttachment(current['id'].toString()),
+                    ),
+                    onLogHours: () => _runAction(() => _logHours(current)),
+                    onStartTimer: () => _runAction(() => _startTimer(current)),
+                    onStopTimer: () => _runAction(() => _stopTimer(current)),
+                    onOpenAttachment: (url) =>
+                        _runAction(() => _openAttachment(url)),
+                  ),
+                ),
+              ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildTasks(BuildContext context) {
     final t = AppLocalizations.of(context)!;
     return FutureBuilder<List<Map<String, dynamic>>>(
       future: _future,
       builder: (context, snapshot) {
+        if (widget.employeeDesign) {
+          return EmployeeTasksView(
+            tasks: snapshot.data ?? const [],
+            loading: snapshot.connectionState == ConnectionState.waiting,
+            failed: snapshot.hasError,
+            error: snapshot.error,
+            onRefresh: () => _runAction(_reload),
+            onOpen: _openTask,
+          );
+        }
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          return const AppLoadingState();
         }
         if (snapshot.hasError) {
-          return Center(child: Text(t.failedToLoadTasks(snapshot.error.toString())));
+          return AppFailureState(error: snapshot.error);
         }
         final allItems = snapshot.data ?? const [];
         final items = applyTaskFilter(allItems, _statusFilter);
         return ListView.separated(
           padding: const EdgeInsets.all(12),
           itemCount: items.isEmpty ? 2 : items.length + 1,
-          separatorBuilder: (_, index) => index == 0 ? const SizedBox(height: 12) : const SizedBox(height: 8),
+          separatorBuilder: (_, index) => index == 0
+              ? const SizedBox(height: 12)
+              : const SizedBox(height: 8),
           itemBuilder: (context, index) {
             if (index == 0) {
               return TaskFiltersBar(
@@ -73,13 +298,23 @@ class _MyTasksSectionState extends State<MyTasksSection> {
               );
             }
             if (items.isEmpty) {
-              return Center(child: Text(t.noTasksAssigned));
+              return Center(
+                child: AppEmptyState(title: t.noTasksAssigned, compact: false),
+              );
             }
             final task = items[index - 1];
             return TaskCard(
               task: task,
-              onStatusChanged: (value) => _updateTask(task, value, ((task['progress'] as num?)?.toInt() ?? 0)),
-              onProgressChanged: (value) => _updateTask(task, value >= 100 ? 'done' : (task['status'] ?? 'todo').toString(), value),
+              onStatusChanged: (value) => _updateTask(
+                task,
+                value,
+                ((task['progress'] as num?)?.toInt() ?? 0),
+              ),
+              onProgressChanged: (value) => _updateTask(
+                task,
+                value >= 100 ? 'done' : (task['status'] ?? 'todo').toString(),
+                value,
+              ),
               onRequestReview: () => _requestReview(task),
               onAttachFile: () => _pickAttachment(task['id'].toString()),
               onLogHours: () => _logHours(task),
@@ -93,8 +328,16 @@ class _MyTasksSectionState extends State<MyTasksSection> {
     );
   }
 
-  Future<void> _updateTask(Map<String, dynamic> task, String status, int progress) async {
-    await _repo.updateTask(id: task['id'].toString(), status: status, progress: progress);
+  Future<void> _updateTask(
+    Map<String, dynamic> task,
+    String status,
+    int progress,
+  ) async {
+    await _repo.updateTask(
+      id: task['id'].toString(),
+      status: status,
+      progress: progress,
+    );
     if (!mounted) return;
     await _reload();
   }
@@ -105,12 +348,16 @@ class _MyTasksSectionState extends State<MyTasksSection> {
     if (note == null) return;
     if (note.isEmpty) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t.reviewNoteRequired)));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(t.reviewNoteRequired)));
       return;
     }
     await _repo.requestReview(taskId: task['id'].toString(), note: note);
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t.reviewRequestSent)));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(t.reviewRequestSent)));
     await _reload();
   }
 
@@ -130,7 +377,9 @@ class _MyTasksSectionState extends State<MyTasksSection> {
             children: [
               TextField(
                 controller: hoursController,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 decoration: InputDecoration(
                   labelText: isArabic ? 'الساعات المسجلة' : 'Logged Hours',
                   hintText: '2.5',
@@ -146,8 +395,14 @@ class _MyTasksSectionState extends State<MyTasksSection> {
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.of(context).pop(false), child: Text(t.cancel)),
-          FilledButton(onPressed: () => Navigator.of(context).pop(true), child: Text(t.save)),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(t.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(t.save),
+          ),
         ],
       ),
     );
@@ -190,9 +445,7 @@ class _MyTasksSectionState extends State<MyTasksSection> {
     await _repo.startTimer(taskId: task['id'].toString());
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(isArabic ? 'تم بدء المؤقت' : 'Timer started'),
-      ),
+      SnackBar(content: Text(isArabic ? 'تم بدء المؤقت' : 'Timer started')),
     );
     await _reload();
   }
@@ -250,7 +503,19 @@ class _MyTasksSectionState extends State<MyTasksSection> {
       final file = await SafeFilePicker.openSingle(
         context: context,
         acceptedTypeGroups: const [
-          XTypeGroup(label: 'Attachments', extensions: ['pdf', 'jpg', 'jpeg', 'png', 'doc', 'docx', 'xlsx', 'xls']),
+          XTypeGroup(
+            label: 'Attachments',
+            extensions: [
+              'pdf',
+              'jpg',
+              'jpeg',
+              'png',
+              'doc',
+              'docx',
+              'xlsx',
+              'xls',
+            ],
+          ),
         ],
       );
       if (file == null) return;
@@ -267,7 +532,9 @@ class _MyTasksSectionState extends State<MyTasksSection> {
       debugPrint('TASK_ATTACHMENT_UPLOAD_ERROR: $e');
       debugPrint('TASK_ATTACHMENT_UPLOAD_STACK: ${StackTrace.current}');
       if (!mounted) return;
-      messenger.showSnackBar(SnackBar(content: Text(t.fileUploadFailed(e.toString()))));
+      messenger.showSnackBar(
+        SnackBar(content: Text(t.fileUploadFailed(e.toString()))),
+      );
     }
   }
 

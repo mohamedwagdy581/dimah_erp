@@ -6,6 +6,7 @@ abstract class AccountsRepo {
     required int pageSize,
     String? search,
     String? type,
+    bool? isActive,
     String sortBy,
     bool ascending,
   });
@@ -14,5 +15,15 @@ abstract class AccountsRepo {
     required String code,
     required String name,
     required String type,
+    bool isActive = true,
+    bool isCash = false,
+  });
+  Future<void> updateAccount({
+    required String id,
+    required String code,
+    required String name,
+    required String type,
+    required bool isActive,
+    bool isCash = false,
   });
 }

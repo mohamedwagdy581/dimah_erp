@@ -1,0 +1,13 @@
+# Company users and access
+
+The `/user-management` route is available in the HR and admin sidebar. It follows the purple shell, with a company-account banner, searchable paginated users on the left and account details on the right. Panels stack on narrow windows; the table keeps all columns with horizontal scrolling. Name and email are read-only because this page changes access, not Auth identity or employee details. The login identifier is the existing email; no separate username is invented.
+
+Run `supabase/install_user_management.sql` in the Supabase SQL Editor before opening the page. This script has not been applied to the live project by these changes. It preserves existing users and roles and adds two authenticated RPCs, a private access audit table and a guard against direct authenticated updates of account access columns. Profile name/phone updates and trusted service-role employee provisioning remain supported.
+
+`list_company_users` accepts active HR/admin users and returns only their company accounts. The server supplies whether editing is allowed. `admin_update_company_user` checks an active admin in the database, locks company access changes, prohibits changing the caller's own role/status, validates supported roles and employee linkage, and compares the original role/status before saving. Stale drafts receive a refresh message; identical retries do not duplicate audit entries. Each actual change records actor, target, old/new role and status in the same transaction. The audit table has RLS and no direct authenticated access.
+
+HR is view-only. Admin can assign existing application roles and activate/deactivate another account. Current `direct_manager` aliases remain supported. The displayed role summary explains existing features; it is not a new per-permission editor and does not replace existing backend RLS. Missing company employee linkage disables employee/manager options. Account creation remains in employee onboarding; passwords and Auth email are not edited here.
+
+Account deactivation is checked when loading an application session and signs the inactive account out. New roles are loaded with the next session load/login. This change does not instantly revoke an already-issued Auth token or broadcast a remote logout to another running device; existing table/RPC authorization remains responsible for access during an open session.
+
+Tests cover Arabic/English at 320/768/1440 pixels, selection and scrolling, search/pagination, HR view-only access, own-admin protection, retaining edits after failure, RPC payloads with original values, and active/inactive session handling. Tests use local HTTP fixtures and do not execute the SQL against a live PostgreSQL instance.

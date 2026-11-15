@@ -10,7 +10,11 @@ String buildEmployeeProfileHtmlReport(
 }) {
   String esc(String? value) {
     final text = (value == null || value.trim().isEmpty) ? '-' : value.trim();
-    return text.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;');
+    return text
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;');
   }
 
   String tableRows(List<(String, String?)> rows) => rows.map((row) {
@@ -37,9 +41,39 @@ String buildEmployeeProfileHtmlReport(
   }).join();
 
   final p = profile;
-  final compensationRows = p.compensationHistory.map((item) => [formatEmployeeDate(item.effectiveAt), item.basicSalary.toStringAsFixed(2), item.housingAllowance.toStringAsFixed(2), item.transportAllowance.toStringAsFixed(2), item.otherAllowance.toStringAsFixed(2), item.total.toStringAsFixed(2)]).toList();
-  final contractRows = p.contractHistory.map((item) => [item.contractType, formatEmployeeDate(item.startDate), formatEmployeeDate(item.endDate), item.probationMonths?.toString() ?? '-', item.fileUrl ?? '-']).toList();
-  final documentRows = p.documents.map((item) => [item.docType, formatEmployeeDate(item.issuedAt), formatEmployeeDate(item.expiresAt), item.fileUrl]).toList();
+  final compensationRows = p.compensationHistory
+      .map(
+        (item) => [
+          formatEmployeeDate(item.effectiveAt),
+          item.basicSalary.toStringAsFixed(2),
+          item.housingAllowance.toStringAsFixed(2),
+          item.transportAllowance.toStringAsFixed(2),
+          item.otherAllowance.toStringAsFixed(2),
+          item.total.toStringAsFixed(2),
+        ],
+      )
+      .toList();
+  final contractRows = p.contractHistory
+      .map(
+        (item) => [
+          item.contractType,
+          formatEmployeeDate(item.startDate),
+          formatEmployeeDate(item.endDate),
+          item.probationMonths?.toString() ?? '-',
+          item.fileUrl ?? '-',
+        ],
+      )
+      .toList();
+  final documentRows = p.documents
+      .map(
+        (item) => [
+          item.docType,
+          formatEmployeeDate(item.issuedAt),
+          formatEmployeeDate(item.expiresAt),
+          item.fileUrl,
+        ],
+      )
+      .toList();
 
   return '''
 <!doctype html>

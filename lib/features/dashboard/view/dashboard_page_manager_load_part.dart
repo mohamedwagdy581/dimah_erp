@@ -5,7 +5,11 @@ extension _ManagerDashboardLoadHelpers on _ManagerDashboardState {
     final client = Supabase.instance.client;
     final uid = client.auth.currentUser?.id;
     if (uid == null) return const _ManagerDashboardData();
-    final me = await client.from('users').select('tenant_id').eq('id', uid).single();
+    final me = await client
+        .from('users')
+        .select('tenant_id')
+        .eq('id', uid)
+        .single();
     final tenantId = me['tenant_id'].toString();
 
     final managedDepartmentsRes = await client
@@ -13,7 +17,8 @@ extension _ManagerDashboardLoadHelpers on _ManagerDashboardState {
         .select('id, name')
         .eq('tenant_id', tenantId)
         .eq('manager_id', widget.managerEmployeeId);
-    final managedDepartments = (managedDepartmentsRes as List).cast<Map<String, dynamic>>();
+    final managedDepartments = (managedDepartmentsRes as List)
+        .cast<Map<String, dynamic>>();
     final managedDepartmentNames = managedDepartments
         .map((e) => (e['name'] ?? '').toString())
         .where((e) => e.isNotEmpty)
@@ -22,7 +27,9 @@ extension _ManagerDashboardLoadHelpers on _ManagerDashboardState {
     final members = await _loadManagedMembers(
       client: client,
       tenantId: tenantId,
-      managedDepartmentIds: managedDepartments.map((e) => e['id'].toString()).toList(),
+      managedDepartmentIds: managedDepartments
+          .map((e) => e['id'].toString())
+          .toList(),
     );
     if (members.isEmpty) return const _ManagerDashboardData();
 
@@ -31,12 +38,17 @@ extension _ManagerDashboardLoadHelpers on _ManagerDashboardState {
       tenantId: tenantId,
       employeeIds: members.map((e) => e['id'].toString()).toList(),
     );
-    await _attachTaskFiles(client: client, tenantId: tenantId, taskRows: taskRows);
+    await _attachTaskFiles(
+      client: client,
+      tenantId: tenantId,
+      taskRows: taskRows,
+    );
 
     final monthStart = DateTime(DateTime.now().year, DateTime.now().month, 1);
     final metrics = _buildMemberMetrics(members, taskRows, monthStart);
     final memberNameById = <String, String>{
-      for (final member in members) member['id'].toString(): member['full_name']?.toString() ?? '-',
+      for (final member in members)
+        member['id'].toString(): member['full_name']?.toString() ?? '-',
     };
 
     return _buildManagerDashboardData(
@@ -55,17 +67,26 @@ extension _ManagerDashboardLoadHelpers on _ManagerDashboardState {
   }) async {
     final directReportsRes = await client
         .from('employees')
-        .select('id, full_name')
+        .select(
+          (widget.assignmentOnly || widget.reviewsOnly)
+              ? 'id, full_name, job_title:job_titles(name)'
+              : 'id, full_name',
+        )
         .eq('tenant_id', tenantId)
         .eq('manager_id', widget.managerEmployeeId)
         .eq('status', 'active');
-    final directReports = (directReportsRes as List).cast<Map<String, dynamic>>();
+    final directReports = (directReportsRes as List)
+        .cast<Map<String, dynamic>>();
 
     final departmentReports = <Map<String, dynamic>>[];
     if (managedDepartmentIds.isNotEmpty) {
       final deptRes = await client
           .from('employees')
-          .select('id, full_name')
+          .select(
+            (widget.assignmentOnly || widget.reviewsOnly)
+                ? 'id, full_name, job_title:job_titles(name)'
+                : 'id, full_name',
+          )
           .eq('tenant_id', tenantId)
           .inFilter('department_id', managedDepartmentIds)
           .eq('status', 'active');
@@ -80,7 +101,11 @@ extension _ManagerDashboardLoadHelpers on _ManagerDashboardState {
     }
 
     final members = byId.values.toList()
-      ..sort((a, b) => (a['full_name']?.toString() ?? '').compareTo(b['full_name']?.toString() ?? ''));
+      ..sort(
+        (a, b) => (a['full_name']?.toString() ?? '').compareTo(
+          b['full_name']?.toString() ?? '',
+        ),
+      );
     return members;
   }
 
@@ -120,7 +145,8 @@ extension _ManagerDashboardLoadHelpers on _ManagerDashboardState {
             .eq('tenant_id', tenantId)
             .inFilter('task_id', taskIds)
             .order('created_at', ascending: false);
-        for (final attachment in (attachmentsRes as List).cast<Map<String, dynamic>>()) {
+        for (final attachment
+            in (attachmentsRes as List).cast<Map<String, dynamic>>()) {
           final taskId = attachment['task_id']?.toString() ?? '';
           if (taskId.isEmpty) continue;
           attachmentsByTask.putIfAbsent(taskId, () => []).add(attachment);

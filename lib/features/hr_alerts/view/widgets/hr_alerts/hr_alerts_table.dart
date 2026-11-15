@@ -1,4 +1,5 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
+import 'package:erp_sys/core/ui/app_data_state.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -16,6 +17,8 @@ class HrAlertsTable extends StatelessWidget {
     required this.onHandled,
     required this.onSnooze,
     required this.onRestore,
+    this.filtered = false,
+    this.onClear,
   });
 
   final List<ExpiryAlertItem> items;
@@ -23,66 +26,159 @@ class HrAlertsTable extends StatelessWidget {
   final ValueChanged<ExpiryAlertItem> onHandled;
   final ValueChanged<ExpiryAlertItem> onSnooze;
   final ValueChanged<ExpiryAlertItem> onRestore;
+  final bool filtered;
+  final VoidCallback? onClear;
 
   @override
   Widget build(BuildContext context) {
     if (items.isEmpty) {
-      return Card(
+      return Padding(
+        padding: const EdgeInsets.all(24),
         child: Center(
-          child: Text(AppLocalizations.of(context)!.hrAlertsNoRows),
+          child: AppEmptyState(
+            filtered: filtered,
+            onClear: onClear,
+            title: filtered
+                ? null
+                : AppLocalizations.of(context)!.hrAlertsNoRows,
+          ),
         ),
       );
     }
 
-    return Card(
-      child: SingleChildScrollView(
+    return LayoutBuilder(
+      builder: (context, constraints) => SingleChildScrollView(
         scrollDirection: Axis.horizontal,
-        child: DataTable(
-          columns: [
-            DataColumn(label: Text(AppLocalizations.of(context)!.hrAlertsColEmployee)),
-            DataColumn(label: Text(AppLocalizations.of(context)!.hrAlertsColType)),
-            DataColumn(label: Text(AppLocalizations.of(context)!.hrAlertsColExpiryDate)),
-            DataColumn(label: Text(AppLocalizations.of(context)!.hrAlertsColDaysLeft)),
-            DataColumn(label: Text(AppLocalizations.of(context)!.hrAlertsColStatus)),
-            DataColumn(label: Text(_followUpLabel(context))),
-            DataColumn(label: Text(AppLocalizations.of(context)!.actions)),
-          ],
-          rows: items.map((item) => _buildRow(context, item)).toList(),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(minWidth: constraints.maxWidth),
+          child: DataTable(
+            headingRowHeight: 42,
+            dataRowMinHeight: 44,
+            dataRowMaxHeight: 48,
+            columnSpacing: 18,
+            horizontalMargin: 10,
+            dividerThickness: 0,
+            border: const TableBorder(
+              horizontalInside: BorderSide(color: Color(0xFFECE6F4)),
+              verticalInside: BorderSide(color: Color(0xFFF4EFFA)),
+            ),
+            headingRowColor: const WidgetStatePropertyAll(Color(0xFFF4F0F8)),
+            headingTextStyle: Theme.of(context).textTheme.labelMedium?.copyWith(
+              fontSize: 13,
+              color: const Color(0xFF21194E),
+            ),
+            dataTextStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
+              fontSize: 13,
+              color: const Color(0xFF21194E),
+            ),
+            columns: [
+              DataColumn(
+                label: Text(AppLocalizations.of(context)!.hrAlertsColEmployee),
+              ),
+              DataColumn(
+                label: Text(AppLocalizations.of(context)!.hrAlertsColType),
+              ),
+              DataColumn(
+                label: Text(
+                  AppLocalizations.of(context)!.hrAlertsColExpiryDate,
+                ),
+              ),
+              DataColumn(
+                label: Text(AppLocalizations.of(context)!.hrAlertsColDaysLeft),
+              ),
+              DataColumn(
+                label: Text(AppLocalizations.of(context)!.hrAlertsColStatus),
+              ),
+              DataColumn(label: Text(AppLocalizations.of(context)!.actions)),
+            ],
+            rows: items.map((item) => _buildRow(context, item)).toList(),
+          ),
         ),
       ),
     );
   }
 
   DataRow _buildRow(BuildContext context, ExpiryAlertItem item) {
-    final band = alertBand(context, item.daysLeft);
+    final band = expiryAlertBand(context, item.daysLeft);
     final state = stateByKey[_stateKey(item)];
     return DataRow(
-      color: WidgetStatePropertyAll(band.bg),
       cells: [
         DataCell(Text(item.employeeName)),
-        DataCell(Text(alertTypeLabel(context, item.type))),
-        DataCell(Text(formatAlertDate(item.expiryDate))),
         DataCell(
           Text(
-            '${item.daysLeft}',
+            item.type.startsWith('document:')
+                ? documentTypeLabel(
+                    AppLocalizations.of(context)!,
+                    item.type.substring('document:'.length),
+                  )
+                : alertTypeLabel(context, item.type),
+          ),
+        ),
+        DataCell(
+          Text(
+            formatAlertDate(item.expiryDate).replaceAll('-', '/'),
+            textDirection: TextDirection.ltr,
+          ),
+        ),
+        DataCell(
+          Text(
+            '${item.daysLeft.clamp(0, 1000000)}',
             style: TextStyle(color: band.fg, fontWeight: FontWeight.w700),
           ),
         ),
         DataCell(
-          Chip(
-            label: Text(band.label),
-            backgroundColor: band.bg,
-            side: BorderSide(color: band.fg.withValues(alpha: 0.4)),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                decoration: BoxDecoration(
+                  color: band.bg,
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                child: Text(
+                  band.label,
+                  style: TextStyle(fontSize: 12, color: band.fg),
+                ),
+              ),
+              if (state?.isHandled == true || state?.isSnoozed == true)
+                Text(
+                  state?.isHandled == true
+                      ? (Localizations.localeOf(context).languageCode == 'ar'
+                            ? 'تم التعامل'
+                            : 'Handled')
+                      : (Localizations.localeOf(context).languageCode == 'ar'
+                            ? 'مؤجل'
+                            : 'Snoozed'),
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: Color(0xFF77738C),
+                  ),
+                ),
+            ],
           ),
         ),
-        DataCell(_AlertStateChips(state: state)),
         DataCell(
-          _AlertsActions(
-            item: item,
-            state: state,
-            onHandled: onHandled,
-            onSnooze: onSnooze,
-            onRestore: onRestore,
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _AlertsActions(
+                item: item,
+                state: state,
+                onHandled: onHandled,
+                onSnooze: onSnooze,
+                onRestore: onRestore,
+                primary: true,
+              ),
+              _AlertsActions(
+                item: item,
+                state: state,
+                onHandled: onHandled,
+                onSnooze: onSnooze,
+                onRestore: onRestore,
+              ),
+            ],
           ),
         ),
       ],
@@ -91,11 +187,6 @@ class HrAlertsTable extends StatelessWidget {
 
   String _stateKey(ExpiryAlertItem item) =>
       '${item.employeeId}|${item.type}|${DateTime(item.expiryDate.year, item.expiryDate.month, item.expiryDate.day).toIso8601String().split('T').first}';
-
-  String _followUpLabel(BuildContext context) {
-    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
-    return isArabic ? 'المتابعة' : 'Follow-up';
-  }
 }
 
 class _AlertsActions extends StatelessWidget {
@@ -105,6 +196,7 @@ class _AlertsActions extends StatelessWidget {
     required this.onHandled,
     required this.onSnooze,
     required this.onRestore,
+    this.primary = false,
   });
 
   final ExpiryAlertItem item;
@@ -112,12 +204,56 @@ class _AlertsActions extends StatelessWidget {
   final ValueChanged<ExpiryAlertItem> onHandled;
   final ValueChanged<ExpiryAlertItem> onSnooze;
   final ValueChanged<ExpiryAlertItem> onRestore;
+  final bool primary;
 
   @override
   Widget build(BuildContext context) {
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
     final hasFile = (item.fileUrl ?? '').trim().isNotEmpty;
     final alertState = state;
+    if (primary) {
+      final renew = item.daysLeft < 0;
+      final label = Text(
+        isArabic
+            ? (renew ? 'تجديد المستند' : 'عرض الموظف')
+            : (renew ? 'Renew document' : 'View employee'),
+        style: const TextStyle(fontSize: 12),
+      );
+      void action() {
+        if (renew) {
+          _handleRenew(context, item);
+        } else {
+          context.push(
+            AppRoutes.employeeProfile.replaceFirst(':id', item.employeeId),
+          );
+        }
+      }
+
+      return renew
+          ? FilledButton(
+              onPressed: action,
+              style: FilledButton.styleFrom(
+                backgroundColor: const Color(0xFF8654BC),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+              ),
+              child: label,
+            )
+          : OutlinedButton(
+              onPressed: action,
+              style: OutlinedButton.styleFrom(
+                foregroundColor: const Color(0xFF8654BC),
+                side: const BorderSide(color: Color(0xFFE2D3F7)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+              ),
+              child: label,
+            );
+    }
 
     return PopupMenuButton<_EmployeeAlertAction>(
       tooltip: isArabic ? 'إجراءات' : 'Actions',
@@ -162,7 +298,9 @@ class _AlertsActions extends StatelessWidget {
         ),
         PopupMenuItem(
           value: _EmployeeAlertAction.openEmployeeDocs,
-          child: Text(isArabic ? 'فتح مستندات الموظف' : 'Open Employee Documents'),
+          child: Text(
+            isArabic ? 'فتح مستندات الموظف' : 'Open Employee Documents',
+          ),
         ),
         PopupMenuItem(
           value: _EmployeeAlertAction.renewDocument,
@@ -185,7 +323,9 @@ class _AlertsActions extends StatelessWidget {
         if (hasFile)
           PopupMenuItem(
             value: _EmployeeAlertAction.openDocument,
-            child: Text(isArabic ? 'فتح المستند الحالي' : 'Open Current Document'),
+            child: Text(
+              isArabic ? 'فتح المستند الحالي' : 'Open Current Document',
+            ),
           ),
       ],
     );
@@ -238,61 +378,17 @@ class _AlertsActions extends StatelessWidget {
     final t = AppLocalizations.of(context)!;
     final uri = Uri.tryParse(url);
     if (uri == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(t.invalidFileUrl)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(t.invalidFileUrl)));
       return;
     }
     final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!ok && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(t.unableOpenFile)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(t.unableOpenFile)));
     }
-  }
-}
-
-class _AlertStateChips extends StatelessWidget {
-  const _AlertStateChips({required this.state});
-
-  final HrAlertStateInfo? state;
-
-  @override
-  Widget build(BuildContext context) {
-    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
-    final alertState = state;
-    if (alertState == null || (!alertState.isHandled && !alertState.isSnoozed)) {
-      return Text(
-        '—',
-        style: TextStyle(color: Theme.of(context).colorScheme.outline),
-      );
-    }
-
-    final chips = <Widget>[];
-    if (alertState.isHandled) {
-      chips.add(
-        Chip(
-          label: Text(isArabic ? 'تم التعامل' : 'Handled'),
-          backgroundColor: Colors.green.withValues(alpha: 0.12),
-          side: BorderSide(color: Colors.green.withValues(alpha: 0.28)),
-        ),
-      );
-    }
-    if (alertState.isSnoozed) {
-      final until = alertState.snoozeUntil!;
-      chips.add(
-        Chip(
-          label: Text(
-            isArabic
-                ? 'مؤجل حتى ${until.year}-${until.month.toString().padLeft(2, '0')}-${until.day.toString().padLeft(2, '0')}'
-                : 'Snoozed to ${until.year}-${until.month.toString().padLeft(2, '0')}-${until.day.toString().padLeft(2, '0')}',
-          ),
-          backgroundColor: Colors.blue.withValues(alpha: 0.12),
-          side: BorderSide(color: Colors.blue.withValues(alpha: 0.28)),
-        ),
-      );
-    }
-    return Wrap(spacing: 8, runSpacing: 8, children: chips);
   }
 }
 

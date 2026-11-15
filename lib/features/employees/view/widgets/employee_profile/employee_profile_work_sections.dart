@@ -1,3 +1,4 @@
+import 'package:erp_sys/core/ui/app_data_state.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../l10n/app_localizations.dart';
@@ -7,6 +8,7 @@ import 'employee_profile_leave_section.dart';
 import 'employee_profile_settlement_section.dart';
 import 'profile_kv_row.dart';
 import 'profile_section_card.dart';
+import 'employee_profile_documents.dart';
 
 class EmployeeProfileWorkSections extends StatelessWidget {
   const EmployeeProfileWorkSections({
@@ -16,6 +18,7 @@ class EmployeeProfileWorkSections extends StatelessWidget {
     required this.onAddContractVersion,
     required this.onAddSettlement,
     required this.onOpenUrl,
+    this.section,
   });
 
   final EmployeeProfileDetails profile;
@@ -23,6 +26,7 @@ class EmployeeProfileWorkSections extends StatelessWidget {
   final VoidCallback onAddContractVersion;
   final VoidCallback onAddSettlement;
   final ValueChanged<String> onOpenUrl;
+  final int? section;
 
   @override
   Widget build(BuildContext context) {
@@ -31,87 +35,84 @@ class EmployeeProfileWorkSections extends StatelessWidget {
 
     return Column(
       children: [
-        ProfileSectionCard(
-          title: t.contract,
-          children: [
-            if (canEdit)
-              Align(
-                alignment: Alignment.centerLeft,
-                child: OutlinedButton.icon(
-                  onPressed: onAddContractVersion,
-                  icon: const Icon(Icons.add_card_outlined),
-                  label: Text(t.addContractVersion),
-                ),
-              ),
-            const SizedBox(height: 8),
-            ProfileKvRow(label: t.type, value: p.contractType),
-            ProfileKvRow(label: t.startDate, value: formatEmployeeDate(p.contractStart)),
-            ProfileKvRow(label: t.endDate, value: formatEmployeeDate(p.contractEnd)),
-            ProfileKvRow(label: t.probationMonthsLabel, value: p.probationMonths == null ? '-' : '${p.probationMonths}'),
-            if ((p.contractFileUrl ?? '').trim().isNotEmpty)
-              Align(
-                alignment: Alignment.centerLeft,
-                child: TextButton.icon(
-                  onPressed: () => onOpenUrl(p.contractFileUrl!),
-                  icon: const Icon(Icons.open_in_new),
-                  label: Text(t.openContractFile),
-                ),
-              ),
-            const SizedBox(height: 10),
-            Text(t.contractHistory, style: const TextStyle(fontWeight: FontWeight.w700)),
-            const SizedBox(height: 6),
-            if (p.contractHistory.isEmpty)
-              Text(t.noContractHistory)
-            else
-              ...p.contractHistory.map(
-                (item) => ListTile(
-                  dense: true,
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(
-                    '${item.contractType} | ${formatEmployeeDate(item.startDate)} -> ${formatEmployeeDate(item.endDate)}',
+        if (section == null)
+          ProfileSectionCard(
+            title: t.contract,
+            children: [
+              if (canEdit)
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: OutlinedButton.icon(
+                    onPressed: onAddContractVersion,
+                    icon: const Icon(Icons.add_card_outlined),
+                    label: Text(t.addContractVersion),
                   ),
-                  subtitle: Text(
-                    '${t.probationMonths}: ${item.probationMonths?.toString() ?? '-'}',
-                  ),
-                  trailing: (item.fileUrl ?? '').trim().isEmpty
-                      ? null
-                      : TextButton(
-                          onPressed: () => onOpenUrl(item.fileUrl!),
-                          child: Text(t.open),
-                        ),
                 ),
+              const SizedBox(height: 8),
+              ProfileKvRow(label: t.type, value: p.contractType),
+              ProfileKvRow(
+                label: t.startDate,
+                value: formatEmployeeDate(p.contractStart),
               ),
-          ],
-        ),
-        EmployeeProfileLeaveSection(profile: p),
-        EmployeeProfileSettlementSection(
-          profile: p,
-          canEdit: canEdit,
-          onAddSettlement: onAddSettlement,
-        ),
-        ProfileSectionCard(
-          title: t.documents,
-          children: [
-            if (p.documents.isEmpty)
-              Text(t.noDocumentsUploaded)
-            else
-              ...p.documents.map(
-                (document) => ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(document.docType),
-                  subtitle: Text(
-                    '${t.issued}: ${formatEmployeeDate(document.issuedAt)} | ${t.expires}: ${formatEmployeeDate(document.expiresAt)}',
+              ProfileKvRow(
+                label: t.endDate,
+                value: formatEmployeeDate(p.contractEnd),
+              ),
+              ProfileKvRow(
+                label: t.probationMonthsLabel,
+                value: p.probationMonths == null ? '-' : '${p.probationMonths}',
+              ),
+              if ((p.contractFileUrl ?? '').trim().isNotEmpty)
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton.icon(
+                    onPressed: () => onOpenUrl(p.contractFileUrl!),
+                    icon: const Icon(Icons.open_in_new),
+                    label: Text(t.openContractFile),
                   ),
-                  trailing: TextButton(
-                    onPressed: document.fileUrl.trim().isEmpty
+                ),
+              const SizedBox(height: 10),
+              Text(
+                t.contractHistory,
+                style: const TextStyle(fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(height: 6),
+              if (p.contractHistory.isEmpty)
+                AppEmptyState(title: t.noContractHistory, compact: false)
+              else
+                ...p.contractHistory.map(
+                  (item) => ListTile(
+                    dense: true,
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(
+                      '${item.contractType} | ${formatEmployeeDate(item.startDate)} -> ${formatEmployeeDate(item.endDate)}',
+                    ),
+                    subtitle: Text(
+                      '${t.probationMonths}: ${item.probationMonths?.toString() ?? '-'}',
+                    ),
+                    trailing: (item.fileUrl ?? '').trim().isEmpty
                         ? null
-                        : () => onOpenUrl(document.fileUrl),
-                    child: Text(t.open),
+                        : TextButton(
+                            onPressed: () => onOpenUrl(item.fileUrl!),
+                            child: Text(t.open),
+                          ),
                   ),
                 ),
-              ),
-          ],
-        ),
+            ],
+          ),
+        if (section == null || section == 5)
+          EmployeeProfileLeaveSection(profile: p),
+        if (section == null || section == 6)
+          EmployeeProfileSettlementSection(
+            profile: p,
+            canEdit: canEdit,
+            onAddSettlement: onAddSettlement,
+          ),
+        if (section == null || section == 4)
+          EmployeeProfileDocuments(
+            documents: p.documents,
+            onOpenUrl: onOpenUrl,
+          ),
       ],
     );
   }

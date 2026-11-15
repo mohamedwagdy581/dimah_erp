@@ -103,19 +103,19 @@ class EmployeeDocsState extends Equatable {
 
   @override
   List<Object?> get props => [
-        employees,
-        docsMap,
-        expandedEmployeeIds,
-        loading,
-        total,
-        page,
-        pageSize,
-        search,
-        docType,
-        expiryStatus,
-        sortBy,
-        ascending,
-        fixedEmployeeId,
-        error,
-      ];
+    employees,
+    docsMap,
+    expandedEmployeeIds,
+    loading,
+    total,
+    page,
+    pageSize,
+    search,
+    docType,
+    expiryStatus,
+    sortBy,
+    ascending,
+    fixedEmployeeId,
+    error,
+  ];
 }

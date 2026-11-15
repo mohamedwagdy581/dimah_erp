@@ -27,8 +27,9 @@ class EmployeeDocument {
       id: map['id'].toString(),
       tenantId: map['tenant_id'].toString(),
       employeeId: map['employee_id'].toString(),
-      employeeName:
-          employee is Map ? (employee['full_name'] ?? '').toString() : '',
+      employeeName: employee is Map
+          ? (employee['full_name'] ?? '').toString()
+          : '',
       docType: (map['doc_type'] ?? 'contract').toString(),
       fileUrl: (map['file_url'] ?? '').toString(),
       issuedAt: map['issued_at'] == null

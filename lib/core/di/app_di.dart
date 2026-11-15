@@ -7,13 +7,18 @@ import '../../features/departments/domain/repos/departments_repo.dart';
 import '../../features/employees/data/repos/employee_repo_impl.dart';
 import '../../features/employees/domain/repos/employee_repo.dart';
 import '../session/session_repo.dart';
-import '../session/session_repo_impl.dart';
+import '../session/api_session_repo.dart';
+import '../config/env.dart';
 import '../../features/profile/domain/repos/profile_repo.dart';
 import '../../features/profile/data/repos/profile_repo_impl.dart';
 import '../../features/job_titles/domain/repos/job_titles_repo.dart';
 import '../../features/job_titles/data/repos/job_titles_repo_impl.dart';
 import '../../features/attendance/domain/repos/attendance_repo.dart';
 import '../../features/attendance/data/repos/attendance_repo_impl.dart';
+import '../../features/attendance/domain/repos/employee_attendance_repo.dart';
+import '../../features/attendance/data/repos/employee_attendance_repo_impl.dart';
+import '../../features/attendance/domain/repos/attendance_identity_repo.dart';
+import '../../features/attendance/data/repos/attendance_identity_repo_impl.dart';
 import '../../features/leaves/domain/repos/leaves_repo.dart';
 import '../../features/leaves/data/repos/leaves_repo_impl.dart';
 import '../../features/payroll/domain/repos/payroll_repo.dart';
@@ -26,6 +31,8 @@ import '../../features/accounting/accounts/domain/repos/accounts_repo.dart';
 import '../../features/accounting/accounts/data/repos/accounts_repo_impl.dart';
 import '../../features/accounting/journal/domain/repos/journal_repo.dart';
 import '../../features/accounting/journal/data/repos/journal_repo_impl.dart';
+import '../../features/accounting/reports/domain/accounting_reports_repo.dart';
+import '../../features/accounting/reports/data/accounting_reports_repo_impl.dart';
 
 class AppDI {
   static late final SupabaseClient supabase;
@@ -36,28 +43,34 @@ class AppDI {
   static late final JobTitlesRepo jobTitlesRepo;
   static late final EmployeesRepo employeesRepo;
   static late final AttendanceRepo attendanceRepo;
+  static late final EmployeeAttendanceRepo employeeAttendanceRepo;
+  static late final AttendanceIdentityRepo attendanceIdentityRepo;
   static late final LeavesRepo leavesRepo;
   static late final PayrollRepo payrollRepo;
   static late final EmployeeDocsRepo employeeDocsRepo;
   static late final ApprovalsRepo approvalsRepo;
   static late final AccountsRepo accountsRepo;
   static late final JournalRepo journalRepo;
+  static late final AccountingReportsRepo accountingReportsRepo;
 
   static void init() {
     supabase = Supabase.instance.client;
 
     authRepo = AuthRepoImpl(supabase);
-    sessionRepo = SessionRepoImpl(supabase);
+    sessionRepo = ApiSessionRepo.supabase(supabase, Env.apiBaseUrl);
     profileRepo = ProfileRepoImpl(supabase);
     departmentsRepo = DepartmentsRepoImpl(supabase);
     jobTitlesRepo = JobTitlesRepoImpl(supabase);
     employeesRepo = EmployeesRepoImpl(supabase);
     attendanceRepo = AttendanceRepoImpl(supabase);
+    employeeAttendanceRepo = EmployeeAttendanceRepoImpl(supabase);
+    attendanceIdentityRepo = AttendanceIdentityRepoImpl(supabase);
     leavesRepo = LeavesRepoImpl(supabase);
     payrollRepo = PayrollRepoImpl(supabase);
     employeeDocsRepo = EmployeeDocsRepoImpl(supabase);
     approvalsRepo = ApprovalsRepoImpl(supabase);
     accountsRepo = AccountsRepoImpl(supabase);
     journalRepo = JournalRepoImpl(supabase);
+    accountingReportsRepo = AccountingReportsRepoImpl(supabase);
   }
 }

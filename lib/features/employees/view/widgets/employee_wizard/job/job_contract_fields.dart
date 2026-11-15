@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../wizard_layout.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../../l10n/app_localizations.dart';
@@ -14,9 +15,10 @@ class JobContractFields extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context)!;
     final cubit = context.read<EmployeeWizardCubit>();
-    return Column(
+    return WizardFieldsGrid(
       children: [
         DropdownButtonFormField<String>(
+          isExpanded: true,
           initialValue: state.contractType,
           decoration: InputDecoration(
             labelText: t.contractType,
@@ -39,19 +41,25 @@ class JobContractFields extends StatelessWidget {
           ],
           onChanged: (v) => cubit.setContractType(v ?? 'full_time'),
         ),
-        const SizedBox(height: 12),
         ContractDateField(
           label: t.contractStart,
           value: state.contractStart ?? state.hireDate,
           onPick: cubit.setContractStart,
         ),
-        const SizedBox(height: 12),
         ContractDateField(
           label: t.contractEnd,
           value: state.contractEnd,
           onPick: cubit.setContractEnd,
+          validator: (date) {
+            final start = cubit.state.contractStart ?? cubit.state.hireDate;
+            if (date != null && start != null && date.isBefore(start)) {
+              return Localizations.localeOf(context).languageCode == 'ar'
+                  ? 'تاريخ نهاية العقد يجب أن يكون بعد بدايته'
+                  : 'Contract end must be on or after its start';
+            }
+            return null;
+          },
         ),
-        const SizedBox(height: 12),
         TextFormField(
           initialValue: state.probationMonths?.toString() ?? '',
           keyboardType: TextInputType.number,
@@ -60,6 +68,16 @@ class JobContractFields extends StatelessWidget {
             border: const OutlineInputBorder(),
           ),
           onChanged: (v) => cubit.setProbationMonths(int.tryParse(v)),
+          validator: (v) {
+            if ((v ?? '').trim().isEmpty) return null;
+            final months = int.tryParse(v!);
+            if (months == null || months < 0) {
+              return Localizations.localeOf(context).languageCode == 'ar'
+                  ? 'أدخل عدد أشهر صحيحًا'
+                  : 'Enter a valid number of months';
+            }
+            return null;
+          },
         ),
       ],
     );
@@ -72,6 +90,7 @@ class ContractDateField extends FormField<DateTime> {
     required String label,
     required DateTime? value,
     required ValueChanged<DateTime?> onPick,
+    super.validator,
   }) : super(
          initialValue: value,
          builder: (field) {
@@ -90,12 +109,15 @@ class ContractDateField extends FormField<DateTime> {
                  firstDate: DateTime(now.year - 10, 1, 1),
                  lastDate: DateTime(now.year + 10, 12, 31),
                );
-               field.didChange(picked);
-               onPick(picked);
+               if (picked != null) {
+                 field.didChange(picked);
+                 onPick(picked);
+               }
              },
              child: InputDecorator(
                decoration: InputDecoration(
                  labelText: label,
+                 errorText: field.errorText,
                  border: const OutlineInputBorder(),
                  suffixIcon: const Icon(Icons.calendar_today_outlined),
                ),

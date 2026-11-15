@@ -1,3 +1,4 @@
+import 'package:erp_sys/core/ui/app_search_field.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../l10n/app_localizations.dart';
@@ -64,7 +65,8 @@ class _AttendanceSearchField extends StatelessWidget {
     final t = AppLocalizations.of(context)!;
     return SizedBox(
       width: 280,
-      child: TextField(
+      child: AppSearchField(
+        value: cubit.state.search,
         onChanged: cubit.searchChanged,
         decoration: InputDecoration(
           prefixIcon: const Icon(Icons.search),
@@ -78,10 +80,7 @@ class _AttendanceSearchField extends StatelessWidget {
 }
 
 class _AttendanceStatusFilter extends StatelessWidget {
-  const _AttendanceStatusFilter({
-    required this.cubit,
-    required this.state,
-  });
+  const _AttendanceStatusFilter({required this.cubit, required this.state});
 
   final AttendanceCubit cubit;
   final AttendanceState state;
@@ -104,10 +103,7 @@ class _AttendanceStatusFilter extends StatelessWidget {
 }
 
 class _AttendanceDateFilterButton extends StatelessWidget {
-  const _AttendanceDateFilterButton({
-    required this.cubit,
-    required this.state,
-  });
+  const _AttendanceDateFilterButton({required this.cubit, required this.state});
 
   final AttendanceCubit cubit;
   final AttendanceState state;
@@ -118,9 +114,7 @@ class _AttendanceDateFilterButton extends StatelessWidget {
     return OutlinedButton.icon(
       onPressed: () => _pickDate(context),
       icon: const Icon(Icons.event),
-      label: Text(
-        state.date == null ? t.filterDate : _formatDate(state.date!),
-      ),
+      label: Text(state.date == null ? t.filterDate : _formatDate(state.date!)),
     );
   }
 

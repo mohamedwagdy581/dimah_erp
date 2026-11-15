@@ -2,6 +2,8 @@ part of 'employee_repo_impl.dart';
 
 mixin _EmployeesRepoCreateFallbackRequestMixin
     on _EmployeesRepoCreateFallbackMixin {
+  // Kept for legacy migration compatibility; new employee creation uses only the atomic RPC.
+  // ignore: unused_element
   Future<String> _createEmployeeFallbackForRequest({
     required String tenantId,
     required String fullName,

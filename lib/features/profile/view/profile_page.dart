@@ -1,14 +1,43 @@
+import 'package:erp_sys/core/ui/app_data_state.dart';
 import 'package:flutter/material.dart';
 import '../../../core/di/app_di.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import '../../../core/session/session_cubit.dart';
+import 'employee_profile_cubit.dart';
+import 'employee_profile_view.dart';
 
-class ProfilePage extends StatefulWidget {
+class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
-
   @override
-  State<ProfilePage> createState() => _ProfilePageState();
+  Widget build(BuildContext context) => BlocBuilder<SessionCubit, SessionState>(
+    builder: (context, session) {
+      if (session is SessionLoading) {
+        return const AppLoadingState();
+      }
+      if (session is SessionReady && session.user.role == 'employee') {
+        return BlocProvider(
+          create: (_) => EmployeeProfileCubit(AppDI.profileRepo)..load(),
+          child: EmployeeProfileView(
+            email: session.user.email,
+            onPassword: () => context.go('/change-password'),
+            onLogout: AppDI.authRepo.signOut,
+          ),
+        );
+      }
+      return const _LegacyProfilePage();
+    },
+  );
 }
 
-class _ProfilePageState extends State<ProfilePage> {
+class _LegacyProfilePage extends StatefulWidget {
+  const _LegacyProfilePage();
+
+  @override
+  State<_LegacyProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<_LegacyProfilePage> {
   final _name = TextEditingController();
   final _phone = TextEditingController();
   bool _loading = false;

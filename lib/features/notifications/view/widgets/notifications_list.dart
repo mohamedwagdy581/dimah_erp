@@ -1,3 +1,4 @@
+import 'package:erp_sys/core/ui/app_data_state.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -16,7 +17,12 @@ class NotificationsList extends StatelessWidget {
       return Card(
         child: Padding(
           padding: const EdgeInsets.all(20),
-          child: Center(child: Text(t.noNotificationsAvailable)),
+          child: Center(
+            child: AppEmptyState(
+              title: t.noNotificationsAvailable,
+              compact: false,
+            ),
+          ),
         ),
       );
     }

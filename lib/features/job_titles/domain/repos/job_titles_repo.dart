@@ -18,6 +18,8 @@ abstract class JobTitlesRepo {
     String? code,
     String? description,
     int? level,
+    String? departmentId,
+    bool isActive = true,
   });
 
   /// Update an existing job title.
@@ -27,6 +29,7 @@ abstract class JobTitlesRepo {
     String? code,
     String? description,
     int? level,
+    String? departmentId,
     required bool isActive,
   });
 }

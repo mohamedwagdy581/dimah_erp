@@ -1,0 +1,4 @@
+﻿[functions.provision-employee-login]
+# The handler validates the caller JWT using Auth getUser before any admin work.
+# This supports projects using asymmetric JWT signing keys.
+verify_jwt = false

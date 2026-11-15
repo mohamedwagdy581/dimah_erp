@@ -36,7 +36,7 @@ extension _AttendanceFormDialogBuild on _AttendanceFormDialogState {
                       ),
                     )
                     .toList(),
-                onChanged: (v) => setState(() => _employeeId = v),
+                onChanged: _setEmployeeId,
                 decoration: const InputDecoration(
                   labelText: 'Employee',
                   border: OutlineInputBorder(),
@@ -83,7 +83,7 @@ extension _AttendanceFormDialogBuild on _AttendanceFormDialogState {
                   DropdownMenuItem(value: 'absent', child: Text('Absent')),
                   DropdownMenuItem(value: 'on_leave', child: Text('On Leave')),
                 ],
-                onChanged: (v) => setState(() => _status = v ?? 'present'),
+                onChanged: _setStatus,
                 decoration: const InputDecoration(
                   labelText: 'Status',
                   border: OutlineInputBorder(),

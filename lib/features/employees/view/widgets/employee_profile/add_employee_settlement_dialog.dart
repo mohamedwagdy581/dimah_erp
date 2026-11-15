@@ -6,10 +6,7 @@ import '../../../domain/models/employee_profile_details.dart';
 import 'edit_dialog/employee_profile_dialog_actions.dart';
 
 class AddEmployeeSettlementDialog extends StatefulWidget {
-  const AddEmployeeSettlementDialog({
-    super.key,
-    required this.profile,
-  });
+  const AddEmployeeSettlementDialog({super.key, required this.profile});
 
   final EmployeeProfileDetails profile;
 
@@ -165,9 +162,9 @@ class _AddEmployeeSettlementDialogState
     } catch (error) {
       if (!mounted) return;
       setState(() => _saving = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(t.saveFailed(error.toString()))),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(t.saveFailed(error.toString()))));
     }
   }
 }
@@ -189,8 +186,8 @@ class _DateField extends StatelessWidget {
     final text = value == null
         ? t.selectDate
         : '${value!.year.toString().padLeft(4, '0')}-'
-            '${value!.month.toString().padLeft(2, '0')}-'
-            '${value!.day.toString().padLeft(2, '0')}';
+              '${value!.month.toString().padLeft(2, '0')}-'
+              '${value!.day.toString().padLeft(2, '0')}';
     return InkWell(
       onTap: onTap,
       child: InputDecorator(

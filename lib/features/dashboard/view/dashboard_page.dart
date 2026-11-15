@@ -1,4 +1,7 @@
+import 'package:erp_sys/core/ui/app_data_state.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:file_selector/file_selector.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -7,6 +10,19 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/di/app_di.dart';
 import '../../../core/routing/app_routes.dart';
 import '../../../core/session/session_cubit.dart';
+import '../../../core/widgets/employee_dashboard_card.dart';
+import '../../manager_team/domain/manager_team_data.dart';
+import '../../manager_home/manager_home_page.dart';
+import '../../hr_home/hr_home_page.dart';
+import '../../finance_home/finance_home_page.dart';
+import '../../admin_home/admin_home_page.dart';
+import '../../../core/ui/employee_theme.dart';
+import '../../../core/utils/safe_file_picker.dart';
+import '../data/manager_task_attachment.dart';
+import '../../employee_portal/view/widgets/my_tasks/task_formatters.dart'
+    show contentTypeFor;
+import '../../employee_portal/view/widgets/my_tasks/task_labels.dart';
+import '../../leaves/domain/models/leave_balance.dart';
 import '../../../l10n/app_localizations.dart';
 
 part 'dashboard_view_body.dart';
@@ -29,6 +45,9 @@ part 'dashboard_page_hr_attendance_helpers_part.dart';
 part 'dashboard_page_hr_document_helpers_part.dart';
 part 'dashboard_page_shared_part.dart';
 part 'manager/dashboard_manager.dart';
+part 'manager/manager_task_assignment.dart';
+part 'manager/manager_task_reviews.dart';
+part 'manager/manager_task_review_design.dart';
 part 'manager/dashboard_manager_body.dart';
 part 'manager/sections/manager_dashboard_charts_section.dart';
 part 'manager/sections/manager_dashboard_due_soon_section.dart';

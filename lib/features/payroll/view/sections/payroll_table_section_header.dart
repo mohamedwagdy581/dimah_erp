@@ -1,4 +1,5 @@
-﻿import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/session/session_cubit.dart';
@@ -23,43 +24,124 @@ class PayrollTableSectionHeader extends StatelessWidget {
 
     return BlocBuilder<SessionCubit, SessionState>(
       builder: (context, sessionState) {
-        final role = (sessionState as SessionReady).user.role;
+        if (sessionState is! SessionReady) return const SizedBox.shrink();
+        final role = sessionState.user.role;
         final isHr = role == 'hr' || role == 'admin';
         final isArabic = Localizations.localeOf(context).languageCode == 'ar';
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              t.menuPayroll,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final heading = Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 42,
+                      height: 42,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF1E6FC),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(
+                        Icons.receipt_long_rounded,
+                        color: Color(0xFF8659BB),
+                        size: 25,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Flexible(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            isArabic ? 'مسيرات الرواتب' : 'Payroll runs',
+                            style: const TextStyle(
+                              fontSize: 23,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF21194E),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            isArabic
+                                ? 'تجهيز الرواتب ومتابعة المراجعة والاعتماد'
+                                : 'Prepare payroll and track review and approval',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Color(0xFF77738C),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                );
+                return constraints.maxWidth >= 650
+                    ? Row(
+                        children: [
+                          Expanded(child: heading),
+                          const SizedBox(width: 16),
+                          _HeaderActions(
+                            cubit: cubit,
+                            isHr: isHr,
+                            loading: state.loading,
+                          ),
+                        ],
+                      )
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          heading,
+                          const SizedBox(height: 12),
+                          _HeaderActions(
+                            cubit: cubit,
+                            isHr: isHr,
+                            loading: state.loading,
+                          ),
+                        ],
+                      );
+              },
             ),
-            const SizedBox(height: 10),
-            Wrap(
-              spacing: 12,
-              runSpacing: 12,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                _PayrollStatusFilter(cubit: cubit, state: state, isArabic: isArabic),
-                _PayrollDateButton(
-                  value: state.startDate,
-                  icon: Icons.calendar_today_outlined,
-                  emptyLabel: t.startFrom,
-                  onPicked: cubit.startDateChanged,
-                ),
-                _PayrollDateButton(
-                  value: state.endDate,
-                  icon: Icons.calendar_month_outlined,
-                  emptyLabel: t.endTo,
-                  onPicked: cubit.endDateChanged,
-                ),
-                if (isHr) _NewPayrollRunButton(cubit: cubit),
-                TextButton.icon(
-                  onPressed: cubit.resetFilters,
-                  icon: const Icon(Icons.filter_alt_off_outlined),
-                  label: Text(isArabic ? 'إعادة ضبط' : 'Reset'),
-                ),
-              ],
+            const SizedBox(height: 20),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFCFAFF),
+                border: Border.all(color: const Color(0xFFEAE3F2)),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Wrap(
+                spacing: 12,
+                runSpacing: 12,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  _PayrollStatusFilter(
+                    cubit: cubit,
+                    state: state,
+                    isArabic: isArabic,
+                  ),
+                  _PayrollDateButton(
+                    value: state.startDate,
+                    icon: Icons.calendar_today_outlined,
+                    emptyLabel: t.startFrom,
+                    onPicked: cubit.startDateChanged,
+                  ),
+                  _PayrollDateButton(
+                    value: state.endDate,
+                    icon: Icons.calendar_month_outlined,
+                    emptyLabel: t.endTo,
+                    onPicked: cubit.endDateChanged,
+                  ),
+                  TextButton.icon(
+                    onPressed: state.loading ? null : cubit.resetFilters,
+                    icon: const Icon(Icons.filter_alt_off_outlined),
+                    label: Text(isArabic ? 'إعادة ضبط' : 'Reset'),
+                  ),
+                ],
+              ),
             ),
           ],
         );
@@ -83,22 +165,29 @@ class _PayrollStatusFilter extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context)!;
     return Container(
+      constraints: const BoxConstraints(maxWidth: 240),
       padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade300),
+        border: Border.all(color: const Color(0xFFE5DCF0)),
         borderRadius: BorderRadius.circular(8),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String?>(
+          isExpanded: true,
           value: state.status,
-          onChanged: cubit.statusFilterChanged,
+          onChanged: state.loading ? null : cubit.statusFilterChanged,
           hint: Text(t.all),
           items: [
             DropdownMenuItem(value: null, child: Text(t.all)),
-            DropdownMenuItem(value: 'draft', child: Text(isArabic ? 'مسودة' : 'Draft')),
+            DropdownMenuItem(
+              value: 'draft',
+              child: Text(isArabic ? 'مسودة' : 'Draft'),
+            ),
             DropdownMenuItem(
               value: 'pending_finance_manager',
-              child: Text(isArabic ? 'بانتظار مدير المحاسبة' : 'Pending Finance Manager'),
+              child: Text(
+                isArabic ? 'بانتظار مدير المحاسبة' : 'Pending Finance Manager',
+              ),
             ),
             DropdownMenuItem(
               value: 'pending_admin_approval',
@@ -106,13 +195,20 @@ class _PayrollStatusFilter extends StatelessWidget {
             ),
             DropdownMenuItem(
               value: 'rejected_by_finance_manager',
-              child: Text(isArabic ? 'مرفوض من مدير المحاسبة' : 'Rejected by Finance Manager'),
+              child: Text(
+                isArabic
+                    ? 'مرفوض من مدير المحاسبة'
+                    : 'Rejected by Finance Manager',
+              ),
             ),
             DropdownMenuItem(
               value: 'rejected_by_admin',
               child: Text(isArabic ? 'مرفوض من الأدمن' : 'Rejected by Admin'),
             ),
-            DropdownMenuItem(value: 'approved', child: Text(isArabic ? 'معتمد' : 'Approved')),
+            DropdownMenuItem(
+              value: 'approved',
+              child: Text(isArabic ? 'معتمد' : 'Approved'),
+            ),
           ],
         ),
       ),
@@ -140,6 +236,11 @@ class _PayrollDateButton extends StatelessWidget {
       icon: Icon(icon, size: 18),
       label: Text(value == null ? emptyLabel : _format(value!)),
       style: OutlinedButton.styleFrom(
+        minimumSize: const Size(160, 48),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        foregroundColor: const Color(0xFF8659BB),
+        backgroundColor: Colors.white,
+        side: const BorderSide(color: Color(0xFFE5DCF0)),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
     );
@@ -163,6 +264,38 @@ class _PayrollDateButton extends StatelessWidget {
   }
 }
 
+class _HeaderActions extends StatelessWidget {
+  const _HeaderActions({
+    required this.cubit,
+    required this.isHr,
+    required this.loading,
+  });
+  final PayrollCubit cubit;
+  final bool isHr, loading;
+  @override
+  Widget build(BuildContext context) => Wrap(
+    spacing: 10,
+    runSpacing: 10,
+    crossAxisAlignment: WrapCrossAlignment.center,
+    children: [
+      if (isHr) _NewPayrollRunButton(cubit: cubit),
+      IconButton.outlined(
+        tooltip: Localizations.localeOf(context).languageCode == 'ar'
+            ? 'تحديث المسيرات'
+            : 'Refresh payroll',
+        onPressed: loading ? null : cubit.load,
+        icon: const Icon(Icons.refresh_rounded),
+        style: IconButton.styleFrom(
+          minimumSize: const Size(44, 44),
+          foregroundColor: const Color(0xFF8659BB),
+          side: const BorderSide(color: Color(0xFFE5DCF0)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        ),
+      ),
+    ],
+  );
+}
+
 class _NewPayrollRunButton extends StatelessWidget {
   const _NewPayrollRunButton({required this.cubit});
 
@@ -170,27 +303,34 @@ class _NewPayrollRunButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final t = AppLocalizations.of(context)!;
     return ElevatedButton.icon(
-      onPressed: () => _open(context),
+      onPressed: cubit.state.loading ? null : () => _open(context),
       icon: const Icon(Icons.add),
-      label: Text(t.newPayrollRun),
+      label: Text(
+        Localizations.localeOf(context).languageCode == 'ar'
+            ? 'تجهيز مسير جديد'
+            : 'Prepare new payroll',
+      ),
       style: ElevatedButton.styleFrom(
+        backgroundColor: const Color(0xFF9B74BF),
+        foregroundColor: Colors.white,
+        elevation: 0,
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 15),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
     );
   }
 
   Future<void> _open(BuildContext context) async {
-    final ok = await showDialog<bool>(
+    final id = await showDialog<String>(
       context: context,
       builder: (_) => BlocProvider.value(
         value: context.read<PayrollCubit>(),
         child: const PayrollRunDialog(),
       ),
     );
-    if (ok == true && context.mounted) {
-      cubit.load(resetPage: true);
+    if (id != null && context.mounted) {
+      context.go('/payroll/$id');
     }
   }
 }

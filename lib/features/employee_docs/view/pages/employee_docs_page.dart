@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/di/app_di.dart';
+import '../../../../core/session/session_cubit.dart';
+import 'hr_employee_docs_page.dart';
 import '../cubit/employee_docs_cubit.dart';
 import '../sections/employee_docs_table_section.dart';
 import '../widgets/employee_docs_form_dialog.dart';
@@ -36,6 +38,7 @@ class EmployeeDocsPage extends StatelessWidget {
         initialEmployeeId: initialEmployeeId,
       )..load(),
       child: _EmployeeDocsPageBody(
+        initialExpiryStatus: initialExpiryStatus,
         initialEmployeeId: initialEmployeeId,
         initialDocType: initialDocType,
         autoOpenCreate: autoOpenCreate,
@@ -49,6 +52,7 @@ class EmployeeDocsPage extends StatelessWidget {
 
 class _EmployeeDocsPageBody extends StatefulWidget {
   const _EmployeeDocsPageBody({
+    this.initialExpiryStatus,
     required this.initialEmployeeId,
     required this.initialDocType,
     required this.autoOpenCreate,
@@ -58,6 +62,7 @@ class _EmployeeDocsPageBody extends StatefulWidget {
   });
 
   final String? initialEmployeeId;
+  final String? initialExpiryStatus;
   final String? initialDocType;
   final bool autoOpenCreate;
   final DateTime? initialIssuedAt;
@@ -74,6 +79,11 @@ class _EmployeeDocsPageBodyState extends State<_EmployeeDocsPageBody> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    final session = context.read<SessionCubit>().state;
+    if (session is SessionReady &&
+        ['hr', 'admin'].contains(session.user.role)) {
+      return;
+    }
     if (_didOpen || !widget.autoOpenCreate) return;
     _didOpen = true;
     WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -98,5 +108,18 @@ class _EmployeeDocsPageBodyState extends State<_EmployeeDocsPageBody> {
   }
 
   @override
-  Widget build(BuildContext context) => const EmployeeDocsTableSection();
+  Widget build(BuildContext context) {
+    final session = context.watch<SessionCubit>().state;
+    return session is SessionReady &&
+            ['hr', 'admin'].contains(session.user.role)
+        ? HrEmployeeDocsPage(
+            initialEmployeeId: widget.initialEmployeeId,
+            initialDocType: widget.initialDocType,
+            initialExpiryStatus: widget.initialExpiryStatus,
+            initialIssuedAt: widget.initialIssuedAt,
+            initialExpiresAt: widget.initialExpiresAt,
+            initialOldExpiresAt: widget.initialOldExpiresAt,
+          )
+        : const EmployeeDocsTableSection();
+  }
 }

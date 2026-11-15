@@ -1,4 +1,6 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
+
+import 'hr_prototype_def.dart';
 
 class HrFormTemplateDef {
   const HrFormTemplateDef({
@@ -26,7 +28,7 @@ class HrFormTemplateDef {
 const acknowledgmentPrototypeTemplateId = 'acknowledgment-prototype';
 const leavePrototypeTemplateId = 'leave-application-prototype';
 
-const hrFormTemplates = <HrFormTemplateDef>[
+final hrFormTemplates = <HrFormTemplateDef>[
   HrFormTemplateDef(
     id: acknowledgmentPrototypeTemplateId,
     titleEn: 'Electronic Acknowledgment',
@@ -45,6 +47,16 @@ const hrFormTemplates = <HrFormTemplateDef>[
     icon: Icons.assignment_turned_in_outlined,
     color: Color(0xFF2D7E9D),
   ),
+  for (final item in hrPrototypes)
+    HrFormTemplateDef(
+      id: item.id,
+      titleEn: item.en,
+      titleAr: item.ar,
+      subtitleEn: 'Fillable prototype · preview, print and PDF export',
+      subtitleAr: 'نموذج قابل للتعبئة والمعاينة والطباعة وتصدير PDF',
+      icon: Icons.description_outlined,
+      color: const Color(0xFF8855BF),
+    ),
 ];
 
 HrFormTemplateDef? findHrFormTemplate(String id) {

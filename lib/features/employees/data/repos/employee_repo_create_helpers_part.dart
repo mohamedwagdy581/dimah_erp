@@ -80,7 +80,9 @@ mixin _EmployeesRepoCreateHelpersMixin on _EmployeesRepoEmployeeLookupMixin {
       'p_gender': _normalizeOptionalText(gender),
       'p_nationality': _normalizeOptionalText(nationality),
       'p_education': _normalizeOptionalText(education),
-      'p_national_id_expiry': nationalIdExpiry == null ? null : _toDateOnly(nationalIdExpiry),
+      'p_national_id_expiry': nationalIdExpiry == null
+          ? null
+          : _toDateOnly(nationalIdExpiry),
       'p_notes': _normalizeOptionalText(notes),
       'p_manager_id': managerId,
       'p_marital_status': _normalizeOptionalText(maritalStatus),
@@ -88,11 +90,21 @@ mixin _EmployeesRepoCreateHelpersMixin on _EmployeesRepoEmployeeLookupMixin {
       'p_city': _normalizeOptionalText(city),
       'p_country': _normalizeOptionalText(country),
       'p_passport_no': _normalizeOptionalText(passportNo),
-      'p_passport_expiry': passportExpiry == null ? null : _toDateOnly(passportExpiry),
-      'p_residency_issue_date': residencyIssueDate == null ? null : _toDateOnly(residencyIssueDate),
-      'p_residency_expiry_date': residencyExpiryDate == null ? null : _toDateOnly(residencyExpiryDate),
-      'p_insurance_start_date': insuranceStartDate == null ? null : _toDateOnly(insuranceStartDate),
-      'p_insurance_expiry_date': insuranceExpiryDate == null ? null : _toDateOnly(insuranceExpiryDate),
+      'p_passport_expiry': passportExpiry == null
+          ? null
+          : _toDateOnly(passportExpiry),
+      'p_residency_issue_date': residencyIssueDate == null
+          ? null
+          : _toDateOnly(residencyIssueDate),
+      'p_residency_expiry_date': residencyExpiryDate == null
+          ? null
+          : _toDateOnly(residencyExpiryDate),
+      'p_insurance_start_date': insuranceStartDate == null
+          ? null
+          : _toDateOnly(insuranceStartDate),
+      'p_insurance_expiry_date': insuranceExpiryDate == null
+          ? null
+          : _toDateOnly(insuranceExpiryDate),
       'p_insurance_provider': _normalizeOptionalText(insuranceProvider),
       'p_insurance_policy_no': _normalizeOptionalText(insurancePolicyNo),
       'p_education_level': _normalizeOptionalText(educationLevel),

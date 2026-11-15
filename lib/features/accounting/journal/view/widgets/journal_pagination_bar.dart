@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../../l10n/app_localizations.dart';
+import '../../../../../core/widgets/page_navigation_buttons.dart';
 
 class JournalPaginationBar extends StatelessWidget {
   const JournalPaginationBar({
@@ -28,12 +29,14 @@ class JournalPaginationBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context)!;
-    return Row(
+    return Wrap(
+      spacing: 12,
+      runSpacing: 8,
+      crossAxisAlignment: WrapCrossAlignment.center,
       children: [
         Text(t.totalWithValue(total)),
         const SizedBox(width: 12),
         Text(t.pageWithValue(page + 1, totalPages)),
-        const Spacer(),
         DropdownButton<int>(
           value: pageSize,
           onChanged: (v) {
@@ -46,15 +49,11 @@ class JournalPaginationBar extends StatelessWidget {
           ],
         ),
         const SizedBox(width: 8),
-        IconButton(
-          tooltip: t.previous,
-          onPressed: canPrev ? onPrev : null,
-          icon: const Icon(Icons.chevron_left),
-        ),
-        IconButton(
-          tooltip: t.next,
-          onPressed: canNext ? onNext : null,
-          icon: const Icon(Icons.chevron_right),
+        PageNavigationButtons(
+          previousTooltip: t.previous,
+          nextTooltip: t.next,
+          onPrevious: canPrev ? onPrev : null,
+          onNext: canNext ? onNext : null,
         ),
       ],
     );

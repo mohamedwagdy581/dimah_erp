@@ -4,10 +4,7 @@ import 'package:pdf/widgets.dart' as pw;
 import '../hr_acknowledgment_pdf_theme.dart';
 
 class HrAcknowledgmentPdfHeader extends pw.StatelessWidget {
-  HrAcknowledgmentPdfHeader({
-    required this.theme,
-    required this.logo,
-  });
+  HrAcknowledgmentPdfHeader({required this.theme, required this.logo});
 
   final HrAcknowledgmentPdfTheme theme;
   final pw.MemoryImage logo;

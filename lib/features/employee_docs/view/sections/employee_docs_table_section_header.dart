@@ -1,3 +1,4 @@
+import 'package:erp_sys/core/ui/app_search_field.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../l10n/app_localizations.dart';
@@ -31,7 +32,8 @@ class EmployeeDocsTableSectionHeader extends StatelessWidget {
           runSpacing: 12,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
-            if (state.fixedEmployeeId == null) _EmployeeDocsSearchField(cubit: cubit),
+            if (state.fixedEmployeeId == null)
+              _EmployeeDocsSearchField(cubit: cubit),
             _EmployeeDocsTypeFilter(cubit: cubit, state: state),
             _EmployeeDocsExpiryFilter(cubit: cubit, state: state),
             OutlinedButton.icon(
@@ -61,7 +63,8 @@ class _EmployeeDocsSearchField extends StatelessWidget {
     final t = AppLocalizations.of(context)!;
     return SizedBox(
       width: 280,
-      child: TextField(
+      child: AppSearchField(
+        value: cubit.state.search,
         onChanged: cubit.searchChanged,
         decoration: InputDecoration(
           prefixIcon: const Icon(Icons.search),
@@ -75,10 +78,7 @@ class _EmployeeDocsSearchField extends StatelessWidget {
 }
 
 class _EmployeeDocsTypeFilter extends StatelessWidget {
-  const _EmployeeDocsTypeFilter({
-    required this.cubit,
-    required this.state,
-  });
+  const _EmployeeDocsTypeFilter({required this.cubit, required this.state});
 
   final EmployeeDocsCubit cubit;
   final EmployeeDocsState state;
@@ -119,10 +119,7 @@ class _EmployeeDocsTypeFilter extends StatelessWidget {
           child: Text(t.medicalInsurance),
         ),
         DropdownMenuItem(value: 'medical_report', child: Text(t.medicalReport)),
-        DropdownMenuItem(
-          value: 'residency',
-          child: Text(t.residencyDocument),
-        ),
+        DropdownMenuItem(value: 'residency', child: Text(t.residencyDocument)),
         DropdownMenuItem(
           value: 'driving_license',
           child: Text(t.drivingLicense),
@@ -136,10 +133,7 @@ class _EmployeeDocsTypeFilter extends StatelessWidget {
 }
 
 class _EmployeeDocsExpiryFilter extends StatelessWidget {
-  const _EmployeeDocsExpiryFilter({
-    required this.cubit,
-    required this.state,
-  });
+  const _EmployeeDocsExpiryFilter({required this.cubit, required this.state});
 
   final EmployeeDocsCubit cubit;
   final EmployeeDocsState state;

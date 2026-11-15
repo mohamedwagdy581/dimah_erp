@@ -7,9 +7,11 @@ class DobFormField extends FormField<DateTime> {
     super.key,
     required DateTime? value,
     required ValueChanged<DateTime?> onPick,
+    bool showLabel = true,
+    String requiredMessage = 'Date of birth is required',
   }) : super(
          initialValue: value,
-         validator: (v) => v == null ? 'Date of birth is required' : null,
+         validator: (v) => v == null ? requiredMessage : null,
          builder: (field) {
            final t = AppLocalizations.of(field.context)!;
            final v = field.value;
@@ -26,12 +28,14 @@ class DobFormField extends FormField<DateTime> {
                  firstDate: DateTime(1950, 1, 1),
                  lastDate: now,
                );
-               field.didChange(picked);
-               onPick(picked);
+               if (picked != null) {
+                 field.didChange(picked);
+                 onPick(picked);
+               }
              },
              child: InputDecorator(
                decoration: InputDecoration(
-                 labelText: t.dateOfBirth,
+                 labelText: showLabel ? t.dateOfBirth : null,
                  border: const OutlineInputBorder(),
                  suffixIcon: const Icon(Icons.calendar_today_outlined),
                  errorText: field.errorText,

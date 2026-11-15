@@ -26,6 +26,7 @@ class JobTitleField extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             DropdownButtonFormField<String>(
+              isExpanded: true,
               initialValue: selectedJobTitleId,
               decoration: InputDecoration(
                 labelText: t.menuJobTitles,

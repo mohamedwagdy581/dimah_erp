@@ -1,4 +1,7 @@
-﻿import 'package:file_selector/file_selector.dart';
+import 'package:erp_sys/core/ui/app_data_state.dart';
+import 'dart:convert';
+import 'package:go_router/go_router.dart';
+import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -11,9 +14,14 @@ import '../../../../l10n/app_localizations.dart';
 import '../../domain/models/payroll_assignee_option.dart';
 import '../../domain/models/payroll_item.dart';
 import '../../domain/models/payroll_run.dart';
+import '../../domain/payroll_approval_error.dart';
 import '../cubit/payroll_run_cubit.dart';
 import '../cubit/payroll_run_state.dart';
-import '../widgets/payroll_run_items_table.dart';
+import '../widgets/payroll_run_design.dart';
+import '../widgets/payroll_preparation_view.dart';
+import '../widgets/finance_payroll_workspace.dart';
+import '../widgets/finance_disbursement_workspace.dart';
+import '../../data/repos/payroll_disbursement_repo.dart';
 
 class PayrollRunPage extends StatelessWidget {
   const PayrollRunPage({super.key, required this.runId});
@@ -22,6 +30,29 @@ class PayrollRunPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final session = context.watch<SessionCubit>().state;
+    if (session is SessionReady &&
+        session.user.role == 'finance_manager' &&
+        GoRouterState.of(context).uri.queryParameters['disbursement'] == '1') {
+      return FinanceDisbursementWorkspace(
+        repo: SupabasePayrollDisbursementRepo(
+          AppDI.payrollRepo,
+          AppDI.supabase,
+        ),
+        runId: runId,
+        onReview: () => context.go('/payroll/$runId'),
+      );
+    }
+    if (session is SessionReady &&
+        session.user.role == 'finance_manager' &&
+        GoRouterState.of(context).uri.queryParameters['disbursement'] != '1') {
+      return FinancePayrollWorkspace(
+        repo: AppDI.payrollRepo,
+        initialRunId: runId,
+        onDisbursement: (id) => context.go('/payroll/$id?disbursement=1'),
+        onHistory: () => context.go('/payroll?history=1'),
+      );
+    }
     return BlocProvider(
       create: (_) => PayrollRunCubit(AppDI.payrollRepo)..load(runId),
       child: _PayrollRunBody(runId: runId),
@@ -29,10 +60,38 @@ class PayrollRunPage extends StatelessWidget {
   }
 }
 
-class _PayrollRunBody extends StatelessWidget {
+class _PayrollRunBody extends StatefulWidget {
   const _PayrollRunBody({required this.runId});
 
   final String runId;
+  @override
+  State<_PayrollRunBody> createState() => _PayrollRunBodyState();
+}
+
+class _PayrollRunBodyState extends State<_PayrollRunBody> {
+  String get runId => widget.runId;
+  bool _busy = false;
+  Future<void> _act(Future<void> Function() action) async {
+    if (_busy) return;
+    setState(() {
+      _busy = true;
+    });
+    try {
+      await action();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.toString())));
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _busy = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +99,8 @@ class _PayrollRunBody extends StatelessWidget {
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
     return BlocBuilder<SessionCubit, SessionState>(
       builder: (context, sessionState) {
-        final session = sessionState as SessionReady;
+        if (sessionState is! SessionReady) return const SizedBox.shrink();
+        final session = sessionState;
         final userRole = session.user.role;
         final currentEmployeeId = session.user.employeeId;
 
@@ -48,55 +108,64 @@ class _PayrollRunBody extends StatelessWidget {
           builder: (context, state) {
             final run = state.run;
 
-            return Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildHeader(
-                    context,
-                    t,
-                    isArabic,
-                    userRole,
-                    currentEmployeeId,
-                    state,
-                    run,
+            if (state.loading && run == null) {
+              return const AppLoadingState();
+            }
+            if (run == null) {
+              if (state.error != null) {
+                return AppFailureState(
+                  error: state.error,
+                  onRetry: () => context.read<PayrollRunCubit>().load(runId),
+                );
+              }
+              return AppEmptyState(
+                title: isArabic ? 'المسير غير موجود' : 'Payroll run not found',
+              );
+            }
+            if (userRole == 'hr' &&
+                (run.status == 'draft' || run.status.startsWith('rejected'))) {
+              return PayrollPreparationView(
+                key: ValueKey(run.id),
+                repo: AppDI.payrollRepo,
+                savedRun: run,
+                onHistory: () => context.go('/payroll?history=1'),
+                onSubmitted: (_) => context.read<PayrollRunCubit>().load(runId),
+              );
+            }
+            return Column(
+              children: [
+                if (state.loading || _busy) const LinearProgressIndicator(),
+                if (state.error != null)
+                  AppFailureState(
+                    error: state.error,
+                    compact: true,
+                    onRetry: () => context.read<PayrollRunCubit>().load(runId),
                   ),
-                  const SizedBox(height: 12),
-                  if (state.loading) const LinearProgressIndicator(),
-                  if (state.error != null) ...[
-                    const SizedBox(height: 10),
-                    Text(state.error!, style: const TextStyle(color: Colors.red)),
-                  ],
-                  if (run?.rejectReason != null && run!.rejectReason!.trim().isNotEmpty) ...[
-                    const SizedBox(height: 10),
-                    Card(
-                      color: Colors.red.withValues(alpha: 0.08),
-                      child: Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.info_outline, color: Colors.red),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Text(
-                                '${isArabic ? 'سبب الرفض' : 'Rejection Reason'}: ${run.rejectReason!}',
-                                style: const TextStyle(color: Colors.red),
-                              ),
-                            ),
-                          ],
-                        ),
+                Expanded(
+                  child: AbsorbPointer(
+                    absorbing: state.loading || _busy,
+                    child: PayrollRunDesign(
+                      run: run,
+                      items: state.items,
+                      preparation:
+                          userRole == 'hr' &&
+                          (run.status == 'draft' ||
+                              run.status.startsWith('rejected')),
+                      actions: _buildHeader(
+                        context,
+                        t,
+                        isArabic,
+                        userRole,
+                        currentEmployeeId,
+                        state,
+                        run,
                       ),
+                      workflow: _PayrollWorkflowSummary(run: run),
+                      onBack: () => context.go('/payroll'),
                     ),
-                  ],
-                  if (run != null) ...[
-                    const SizedBox(height: 10),
-                    _PayrollWorkflowSummary(run: run),
-                  ],
-                  const SizedBox(height: 12),
-                  Expanded(child: PayrollRunItemsTable(items: state.items)),
-                ],
-              ),
+                  ),
+                ),
+              ],
             );
           },
         );
@@ -115,7 +184,8 @@ class _PayrollRunBody extends StatelessWidget {
   ) {
     final status = run?.status ?? 'draft';
     final disbursementStatus = run?.disbursementStatus ?? 'not_started';
-    final isAssignedAccountant = role == 'accountant' &&
+    final isAssignedAccountant =
+        role == 'accountant' &&
         currentEmployeeId != null &&
         currentEmployeeId.isNotEmpty &&
         currentEmployeeId == run?.disbursementAssigneeEmployeeId;
@@ -125,38 +195,43 @@ class _PayrollRunBody extends StatelessWidget {
       runSpacing: 12,
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
-        Text(
-          t.payrollRunItems,
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+        _buildStatusChip(
+          _approvalStatusLabel(status, isArabic),
+          _approvalStatusColor(status),
         ),
-        _buildStatusChip(_approvalStatusLabel(status, isArabic), _approvalStatusColor(status)),
         if (status == 'approved')
           _buildStatusChip(
             _disbursementStatusLabel(disbursementStatus, isArabic),
             _disbursementStatusColor(disbursementStatus),
           ),
-        if (role == 'hr' && (status == 'draft' || status.startsWith('rejected')))
+        if (role == 'hr' &&
+            (status == 'draft' || status.startsWith('rejected')))
           ElevatedButton.icon(
-            onPressed: () => _submitToFinance(context),
+            onPressed: () => _act(() => _submitToFinance(context)),
             icon: const Icon(Icons.send),
-            label: Text(isArabic ? 'اعتماد وإرسال لمدير المحاسبة' : 'Approve & Send to Finance Manager'),
+            label: Text(
+              isArabic ? 'إرسال للمراجعة المالية' : 'Send to finance review',
+            ),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue,
+              backgroundColor: const Color(0xFF9B74BF),
               foregroundColor: Colors.white,
             ),
           ),
-        if (role == 'finance_manager' && status == 'pending_finance_manager') ...[
+        if (role == 'finance_manager' &&
+            status == 'pending_finance_manager') ...[
           ElevatedButton.icon(
-            onPressed: () => _financeApprove(context),
+            onPressed: () => _act(() => _financeApprove(context)),
             icon: const Icon(Icons.check_circle_outline),
-            label: Text(isArabic ? 'اعتماد وإرسال للأدمن' : 'Approve & Send to Admin'),
+            label: Text(
+              isArabic ? 'اعتماد وإرسال للأدمن' : 'Approve & Send to Admin',
+            ),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green,
+              backgroundColor: const Color(0xFF9B74BF),
               foregroundColor: Colors.white,
             ),
           ),
           OutlinedButton.icon(
-            onPressed: () => _showRejectDialog(context),
+            onPressed: () => _act(() => _showRejectDialog(context)),
             icon: const Icon(Icons.cancel_outlined),
             label: Text(isArabic ? 'رفض' : 'Reject'),
             style: OutlinedButton.styleFrom(foregroundColor: Colors.red),
@@ -164,16 +239,16 @@ class _PayrollRunBody extends StatelessWidget {
         ],
         if (role == 'admin' && status == 'pending_admin_approval') ...[
           ElevatedButton.icon(
-            onPressed: () => _adminApprove(context),
+            onPressed: () => _act(() => _adminApprove(context)),
             icon: const Icon(Icons.verified_user_outlined),
             label: Text(isArabic ? 'اعتماد نهائي' : 'Final Approval'),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.indigo,
+              backgroundColor: const Color(0xFF9B74BF),
               foregroundColor: Colors.white,
             ),
           ),
           OutlinedButton.icon(
-            onPressed: () => _showRejectDialog(context),
+            onPressed: () => _act(() => _showRejectDialog(context)),
             icon: const Icon(Icons.cancel_outlined),
             label: Text(isArabic ? 'رفض' : 'Reject'),
             style: OutlinedButton.styleFrom(foregroundColor: Colors.red),
@@ -184,36 +259,42 @@ class _PayrollRunBody extends StatelessWidget {
             (disbursementStatus == 'assigned_to_finance_manager' ||
                 disbursementStatus == 'not_started'))
           ElevatedButton.icon(
-            onPressed: () => _assignToAccountant(context),
+            onPressed: () => _act(() => _assignToAccountant(context)),
             icon: const Icon(Icons.assignment_ind_outlined),
             label: Text(isArabic ? 'تحويل لمحاسب' : 'Assign to Accountant'),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.deepPurple,
+              backgroundColor: const Color(0xFF9B74BF),
               foregroundColor: Colors.white,
             ),
           ),
-        if (isAssignedAccountant && status == 'approved' && disbursementStatus == 'assigned_to_accountant')
+        if (isAssignedAccountant &&
+            status == 'approved' &&
+            disbursementStatus == 'assigned_to_accountant')
           ElevatedButton.icon(
-            onPressed: () => _markPaymentInProgress(context),
+            onPressed: () => _act(() => _markPaymentInProgress(context)),
             icon: const Icon(Icons.play_circle_outline),
             label: Text(isArabic ? 'بدء الصرف' : 'Start Payment'),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.orange,
+              backgroundColor: const Color(0xFF9B74BF),
               foregroundColor: Colors.white,
             ),
           ),
-        if (isAssignedAccountant && status == 'approved' && disbursementStatus == 'payment_in_progress')
+        if (isAssignedAccountant &&
+            status == 'approved' &&
+            disbursementStatus == 'payment_in_progress')
           ElevatedButton.icon(
-            onPressed: () => _markPaid(context),
+            onPressed: () => _act(() => _markPaid(context)),
             icon: const Icon(Icons.check_circle_outline),
             label: Text(isArabic ? 'تم الصرف' : 'Mark as Paid'),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green,
+              backgroundColor: const Color(0xFF9B74BF),
               foregroundColor: Colors.white,
             ),
           ),
         ElevatedButton.icon(
-          onPressed: state.items.isEmpty ? null : () => _exportCsvFile(context, state.items),
+          onPressed: state.items.isEmpty
+              ? null
+              : () => _exportCsvFile(context, state.items),
           icon: const Icon(Icons.download),
           label: Text(t.exportCsv),
         ),
@@ -223,7 +304,10 @@ class _PayrollRunBody extends StatelessWidget {
 
   Widget _buildStatusChip(String label, Color color) {
     return Chip(
-      label: Text(label, style: const TextStyle(color: Colors.white, fontSize: 10)),
+      label: Text(
+        label,
+        style: const TextStyle(color: Colors.white, fontSize: 10),
+      ),
       backgroundColor: color,
     );
   }
@@ -237,7 +321,9 @@ class _PayrollRunBody extends StatelessWidget {
       case 'pending_admin_approval':
         return isArabic ? 'بانتظار الأدمن' : 'Pending Admin';
       case 'rejected_by_finance_manager':
-        return isArabic ? 'مرفوض من مدير المحاسبة' : 'Rejected by Finance Manager';
+        return isArabic
+            ? 'مرفوض من مدير المحاسبة'
+            : 'Rejected by Finance Manager';
       case 'rejected_by_admin':
         return isArabic ? 'مرفوض من الأدمن' : 'Rejected by Admin';
       case 'approved':
@@ -329,9 +415,16 @@ class _PayrollRunBody extends StatelessWidget {
       if (context.mounted) context.read<PayrollRunCubit>().load(runId);
     } catch (e) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(e.toString())));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            payrollApprovalError(
+              e,
+              isArabic: Localizations.localeOf(context).languageCode == 'ar',
+            ),
+          ),
+        ),
+      );
     }
   }
 
@@ -414,7 +507,9 @@ class _PayrollRunBody extends StatelessWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              isArabic ? 'تم تعليم مسير الرواتب كمصروف' : 'Payroll marked as paid',
+              isArabic
+                  ? 'تم تعليم مسير الرواتب كمصروف'
+                  : 'Payroll marked as paid',
             ),
           ),
         );
@@ -437,7 +532,9 @@ class _PayrollRunBody extends StatelessWidget {
         content: TextField(
           controller: controller,
           decoration: InputDecoration(
-            hintText: isArabic ? 'اكتب سبب الرفض' : 'Enter reason for rejection',
+            hintText: isArabic
+                ? 'اكتب سبب الرفض'
+                : 'Enter reason for rejection',
           ),
           maxLines: 3,
         ),
@@ -455,8 +552,10 @@ class _PayrollRunBody extends StatelessWidget {
       ),
     );
 
+    controller.dispose();
     if (result != null && result.trim().isNotEmpty && context.mounted) {
-      final role = (context.read<SessionCubit>().state as SessionReady).user.role;
+      final role =
+          (context.read<SessionCubit>().state as SessionReady).user.role;
       await AppDI.payrollRepo.rejectRun(
         runId: runId,
         reason: result.trim(),
@@ -466,33 +565,44 @@ class _PayrollRunBody extends StatelessWidget {
     }
   }
 
-  Future<void> _exportCsvFile(BuildContext context, List<PayrollItem> items) async {
+  Future<void> _exportCsvFile(
+    BuildContext context,
+    List<PayrollItem> items,
+  ) async {
     final t = AppLocalizations.of(context)!;
     final buffer = StringBuffer();
-    buffer.writeln('${t.employee},${t.basic},${t.housing},${t.transport},${t.other},${t.total}');
+    buffer.writeln(
+      '${t.employee},${t.basic},${t.housing},${t.transport},${t.other},${t.total}',
+    );
     for (final r in items) {
-      buffer.writeln('${_csv(r.employeeName)},${r.basicSalary},${r.housingAllowance},${r.transportAllowance},${r.otherAllowance},${r.total}');
+      buffer.writeln(
+        '${_csv(r.employeeName)},${r.basicSalary},${r.housingAllowance},${r.transportAllowance},${r.otherAllowance},${r.total}',
+      );
     }
     final fileName = 'payroll_${DateTime.now().millisecondsSinceEpoch}.csv';
     try {
       final saveLocation = await SafeFilePicker.saveLocation(
         context: context,
         suggestedName: fileName,
-        acceptedTypeGroups: const [XTypeGroup(label: 'CSV', extensions: ['csv'])],
+        acceptedTypeGroups: const [
+          XTypeGroup(label: 'CSV', extensions: ['csv']),
+        ],
       );
       if (saveLocation == null) return;
-      final data = Uint8List.fromList(buffer.toString().codeUnits);
+      final data = Uint8List.fromList(
+        utf8.encode('\ufeff${buffer.toString()}'),
+      );
       final file = XFile.fromData(data, name: fileName, mimeType: 'text/csv');
       await file.saveTo(saveLocation.path);
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(t.csvSavedTo(saveLocation.path))),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(t.csvSavedTo(saveLocation.path))));
     } catch (e) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(t.exportFailed(e.toString()))),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(t.exportFailed(e.toString()))));
     }
   }
 
@@ -520,16 +630,23 @@ class _PayrollWorkflowSummary extends StatelessWidget {
             ),
             _InfoLine(
               label: isArabic ? 'حالة الصرف' : 'Disbursement Status',
-              value: _disbursementStatusText(run.disbursementStatus ?? 'not_started', isArabic),
+              value: _disbursementStatusText(
+                run.disbursementStatus ?? 'not_started',
+                isArabic,
+              ),
             ),
             _InfoLine(
               label: isArabic ? 'المهمة المرتبطة' : 'Linked Task',
-              value: run.disbursementTaskId == null || run.disbursementTaskId!.isEmpty
+              value:
+                  run.disbursementTaskId == null ||
+                      run.disbursementTaskId!.isEmpty
                   ? (isArabic ? 'لم تُنشأ بعد' : 'Not created yet')
                   : _shortId(run.disbursementTaskId!),
             ),
             if ((run.disbursementAssigneeEmployeeId ?? '').isNotEmpty)
-              _AssigneeInfoLine(employeeId: run.disbursementAssigneeEmployeeId!),
+              _AssigneeInfoLine(
+                employeeId: run.disbursementAssigneeEmployeeId!,
+              ),
           ],
         ),
       ),
@@ -550,7 +667,9 @@ class _PayrollWorkflowSummary extends StatelessWidget {
       case 'pending_admin_approval':
         return isArabic ? 'بانتظار الأدمن' : 'Pending Admin';
       case 'rejected_by_finance_manager':
-        return isArabic ? 'مرفوض من مدير المحاسبة' : 'Rejected by Finance Manager';
+        return isArabic
+            ? 'مرفوض من مدير المحاسبة'
+            : 'Rejected by Finance Manager';
       case 'rejected_by_admin':
         return isArabic ? 'مرفوض من الأدمن' : 'Rejected by Admin';
       case 'approved':
@@ -594,7 +713,8 @@ class _AssigneeInfoLineState extends State<_AssigneeInfoLine> {
     return FutureBuilder<String>(
       future: _futureName,
       builder: (context, snapshot) {
-        final value = snapshot.data ??
+        final value =
+            snapshot.data ??
             (snapshot.connectionState == ConnectionState.waiting
                 ? (isArabic ? 'جارٍ التحميل...' : 'Loading...')
                 : widget.employeeId);
@@ -650,7 +770,8 @@ class _AssignAccountantDialog extends StatefulWidget {
   final List<PayrollAssigneeOption> options;
 
   @override
-  State<_AssignAccountantDialog> createState() => _AssignAccountantDialogState();
+  State<_AssignAccountantDialog> createState() =>
+      _AssignAccountantDialogState();
 }
 
 class _AssignAccountantDialogState extends State<_AssignAccountantDialog> {

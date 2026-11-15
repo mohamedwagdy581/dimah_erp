@@ -135,14 +135,14 @@ class _AddContractVersionDialogState extends State<AddContractVersionDialog> {
   }
 
   Future<void> _pickStartDate() => _pickDate(
-        initialDate: _startDate,
-        onSelected: (value) => setState(() => _startDate = value),
-      );
+    initialDate: _startDate,
+    onSelected: (value) => setState(() => _startDate = value),
+  );
 
   Future<void> _pickEndDate() => _pickDate(
-        initialDate: _endDate ?? _startDate,
-        onSelected: (value) => setState(() => _endDate = value),
-      );
+    initialDate: _endDate ?? _startDate,
+    onSelected: (value) => setState(() => _endDate = value),
+  );
 
   Future<void> _pickDate({
     required DateTime? initialDate,
@@ -182,9 +182,9 @@ class _AddContractVersionDialogState extends State<AddContractVersionDialog> {
     } catch (error) {
       if (!mounted) return;
       setState(() => _saving = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(t.saveFailed(error.toString()))),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(t.saveFailed(error.toString()))));
     }
   }
 }

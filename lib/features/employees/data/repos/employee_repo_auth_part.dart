@@ -1,128 +1,62 @@
 part of 'employee_repo_impl.dart';
 
 mixin _EmployeesRepoAuthMixin on _EmployeesRepoSessionMixin {
-  String _buildTestPasswordFromEmail(String email) {
-    final local = email.split('@').first.trim();
-    if (local.isEmpty) return 'Employee@2030';
-
-    final normalized = local.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '');
-    if (normalized.isEmpty) return 'Employee@2030';
-
-    final firstUpper = normalized[0].toUpperCase();
-    final restLower = normalized.length > 1
-        ? normalized.substring(1).toLowerCase()
-        : '';
-    return '$firstUpper$restLower@2030';
-  }
-
-  Future<String?> _signUpAuthUserForTesting({
-    required String email,
-    required String password,
-  }) async {
-    final client = HttpClient();
+  Future<void> checkEmployeeCreationReady() async {
     try {
-      final req = await client.postUrl(
-        Uri.parse('${Env.supabaseUrl}/auth/v1/signup'),
+      final response = await _client.functions.invoke(
+        'provision-employee-login',
+        body: {'action': 'check'},
       );
-      req.headers.set('apikey', Env.supabaseAnonKey);
-      req.headers.set(HttpHeaders.contentTypeHeader, 'application/json');
-      req.write(jsonEncode({'email': email, 'password': password}));
-
-      final res = await req.close();
-      final body = await utf8.decoder.bind(res).join();
-      final map = body.trim().isEmpty
-          ? <String, dynamic>{}
-          : (jsonDecode(body) as Map<String, dynamic>);
-
-      if (res.statusCode >= 200 && res.statusCode < 300) {
-        final user = map['user'];
-        if (user is Map && user['id'] != null) {
-          return user['id'].toString();
-        }
-        return null;
+      if (response.data is! Map ||
+          response.data['ready'] != true ||
+          response.data['version'] != 2) {
+        throw const FormatException(
+          'Employee provisioning service needs updating',
+        );
       }
-
-      final message =
-          map['msg']?.toString() ??
-          map['message']?.toString() ??
-          map['error_description']?.toString() ??
-          map['error']?.toString() ??
-          'Auth signup failed with status ${res.statusCode}';
-
-      if (message.toLowerCase().contains('already registered')) {
-        return null;
+    } on FunctionException catch (error) {
+      if (error.details is Map && error.details['code'] == 'invalid_employee') {
+        throw StateError(
+          'خدمة provision-employee-login قديمة. حدّثها من ملف النشر قبل إضافة الموظف.',
+        );
       }
-      throw Exception(message);
-    } finally {
-      client.close(force: true);
-    }
-  }
-
-  Future<void> _upsertAppUserLink({
-    required String tenantId,
-    required String employeeId,
-    required String fullName,
-    required String email,
-    String? authUserId,
-  }) async {
-    if (authUserId != null && authUserId.trim().isNotEmpty) {
-      await _client.from('users').upsert({
-        'id': authUserId,
-        'tenant_id': tenantId,
-        'email': email,
-        'name': fullName,
-        'role': 'employee',
-        'employee_id': employeeId,
-        'is_active': true,
-      });
-      return;
-    }
-
-    final existing = await _client
-        .from('users')
-        .select('id')
-        .eq('tenant_id', tenantId)
-        .eq('email', email)
-        .maybeSingle();
-    if (existing == null) {
       throw Exception(
-        'Test login could not be auto-linked: existing auth user was not found in public.users.',
+        error.details is Map
+            ? error.details['message'] ??
+                  'خدمة حسابات الموظفين تحتاج التفعيل قبل الإضافة.'
+            : 'خدمة حسابات الموظفين تحتاج التفعيل قبل الإضافة.',
       );
     }
-
-    await _client
-        .from('users')
-        .update({
-          'name': fullName,
-          'role': 'employee',
-          'employee_id': employeeId,
-          'is_active': true,
-        })
-        .eq('tenant_id', tenantId)
-        .eq('id', existing['id'].toString());
   }
 
-  Future<void> _createAndLinkTestLogin({
-    required String tenantId,
+  Future<EmployeeLoginResult> provisionEmployeeLogin({
     required String employeeId,
-    required String fullName,
-    required String email,
+    required String role,
+    required String initialPassword,
   }) async {
-    final normalizedEmail = email.trim().toLowerCase();
-    if (normalizedEmail.isEmpty || !normalizedEmail.contains('@')) return;
-
-    final generatedPassword = _buildTestPasswordFromEmail(normalizedEmail);
-    final authUserId = await _signUpAuthUserForTesting(
-      email: normalizedEmail,
-      password: generatedPassword,
-    );
-
-    await _upsertAppUserLink(
-      tenantId: tenantId,
-      employeeId: employeeId,
-      fullName: fullName.trim(),
-      email: normalizedEmail,
-      authUserId: authUserId,
-    );
+    if (!['employee', 'manager'].contains(role)) {
+      throw ArgumentError('Unsupported employee login role');
+    }
+    try {
+      final response = await _client.functions.invoke(
+        'provision-employee-login',
+        body: {
+          'employeeId': employeeId,
+          'role': role,
+          'initialPassword': initialPassword,
+        },
+      );
+      final result = EmployeeLoginResult.fromMap(
+        Map<String, dynamic>.from(response.data as Map),
+      );
+      if (result.employeeId != employeeId || result.role != role) {
+        throw const FormatException('Login response does not match employee');
+      }
+      return result;
+    } on FunctionException catch (error) {
+      final details = error.details;
+      final message = details is Map ? details['message']?.toString() : null;
+      throw Exception(message ?? 'تعذّر تجهيز حساب الدخول؛ أعد المحاولة');
+    }
   }
 }

@@ -11,9 +11,11 @@ import '../widgets/employee_wizard/job/job_department_field.dart';
 import '../widgets/employee_wizard/job/job_hire_date_field.dart';
 import '../widgets/employee_wizard/job/job_manager_field.dart';
 import '../widgets/employee_wizard/job/job_title_field.dart';
+import '../widgets/employee_wizard/wizard_layout.dart';
 
 class StepJob extends StatelessWidget {
-  const StepJob({super.key});
+  const StepJob({super.key, this.includeContract = true});
+  final bool includeContract;
 
   static final formKey = GlobalKey<FormState>();
 
@@ -21,16 +23,19 @@ class StepJob extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(create: (_) => DepartmentsCubit(AppDI.departmentsRepo)..load()),
+        BlocProvider(
+          create: (_) => DepartmentsCubit(AppDI.departmentsRepo)..load(),
+        ),
         BlocProvider(create: (_) => JobTitlesCubit(AppDI.jobTitlesRepo)),
       ],
-      child: const _StepJobBody(),
+      child: _StepJobBody(includeContract: includeContract),
     );
   }
 }
 
 class _StepJobBody extends StatelessWidget {
-  const _StepJobBody();
+  const _StepJobBody({required this.includeContract});
+  final bool includeContract;
 
   @override
   Widget build(BuildContext context) {
@@ -49,18 +54,20 @@ class _StepJobBody extends StatelessWidget {
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 16),
-          JobDepartmentField(selectedDepartmentId: state.departmentId),
-          const SizedBox(height: 16),
-          JobManagerField(selectedManagerId: state.managerId),
-          const SizedBox(height: 16),
-          JobTitleField(
-            selectedDepartmentId: state.departmentId,
-            selectedJobTitleId: state.jobTitleId,
+          WizardFieldsGrid(
+            children: [
+              JobDepartmentField(selectedDepartmentId: state.departmentId),
+              JobTitleField(
+                key: ValueKey(state.departmentId),
+                selectedDepartmentId: state.departmentId,
+                selectedJobTitleId: state.jobTitleId,
+              ),
+              JobManagerField(selectedManagerId: state.managerId),
+              const JobHireDateField(),
+            ],
           ),
-          const SizedBox(height: 12),
-          const JobHireDateField(),
           const SizedBox(height: 16),
-          JobContractFields(state: state),
+          if (includeContract) JobContractFields(state: state),
         ],
       ),
     );

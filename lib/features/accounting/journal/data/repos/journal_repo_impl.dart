@@ -1,4 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../../../core/utils/request_id.dart';
 
 import '../../domain/models/journal_entry.dart';
 import '../../domain/models/journal_line.dart';
@@ -94,32 +95,11 @@ class JournalRepoImpl implements JournalRepo {
     required DateTime entryDate,
     required String memo,
     required List<JournalLine> lines,
+    String? requestId,
   }) async {
-    final tenantId = await _tenantId();
-
-    final totalDebit = lines.fold<num>(0, (s, l) => s + l.debit);
-    final totalCredit = lines.fold<num>(0, (s, l) => s + l.credit);
-
-    final entry = await _client
-        .from('journal_entries')
-        .insert({
-          'tenant_id': tenantId,
-          'entry_date': _toDateOnly(entryDate),
-          'memo': memo.trim(),
-          'total_debit': totalDebit,
-          'total_credit': totalCredit,
-          'status': 'draft',
-        })
-        .select('id')
-        .single();
-
-    final entryId = entry['id'].toString();
-
     final batch = lines
         .map(
           (l) => {
-            'tenant_id': tenantId,
-            'entry_id': entryId,
             'account_id': l.accountId,
             'debit': l.debit,
             'credit': l.credit,
@@ -127,6 +107,19 @@ class JournalRepoImpl implements JournalRepo {
         )
         .toList();
 
-    await _client.from('journal_lines').insert(batch);
+    await _client.rpc(
+      'accounting_save_draft',
+      params: {
+        'p_id': requestId ?? newRequestId(),
+        'p_date': _toDateOnly(entryDate),
+        'p_memo': memo.trim(),
+        'p_lines': batch,
+      },
+    );
+  }
+
+  @override
+  Future<void> postEntry(String id) async {
+    await _client.rpc('accounting_post_entry', params: {'p_id': id});
   }
 }

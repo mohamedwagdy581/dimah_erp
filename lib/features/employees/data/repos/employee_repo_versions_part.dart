@@ -22,6 +22,7 @@ mixin _EmployeesRepoVersionsMixin on _EmployeesRepoExpiryAlertsMixin {
       'file_url': _normalizeOptionalText(fileUrl),
     });
   }
+
   Future<void> addEmployeeCompensationVersion({
     required String employeeId,
     required double basicSalary,

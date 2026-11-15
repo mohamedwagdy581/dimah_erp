@@ -41,25 +41,42 @@ class EmployeeProfilePersonalSection extends StatelessWidget {
       children: [
         EmployeeProfileEditField(controller: nationality, label: t.nationality),
         const SizedBox(height: 10),
-        EmployeeProfileEditField(controller: maritalStatus, label: t.maritalStatus),
+        EmployeeProfileEditField(
+          controller: maritalStatus,
+          label: t.maritalStatus,
+        ),
         const SizedBox(height: 10),
         EmployeeProfileEditField(controller: address, label: t.address),
         const SizedBox(height: 10),
         Row(
           children: [
-            Expanded(child: EmployeeProfileEditField(controller: city, label: t.city)),
+            Expanded(
+              child: EmployeeProfileEditField(controller: city, label: t.city),
+            ),
             const SizedBox(width: 10),
-            Expanded(child: EmployeeProfileEditField(controller: country, label: t.country)),
+            Expanded(
+              child: EmployeeProfileEditField(
+                controller: country,
+                label: t.country,
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 10),
         Row(
           children: [
-            Expanded(child: EmployeeProfileEditField(controller: passportNo, label: t.passportNo)),
+            Expanded(
+              child: EmployeeProfileEditField(
+                controller: passportNo,
+                label: t.passportNo,
+              ),
+            ),
             const SizedBox(width: 10),
             Expanded(
               child: EmployeeProfileDateButton(
-                label: passportExpiry == null ? t.passportExpiry : formatEmployeeDate(passportExpiry),
+                label: passportExpiry == null
+                    ? t.passportExpiry
+                    : formatEmployeeDate(passportExpiry),
                 icon: Icons.event,
                 onPressed: onPickPassportExpiry,
               ),
@@ -71,7 +88,9 @@ class EmployeeProfilePersonalSection extends StatelessWidget {
           children: [
             Expanded(
               child: EmployeeProfileDateButton(
-                label: residencyIssueDate == null ? t.residencyIssue : formatEmployeeDate(residencyIssueDate),
+                label: residencyIssueDate == null
+                    ? t.residencyIssue
+                    : formatEmployeeDate(residencyIssueDate),
                 icon: Icons.badge_outlined,
                 onPressed: onPickResidencyIssueDate,
               ),
@@ -79,7 +98,9 @@ class EmployeeProfilePersonalSection extends StatelessWidget {
             const SizedBox(width: 10),
             Expanded(
               child: EmployeeProfileDateButton(
-                label: residencyExpiryDate == null ? t.residencyExpiry : formatEmployeeDate(residencyExpiryDate),
+                label: residencyExpiryDate == null
+                    ? t.residencyExpiry
+                    : formatEmployeeDate(residencyExpiryDate),
                 icon: Icons.badge,
                 onPressed: onPickResidencyExpiryDate,
               ),

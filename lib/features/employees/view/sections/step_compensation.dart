@@ -50,7 +50,11 @@ class _StepCompensationState extends State<StepCompensation> {
 
     return BlocBuilder<EmployeeWizardCubit, EmployeeWizardState>(
       builder: (context, state) {
-        final total = state.basicSalary + state.housingAllowance + state.transportAllowance + state.otherAllowance;
+        final total =
+            state.basicSalary +
+            state.housingAllowance +
+            state.transportAllowance +
+            state.otherAllowance;
         return Form(
           key: StepCompensation.formKey,
           autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -59,7 +63,10 @@ class _StepCompensationState extends State<StepCompensation> {
             children: [
               Text(
                 t.stepCompensation,
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 16),
               CompensationSalaryFields(

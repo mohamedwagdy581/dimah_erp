@@ -10,11 +10,17 @@ import '../../../../attendance/view/sections/attendance_table_section.dart';
 import '../../../../leaves/view/cubit/leaves_cubit.dart';
 import '../../../../leaves/view/sections/leaves_table_section.dart';
 import '../../sections/my_tasks_section.dart';
+import '../../sections/employee_requests_section.dart';
 
 class EmployeePortalTabs extends StatelessWidget {
-  const EmployeePortalTabs({super.key, required this.employeeId});
+  const EmployeePortalTabs({
+    super.key,
+    required this.employeeId,
+    this.employeeDesign = false,
+  });
 
   final String employeeId;
+  final bool employeeDesign;
 
   @override
   Widget build(BuildContext context) {
@@ -26,26 +32,41 @@ class EmployeePortalTabs extends StatelessWidget {
             tabs: [
               Tab(text: t.myTasks),
               Tab(text: t.myAttendance),
-              Tab(text: t.myLeaves),
+              if (!employeeDesign) Tab(text: t.myLeaves),
               Tab(text: t.myRequests),
             ],
           ),
           Expanded(
             child: TabBarView(
               children: [
-                MyTasksSection(employeeId: employeeId),
+                MyTasksSection(
+                  employeeId: employeeId,
+                  employeeDesign: employeeDesign,
+                ),
                 BlocProvider(
-                  create: (_) => AttendanceCubit(AppDI.attendanceRepo, employeeId: employeeId)..load(),
+                  create: (_) => AttendanceCubit(
+                    AppDI.attendanceRepo,
+                    employeeId: employeeId,
+                  )..load(),
                   child: const AttendanceTableSection(showCreate: false),
                 ),
-                BlocProvider(
-                  create: (_) => LeavesCubit(AppDI.leavesRepo, employeeId: employeeId)..load(),
-                  child: LeavesTableSection(employeeId: employeeId),
-                ),
-                BlocProvider(
-                  create: (_) => ApprovalsCubit(AppDI.approvalsRepo, employeeId: employeeId)..load(),
-                  child: const ApprovalsTableSection(readOnly: true),
-                ),
+                if (!employeeDesign)
+                  BlocProvider(
+                    create: (_) =>
+                        LeavesCubit(AppDI.leavesRepo, employeeId: employeeId)
+                          ..load(),
+                    child: LeavesTableSection(employeeId: employeeId),
+                  ),
+                if (employeeDesign)
+                  EmployeeRequestsSection(employeeId: employeeId)
+                else
+                  BlocProvider(
+                    create: (_) => ApprovalsCubit(
+                      AppDI.approvalsRepo,
+                      employeeId: employeeId,
+                    )..load(),
+                    child: const ApprovalsTableSection(readOnly: true),
+                  ),
               ],
             ),
           ),

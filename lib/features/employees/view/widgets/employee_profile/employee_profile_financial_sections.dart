@@ -1,3 +1,4 @@
+import 'package:erp_sys/core/ui/app_data_state.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../l10n/app_localizations.dart';
@@ -38,16 +39,34 @@ class EmployeeProfileFinancialSections extends StatelessWidget {
                 ),
               ),
             const SizedBox(height: 8),
-            ProfileKvRow(label: t.basicSalary, value: formatEmployeeMoney(p.basicSalary)),
-            ProfileKvRow(label: t.housingAllowance, value: formatEmployeeMoney(p.housingAllowance)),
-            ProfileKvRow(label: t.transportAllowance, value: formatEmployeeMoney(p.transportAllowance)),
-            ProfileKvRow(label: t.otherAllowance, value: formatEmployeeMoney(p.otherAllowance)),
-            ProfileKvRow(label: t.totalCompensation, value: formatEmployeeMoney(totalEmployeeCompensation(p))),
+            ProfileKvRow(
+              label: t.basicSalary,
+              value: formatEmployeeMoney(p.basicSalary),
+            ),
+            ProfileKvRow(
+              label: t.housingAllowance,
+              value: formatEmployeeMoney(p.housingAllowance),
+            ),
+            ProfileKvRow(
+              label: t.transportAllowance,
+              value: formatEmployeeMoney(p.transportAllowance),
+            ),
+            ProfileKvRow(
+              label: t.otherAllowance,
+              value: formatEmployeeMoney(p.otherAllowance),
+            ),
+            ProfileKvRow(
+              label: t.totalCompensation,
+              value: formatEmployeeMoney(totalEmployeeCompensation(p)),
+            ),
             const SizedBox(height: 10),
-            Text(t.compensationHistory, style: const TextStyle(fontWeight: FontWeight.w700)),
+            Text(
+              t.compensationHistory,
+              style: const TextStyle(fontWeight: FontWeight.w700),
+            ),
             const SizedBox(height: 6),
             if (p.compensationHistory.isEmpty)
-              Text(t.noCompensationHistory)
+              AppEmptyState(title: t.noCompensationHistory, compact: false)
             else
               ...p.compensationHistory.map(
                 (item) => ListTile(

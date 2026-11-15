@@ -1,7 +1,16 @@
 class AppRoutes {
   static const splash = '/splash';
   static const login = '/login';
+  static const resetPassword = '/reset-password';
+  static const recoverPassword = '/recover-password';
+  static const authLinkError = '/auth-link-error';
   static const dashboard = '/';
+  static const managerTeam = '/manager/team';
+  static const financeTeam = '/finance/team';
+  static const managerTasks = '/manager/tasks';
+  static const managerReviews = '/manager/reviews';
+  static const managerRequests = '/manager/requests';
+  static const managerAttendance = '/manager/attendance';
   static const departments = '/departments';
   static const employees = '/employees';
   static const settlements = '/settlements';
@@ -16,9 +25,12 @@ class AppRoutes {
   static const hrFormTemplate = '/hr-forms/:templateId';
   static const approvals = '/approvals';
   static const notifications = '/notifications';
+  static const userManagement = '/user-management';
   static const myPortal = '/my';
   static const accounts = '/accounts';
   static const journal = '/journal';
+  static const ledger = '/ledger';
+  static const trialBalance = '/trial-balance';
   static const employeeCreate = '/employees/create';
   static const employeeProfile = '/employees/:id';
 }

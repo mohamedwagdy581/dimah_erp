@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../../l10n/app_localizations.dart';
+import '../../../view/accounting_ui.dart';
 import '../cubit/journal_cubit.dart';
 import '../cubit/journal_state.dart';
-import '../widgets/journal_form_dialog.dart';
 
 class JournalTableSectionHeader extends StatelessWidget {
   const JournalTableSectionHeader({
@@ -24,7 +24,11 @@ class JournalTableSectionHeader extends StatelessWidget {
       children: [
         Text(
           t.menuJournal,
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+          style: const TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.w800,
+            color: accountingInk,
+          ),
         ),
         const SizedBox(height: 10),
         Wrap(
@@ -63,10 +67,7 @@ class JournalTableSectionHeader extends StatelessWidget {
 }
 
 class _JournalStatusFilter extends StatelessWidget {
-  const _JournalStatusFilter({
-    required this.cubit,
-    required this.state,
-  });
+  const _JournalStatusFilter({required this.cubit, required this.state});
 
   final JournalCubit cubit;
   final JournalState state;
@@ -136,7 +137,8 @@ class _NewJournalEntryButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context)!;
-    return ElevatedButton.icon(
+    return FilledButton.icon(
+      style: FilledButton.styleFrom(backgroundColor: accountingPurple),
       onPressed: () => _openDialog(context),
       icon: const Icon(Icons.add),
       label: Text(t.newEntry),
@@ -144,15 +146,6 @@ class _NewJournalEntryButton extends StatelessWidget {
   }
 
   Future<void> _openDialog(BuildContext context) async {
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (_) => BlocProvider.value(
-        value: context.read<JournalCubit>(),
-        child: const JournalFormDialog(),
-      ),
-    );
-    if (ok == true && context.mounted) {
-      cubit.load(resetPage: true);
-    }
+    context.go('/journal?new=1');
   }
 }

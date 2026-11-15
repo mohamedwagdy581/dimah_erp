@@ -23,20 +23,30 @@ class ApprovalActionsCell extends StatelessWidget {
     final t = AppLocalizations.of(context)!;
     final isPending = request.status == 'pending';
     final isApproved = request.status == 'approved';
-    final canAct = isPending &&
-        (request.currentApproverRole ?? '').trim() == actorRole;
+    final canAct =
+        isPending && (request.currentApproverRole ?? '').trim() == actorRole;
 
     if (canAct) {
-      return Row(
+      return Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        crossAxisAlignment: WrapCrossAlignment.center,
         children: [
-          TextButton(
+          FilledButton.icon(
+            icon: const Icon(Icons.check, size: 16),
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFF8659BB),
+            ),
             onPressed: onApprove == null ? null : () => onApprove!(request.id),
-            child: Text(t.approve),
+            label: Text(t.approve),
           ),
-          const SizedBox(width: 8),
-          TextButton(
+          OutlinedButton.icon(
+            icon: const Icon(Icons.close, size: 16),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: const Color(0xFFDC4545),
+            ),
             onPressed: onReject == null ? null : () => onReject!(request.id),
-            child: Text(t.reject),
+            label: Text(t.reject),
           ),
         ],
       );
@@ -45,26 +55,28 @@ class ApprovalActionsCell extends StatelessWidget {
     final color = isPending
         ? Colors.orange
         : isApproved
-            ? Colors.green
-            : Colors.red;
+        ? Colors.green
+        : Colors.red;
     final icon = isPending
         ? Icons.pending_actions
         : isApproved
-            ? Icons.check_circle
-            : Icons.cancel;
+        ? Icons.check_circle
+        : Icons.cancel;
     final label = isPending
         ? approvalPendingWithLabel(t, request)
         : isApproved
-            ? t.processedApproved
-            : t.processedRejected;
+        ? t.processedApproved
+        : t.processedRejected;
 
     return Row(
       children: [
         Icon(icon, size: 18, color: color),
         const SizedBox(width: 6),
-        Text(
-          label,
-          style: TextStyle(color: color, fontWeight: FontWeight.w600),
+        Flexible(
+          child: Text(
+            label,
+            style: TextStyle(color: color, fontWeight: FontWeight.w600),
+          ),
         ),
       ],
     );

@@ -17,9 +17,7 @@ class ElectronicLeaveRequestPdfCoverageSection extends pw.StatelessWidget {
   pw.Widget build(pw.Context context) {
     return electronicLeaveSection(
       theme,
-      title: theme.isArabic
-          ? 'التغطية أثناء الإجازة'
-          : 'Coverage During Leave',
+      title: theme.isArabic ? 'التغطية أثناء الإجازة' : 'Coverage During Leave',
       children: [
         electronicLeaveField(
           theme,

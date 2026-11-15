@@ -1,6 +1,7 @@
 part of 'employee_repo_impl.dart';
 
-mixin _EmployeesRepoProfileFetchQueriesMixin on _EmployeesRepoProfileFetchHelpersMixin {
+mixin _EmployeesRepoProfileFetchQueriesMixin
+    on _EmployeesRepoProfileFetchHelpersMixin {
   Future<Map<String, dynamic>?> _fetchEmployeeBase({
     required String tenantId,
     required String employeeId,
@@ -8,7 +9,7 @@ mixin _EmployeesRepoProfileFetchQueriesMixin on _EmployeesRepoProfileFetchHelper
     return _client
         .from('employees')
         .select(
-          'id, full_name, email, phone, status, hire_date, '
+          'id, employee_number, manager_id, full_name, email, phone, status, hire_date, '
           'national_id, date_of_birth, gender, nationality, education, employment_type, photo_url, '
           'department:departments!employees_department_id_fkey(name), '
           'job_title:job_titles(name)',
@@ -18,7 +19,10 @@ mixin _EmployeesRepoProfileFetchQueriesMixin on _EmployeesRepoProfileFetchHelper
         .maybeSingle();
   }
 
-  Future<Map<String, dynamic>?> _fetchEmployeePersonal(String tenantId, String employeeId) {
+  Future<Map<String, dynamic>?> _fetchEmployeePersonal(
+    String tenantId,
+    String employeeId,
+  ) {
     return _client
         .from('employee_personal')
         .select(
@@ -32,7 +36,9 @@ mixin _EmployeesRepoProfileFetchQueriesMixin on _EmployeesRepoProfileFetchHelper
         .maybeSingle();
   }
 
-  Future<Map<String, dynamic>?> _fetchEmployeePersonalFallback(String employeeId) {
+  Future<Map<String, dynamic>?> _fetchEmployeePersonalFallback(
+    String employeeId,
+  ) {
     return _client
         .from('employee_personal')
         .select(
@@ -45,7 +51,10 @@ mixin _EmployeesRepoProfileFetchQueriesMixin on _EmployeesRepoProfileFetchHelper
         .maybeSingle();
   }
 
-  Future<Map<String, dynamic>?> _fetchEmployeeFinancial(String tenantId, String employeeId) {
+  Future<Map<String, dynamic>?> _fetchEmployeeFinancial(
+    String tenantId,
+    String employeeId,
+  ) {
     return _client
         .from('employee_financial')
         .select('bank_name, iban, account_number, payment_method')
@@ -54,7 +63,9 @@ mixin _EmployeesRepoProfileFetchQueriesMixin on _EmployeesRepoProfileFetchHelper
         .maybeSingle();
   }
 
-  Future<Map<String, dynamic>?> _fetchEmployeeFinancialFallback(String employeeId) {
+  Future<Map<String, dynamic>?> _fetchEmployeeFinancialFallback(
+    String employeeId,
+  ) {
     return _client
         .from('employee_financial')
         .select('bank_name, iban, account_number, payment_method')

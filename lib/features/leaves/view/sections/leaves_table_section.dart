@@ -1,3 +1,4 @@
+import 'package:erp_sys/core/ui/app_data_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -34,24 +35,29 @@ class LeavesTableSection extends StatelessWidget {
               ),
               if (state.balances.isNotEmpty) ...[
                 const SizedBox(height: 10),
-                LeavesBalanceCards(
-                  balances: state.balances,
-                  t: t,
-                ),
+                LeavesBalanceCards(balances: state.balances, t: t),
               ],
               const SizedBox(height: 12),
-              if (state.loading) const LinearProgressIndicator(),
-              if (state.error != null) ...[
-                const SizedBox(height: 10),
-                Text(state.error!, style: const TextStyle(color: Colors.red)),
-              ],
               const SizedBox(height: 12),
               Expanded(
-                child: LeavesTable(
-                  items: state.items,
-                  onResubmit: employeeId == null
-                      ? null
-                      : (leave) => openLeaveResubmitDialog(context, leave),
+                child: AppDataRegion(
+                  loading: state.loading,
+                  error: state.error,
+                  empty: state.items.isEmpty,
+                  filtered:
+                      state.search.trim().isNotEmpty ||
+                      state.status != null ||
+                      state.type != null ||
+                      state.startDate != null ||
+                      state.endDate != null,
+                  onClear: cubit.resetFilters,
+                  onRetry: cubit.load,
+                  child: LeavesTable(
+                    items: state.items,
+                    onResubmit: employeeId == null
+                        ? null
+                        : (leave) => openLeaveResubmitDialog(context, leave),
+                  ),
                 ),
               ),
               const SizedBox(height: 12),

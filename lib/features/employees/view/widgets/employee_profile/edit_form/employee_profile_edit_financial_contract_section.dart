@@ -37,17 +37,32 @@ class EmployeeProfileFinancialContractSection extends StatelessWidget {
       children: [
         Row(
           children: [
-            Expanded(child: EmployeeProfileEditField(controller: bankName, label: t.bankName)),
+            Expanded(
+              child: EmployeeProfileEditField(
+                controller: bankName,
+                label: t.bankName,
+              ),
+            ),
             const SizedBox(width: 10),
-            Expanded(child: EmployeeProfileEditField(controller: iban, label: t.iban)),
+            Expanded(
+              child: EmployeeProfileEditField(controller: iban, label: t.iban),
+            ),
           ],
         ),
         const SizedBox(height: 10),
-        EmployeeProfileEditField(controller: accountNumber, label: t.accountNumber),
+        EmployeeProfileEditField(
+          controller: accountNumber,
+          label: t.accountNumber,
+        ),
         const SizedBox(height: 10),
         Row(
           children: [
-            Expanded(child: EmployeeProfileEditField(controller: contractType, label: t.contractType)),
+            Expanded(
+              child: EmployeeProfileEditField(
+                controller: contractType,
+                label: t.contractType,
+              ),
+            ),
             const SizedBox(width: 10),
             Expanded(
               child: EmployeeProfileEditField(
@@ -63,7 +78,9 @@ class EmployeeProfileFinancialContractSection extends StatelessWidget {
           children: [
             Expanded(
               child: EmployeeProfileDateButton(
-                label: contractStart == null ? t.contractStart : formatEmployeeDate(contractStart),
+                label: contractStart == null
+                    ? t.contractStart
+                    : formatEmployeeDate(contractStart),
                 icon: Icons.event_note,
                 onPressed: onPickContractStart,
               ),
@@ -71,7 +88,9 @@ class EmployeeProfileFinancialContractSection extends StatelessWidget {
             const SizedBox(width: 10),
             Expanded(
               child: EmployeeProfileDateButton(
-                label: contractEnd == null ? t.contractEnd : formatEmployeeDate(contractEnd),
+                label: contractEnd == null
+                    ? t.contractEnd
+                    : formatEmployeeDate(contractEnd),
                 icon: Icons.event_busy,
                 onPressed: onPickContractEnd,
               ),
@@ -79,7 +98,10 @@ class EmployeeProfileFinancialContractSection extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 10),
-        EmployeeProfileEditField(controller: contractFileUrl, label: t.contractFileUrl),
+        EmployeeProfileEditField(
+          controller: contractFileUrl,
+          label: t.contractFileUrl,
+        ),
       ],
     );
   }

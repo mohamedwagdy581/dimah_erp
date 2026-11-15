@@ -1,35 +1,93 @@
 part of 'dashboard_page.dart';
 
 extension _EmployeeDashboardNotificationHelpers on _EmployeeDashboard {
-  List<_EmployeeNotificationItem> _buildNotifications(
+  List<EmployeeDashboardNotification> _buildNotifications(
     List<Map<String, dynamic>> rows,
     DateTime today,
   ) {
-    final notifications = <_EmployeeNotificationItem>[];
-    for (final row in rows.take(20)) {
+    final notifications = <EmployeeDashboardNotification>[];
+    final recent = List<Map<String, dynamic>>.of(rows)
+      ..sort((a, b) {
+        final aDate = DateTime.tryParse(
+          (a['updated_at'] ?? a['created_at'])?.toString() ?? '',
+        );
+        final bDate = DateTime.tryParse(
+          (b['updated_at'] ?? b['created_at'])?.toString() ?? '',
+        );
+        if (aDate == null) return bDate == null ? 0 : 1;
+        if (bDate == null) return -1;
+        return bDate.compareTo(aDate);
+      });
+    for (final row in recent.take(30)) {
       final title = row['title']?.toString() ?? '-';
       final reviewStatus = (row['employee_review_status'] ?? 'none').toString();
       final qaStatus = (row['qa_status'] ?? 'pending').toString();
       final taskStatus = (row['status'] ?? '').toString();
       final dueDate = DateTime.tryParse(row['due_date']?.toString() ?? '');
-      final createdAt = _dateOnlyFromRaw(row['created_at']?.toString());
+      final createdAt = _dateOnlyFromRaw(
+        (row['updated_at'] ?? row['created_at'])?.toString(),
+      );
       if (reviewStatus == 'rejected') {
-        notifications.add(_EmployeeNotificationItem(type: 'review_rejected', subtitle: '$title - $createdAt', icon: Icons.reply_outlined, color: Colors.orange));
+        notifications.add(
+          EmployeeDashboardNotification(
+            type: 'review_rejected',
+            subtitle: '$title - $createdAt',
+            icon: Icons.reply_outlined,
+            color: Colors.orange,
+          ),
+        );
       } else if (reviewStatus == 'approved') {
-        notifications.add(_EmployeeNotificationItem(type: 'review_approved', subtitle: '$title - $createdAt', icon: Icons.rule_folder_outlined, color: Colors.blue));
+        notifications.add(
+          EmployeeDashboardNotification(
+            type: 'review_approved',
+            subtitle: '$title - $createdAt',
+            icon: Icons.rule_folder_outlined,
+            color: Colors.blue,
+          ),
+        );
       }
       if (qaStatus == 'rework') {
-        notifications.add(_EmployeeNotificationItem(type: 'qa_rework', subtitle: '$title - $createdAt', icon: Icons.restart_alt_outlined, color: Colors.orange));
+        notifications.add(
+          EmployeeDashboardNotification(
+            type: 'qa_rework',
+            subtitle: '$title - $createdAt',
+            icon: Icons.restart_alt_outlined,
+            color: Colors.orange,
+          ),
+        );
       } else if (qaStatus == 'accepted') {
-        notifications.add(_EmployeeNotificationItem(type: 'qa_accepted', subtitle: '$title - $createdAt', icon: Icons.verified_outlined, color: Colors.green));
+        notifications.add(
+          EmployeeDashboardNotification(
+            type: 'qa_accepted',
+            subtitle: '$title - $createdAt',
+            icon: Icons.verified_outlined,
+            color: Colors.green,
+          ),
+        );
       } else if (qaStatus == 'rejected') {
-        notifications.add(_EmployeeNotificationItem(type: 'qa_rejected', subtitle: '$title - $createdAt', icon: Icons.block_outlined, color: Colors.red));
+        notifications.add(
+          EmployeeDashboardNotification(
+            type: 'qa_rejected',
+            subtitle: '$title - $createdAt',
+            icon: Icons.block_outlined,
+            color: Colors.red,
+          ),
+        );
       }
       if (taskStatus != 'done' && dueDate != null) {
         final dueOnly = DateTime(dueDate.year, dueDate.month, dueDate.day);
         final todayOnly = DateTime(today.year, today.month, today.day);
-        if (!dueOnly.isBefore(todayOnly) && !dueOnly.isAfter(todayOnly.add(const Duration(days: 2)))) {
-          notifications.add(_EmployeeNotificationItem(type: 'task_due_soon', subtitle: '$title - ${_dateOnlyFromRaw(row['due_date']?.toString())}', icon: Icons.schedule_outlined, color: Colors.amber));
+        if (!dueOnly.isBefore(todayOnly) &&
+            !dueOnly.isAfter(todayOnly.add(const Duration(days: 2)))) {
+          notifications.add(
+            EmployeeDashboardNotification(
+              type: 'task_due_soon',
+              subtitle:
+                  '$title - ${_dateOnlyFromRaw(row['due_date']?.toString())}',
+              icon: Icons.schedule_outlined,
+              color: Colors.amber,
+            ),
+          );
         }
       }
     }

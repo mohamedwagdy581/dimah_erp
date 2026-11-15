@@ -3,6 +3,8 @@ import '../models/payroll_item.dart';
 import '../models/payroll_assignee_option.dart';
 
 abstract class PayrollRepo {
+  /// Read-only preview; opening the preparation page never creates a run.
+  Future<List<PayrollItem>> fetchPreparationItems();
   Future<({List<PayrollRun> items, int total})> fetchRuns({
     required int page,
     required int pageSize,
@@ -18,26 +20,27 @@ abstract class PayrollRepo {
     required DateTime periodEnd,
   });
 
-  Future<List<PayrollItem>> fetchRunItems({
-    required String runId,
-  });
+  Future<List<PayrollItem>> fetchRunItems({required String runId});
 
   Future<void> finalizeRun({required String runId});
 
   // --- New Multi-Stage Workflow ---
-  
+
   /// HR submits to Finance Manager
   Future<void> submitToFinanceManager({required String runId});
-  
+
   /// Finance Manager approves and sends to Admin
-  Future<void> financeManagerApprove({required String runId});
-  
+  Future<void> financeManagerApprove({required String runId, String? notes});
+
+  /// Notes saved with the approval request, including previously reviewed runs.
+  Future<String?> fetchFinanceReviewNotes({required String runId});
+
   /// Admin gives final approval and creates task for Finance Manager
   Future<void> adminApprove({required String runId});
-  
+
   /// Rejection logic with reason
   Future<void> rejectRun({
-    required String runId, 
+    required String runId,
     required String reason,
     required String rejectedByRole,
   });

@@ -1,3 +1,4 @@
+import 'package:erp_sys/core/ui/app_data_state.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../l10n/app_localizations.dart';
@@ -35,7 +36,7 @@ class EmployeeProfileSettlementSection extends StatelessWidget {
           ),
         if (canEdit) const SizedBox(height: 8),
         if (profile.settlements.isEmpty)
-          Text(t.noSettlementHistory)
+          AppEmptyState(title: t.noSettlementHistory, compact: false)
         else
           ...profile.settlements.map((settlement) {
             return ListTile(

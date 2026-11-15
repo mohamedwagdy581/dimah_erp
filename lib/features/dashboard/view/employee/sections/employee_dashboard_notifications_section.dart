@@ -2,38 +2,55 @@ part of '../../dashboard_page.dart';
 
 class _EmployeeNotificationsCard extends StatelessWidget {
   const _EmployeeNotificationsCard({required this.data});
-
-  final _EmployeeDashboardData data;
+  final EmployeeDashboardData data;
 
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context)!;
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              t.employeeNotifications,
-              style: const TextStyle(fontWeight: FontWeight.w700),
-            ),
-            const SizedBox(height: 8),
-            if (data.notifications.isEmpty)
-              Text(t.noEmployeeNotifications)
-            else
-              ...data.notifications.map(
-                (item) => ListTile(
-                  dense: true,
-                  contentPadding: EdgeInsets.zero,
-                  leading: Icon(item.icon, color: item.color),
-                  title: Text(_employeeNotificationTitle(t, item.type)),
-                  subtitle: Text(item.subtitle),
-                ),
+    final ar = Localizations.localeOf(context).languageCode == 'ar';
+    return EmployeeDashboardCard(
+      title: ar ? 'الإشعارات الحديثة' : 'Recent notifications',
+      actionLabel: ar ? 'عرض الكل' : 'View all',
+      onAction: () => context.go(AppRoutes.notifications),
+      child: data.notifications.isEmpty
+          ? Padding(
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              child: AppEmptyState(
+                title: t.noEmployeeNotifications,
+                compact: false,
               ),
-          ],
-        ),
-      ),
+            )
+          : Column(
+              children: [
+                for (var i = 0; i < data.notifications.take(4).length; i++) ...[
+                  if (i > 0) const Divider(height: 1),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: CircleAvatar(
+                      radius: 13,
+                      backgroundColor: data.notifications[i].color.withValues(
+                        alpha: .1,
+                      ),
+                      child: Icon(
+                        data.notifications[i].icon,
+                        size: 15,
+                        color: data.notifications[i].color,
+                      ),
+                    ),
+                    title: Text(
+                      _employeeNotificationTitle(t, data.notifications[i].type),
+                      style: const TextStyle(fontSize: 13),
+                    ),
+                    subtitle: Text(
+                      data.notifications[i].subtitle,
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                    trailing: const Icon(Icons.arrow_forward_ios, size: 12),
+                    onTap: () => context.go('/my?tab=tasks'),
+                  ),
+                ],
+              ],
+            ),
     );
   }
 }

@@ -4,10 +4,7 @@ import 'package:pdf/widgets.dart' as pw;
 import '../electronic_leave_request_pdf_theme.dart';
 
 class ElectronicLeaveRequestPdfHeader extends pw.StatelessWidget {
-  ElectronicLeaveRequestPdfHeader({
-    required this.theme,
-    required this.logo,
-  });
+  ElectronicLeaveRequestPdfHeader({required this.theme, required this.logo});
 
   final ElectronicLeaveRequestPdfTheme theme;
   final pw.MemoryImage logo;

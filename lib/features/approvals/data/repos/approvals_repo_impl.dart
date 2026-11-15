@@ -2,6 +2,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../domain/models/approval_request.dart';
 import '../../domain/repos/approvals_repo.dart';
+import '../../../payroll/domain/repos/payroll_repo.dart';
+import '../../../payroll/data/repos/payroll_repo_impl.dart';
 
 part 'approvals_repo_actions_part.dart';
 part 'approvals_repo_leave_helpers_part.dart';
@@ -21,7 +23,11 @@ class ApprovalsRepoImpl
         _ApprovalsRepoCountsMixin,
         _ApprovalsRepoActionsMixin
     implements ApprovalsRepo {
-  ApprovalsRepoImpl(this._client);
+  ApprovalsRepoImpl(this._client, {PayrollRepo? payroll})
+    : _payroll = payroll ?? PayrollRepoImpl(_client);
+
+  @override
+  final PayrollRepo _payroll;
 
   @override
   final SupabaseClient _client;

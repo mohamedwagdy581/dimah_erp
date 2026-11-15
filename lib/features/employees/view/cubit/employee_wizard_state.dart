@@ -1,3 +1,4 @@
+import '../../domain/models/employee_login_result.dart';
 import 'package:equatable/equatable.dart';
 
 import 'models/employee_wizard_additional.dart';
@@ -14,6 +15,10 @@ class EmployeeWizardState extends Equatable {
     this.loading = false,
     this.success = false,
     this.error,
+    this.loginRole = 'employee',
+    this.savedEmployeeId,
+    this.loginResult,
+    this.attendanceNumber = '',
   });
 
   final EmployeeWizardPersonal personal;
@@ -23,6 +28,10 @@ class EmployeeWizardState extends Equatable {
   final bool loading;
   final bool success;
   final String? error;
+  final String loginRole;
+  final String? savedEmployeeId;
+  final EmployeeLoginResult? loginResult;
+  final String attendanceNumber;
 
   EmployeeWizardState copyWith({
     EmployeeWizardPersonal? personal,
@@ -32,6 +41,10 @@ class EmployeeWizardState extends Equatable {
     bool? loading,
     bool? success,
     String? error,
+    String? loginRole,
+    String? savedEmployeeId,
+    EmployeeLoginResult? loginResult,
+    String? attendanceNumber,
   }) {
     return EmployeeWizardState(
       personal: personal ?? this.personal,
@@ -41,6 +54,10 @@ class EmployeeWizardState extends Equatable {
       loading: loading ?? this.loading,
       success: success ?? this.success,
       error: error,
+      loginRole: loginRole ?? this.loginRole,
+      savedEmployeeId: savedEmployeeId ?? this.savedEmployeeId,
+      loginResult: loginResult ?? this.loginResult,
+      attendanceNumber: attendanceNumber ?? this.attendanceNumber,
     );
   }
 
@@ -82,5 +99,17 @@ class EmployeeWizardState extends Equatable {
   String get university => additional.university;
 
   @override
-  List<Object?> get props => [personal, job, compensation, additional, loading, success, error];
+  List<Object?> get props => [
+    personal,
+    job,
+    compensation,
+    additional,
+    loading,
+    success,
+    error,
+    loginRole,
+    savedEmployeeId,
+    loginResult,
+    attendanceNumber,
+  ];
 }

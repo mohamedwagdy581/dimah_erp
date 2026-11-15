@@ -1,7 +1,11 @@
 part of 'dashboard_page.dart';
 
-class _EmployeeDashboardData {
-  const _EmployeeDashboardData({
+class EmployeeDashboardData {
+  const EmployeeDashboardData({
+    this.employeeName = '',
+    this.annualBalance,
+    this.pendingRequests = 0,
+    this.todayTasks = 0,
     this.totalTasks = 0,
     this.pendingTasks = 0,
     this.doneTasks = 0,
@@ -17,6 +21,10 @@ class _EmployeeDashboardData {
   });
 
   final int totalTasks;
+  final String employeeName;
+  final LeaveBalance? annualBalance;
+  final int pendingRequests;
+  final int todayTasks;
   final int pendingTasks;
   final int doneTasks;
   final int inProgressTasks;
@@ -27,11 +35,11 @@ class _EmployeeDashboardData {
   final double monthCompletionRate;
   final double productivityPercent;
   final List<Map<String, dynamic>> recentTasks;
-  final List<_EmployeeNotificationItem> notifications;
+  final List<EmployeeDashboardNotification> notifications;
 }
 
-class _EmployeeNotificationItem {
-  const _EmployeeNotificationItem({
+class EmployeeDashboardNotification {
+  const EmployeeDashboardNotification({
     required this.type,
     required this.subtitle,
     required this.icon,
@@ -115,6 +123,7 @@ class _MemberProductivity {
   const _MemberProductivity({
     required this.employeeId,
     required this.name,
+    this.jobTitle = '',
     required this.totalTasks,
     required this.doneTasks,
     required this.monthTotalTasks,
@@ -128,6 +137,7 @@ class _MemberProductivity {
 
   final String employeeId;
   final String name;
+  final String jobTitle;
   final int totalTasks;
   final int doneTasks;
   final int monthTotalTasks;

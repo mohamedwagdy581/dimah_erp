@@ -1,8 +1,5 @@
 class HrAlertStateInfo {
-  const HrAlertStateInfo({
-    this.snoozeUntil,
-    this.resolvedAt,
-  });
+  const HrAlertStateInfo({this.snoozeUntil, this.resolvedAt});
 
   final DateTime? snoozeUntil;
   final DateTime? resolvedAt;

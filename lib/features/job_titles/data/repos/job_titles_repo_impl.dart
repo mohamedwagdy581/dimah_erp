@@ -59,7 +59,10 @@ class JobTitlesRepoImpl implements JobTitlesRepo {
       listQ = listQ.or('name.ilike.%$escaped%,code.ilike.%$escaped%');
     }
 
-    listQ = listQ.order(sortBy, ascending: ascending).range(from, to);
+    listQ = listQ
+        .order(sortBy, ascending: ascending)
+        .order('id')
+        .range(from, to);
 
     final listRes = await listQ;
     final items = (listRes as List)
@@ -67,7 +70,10 @@ class JobTitlesRepoImpl implements JobTitlesRepo {
         .toList();
 
     // ===== Count query =====
-    dynamic countQ = _client.from('job_titles').select('id');
+    dynamic countQ = _client
+        .from('job_titles')
+        .select('id')
+        .eq('tenant_id', tenantId);
 
     if (departmentId != null) {
       countQ = countQ.eq('department_id', departmentId);
@@ -95,6 +101,7 @@ class JobTitlesRepoImpl implements JobTitlesRepo {
     String? description,
     int? level,
     String? departmentId,
+    bool isActive = true,
   }) async {
     final tenantId = await _tenantId();
 
@@ -109,7 +116,7 @@ class JobTitlesRepoImpl implements JobTitlesRepo {
       'department_id': (departmentId != null && departmentId.trim().isNotEmpty)
           ? departmentId.trim()
           : null,
-      'is_active': true,
+      'is_active': isActive,
     });
   }
 

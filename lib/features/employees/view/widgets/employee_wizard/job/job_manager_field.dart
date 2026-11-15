@@ -19,6 +19,7 @@ class JobManagerField extends StatelessWidget {
       builder: (context, snap) {
         final managers = snap.data ?? const <EmployeeLookup>[];
         return DropdownButtonFormField<String>(
+          isExpanded: true,
           initialValue: selectedManagerId,
           decoration: InputDecoration(
             labelText: t.directManagerOptional,

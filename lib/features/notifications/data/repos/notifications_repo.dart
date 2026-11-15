@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/routing/app_routes.dart';
@@ -14,7 +14,11 @@ class NotificationsRepo {
   Future<List<NotificationItem>> fetch(AppUser user, AppLocalizations t) async {
     final uid = _client.auth.currentUser?.id;
     if (uid == null) return const [];
-    final me = await _client.from('users').select('tenant_id').eq('id', uid).single();
+    final me = await _client
+        .from('users')
+        .select('tenant_id')
+        .eq('id', uid)
+        .single();
     final tenantId = me['tenant_id'].toString();
 
     if (user.role == 'employee' && user.employeeId != null) {
@@ -58,23 +62,72 @@ class NotificationsRepo {
       final reviewStatus = (row['employee_review_status'] ?? 'none').toString();
       final qaStatus = (row['qa_status'] ?? 'pending').toString();
       if (reviewStatus == 'approved') {
-        items.add(_item(t.reviewApproved, '$title - $updatedAt', Icons.rule_folder_outlined, Colors.blue, AppRoutes.myPortal));
+        items.add(
+          _item(
+            t.reviewApproved,
+            '$title - $updatedAt',
+            Icons.rule_folder_outlined,
+            Colors.blue,
+            AppRoutes.myPortal,
+          ),
+        );
       } else if (reviewStatus == 'rejected') {
-        items.add(_item(t.reviewRejected, '$title - $updatedAt', Icons.reply_outlined, Colors.orange, AppRoutes.myPortal));
+        items.add(
+          _item(
+            t.reviewRejected,
+            '$title - $updatedAt',
+            Icons.reply_outlined,
+            Colors.orange,
+            AppRoutes.myPortal,
+          ),
+        );
       }
       if (qaStatus == 'accepted') {
-        items.add(_item(t.qaAccepted, '$title - $updatedAt', Icons.verified_outlined, Colors.green, AppRoutes.myPortal));
+        items.add(
+          _item(
+            t.qaAccepted,
+            '$title - $updatedAt',
+            Icons.verified_outlined,
+            Colors.green,
+            AppRoutes.myPortal,
+          ),
+        );
       } else if (qaStatus == 'rework') {
-        items.add(_item(t.qaRework, '$title - $managerNote', Icons.restart_alt_outlined, Colors.orange, AppRoutes.myPortal));
+        items.add(
+          _item(
+            t.qaRework,
+            '$title - $managerNote',
+            Icons.restart_alt_outlined,
+            Colors.orange,
+            AppRoutes.myPortal,
+          ),
+        );
       } else if (qaStatus == 'rejected') {
-        items.add(_item(t.qaRejected, '$title - $managerNote', Icons.block_outlined, Colors.red, AppRoutes.myPortal));
+        items.add(
+          _item(
+            t.qaRejected,
+            '$title - $managerNote',
+            Icons.block_outlined,
+            Colors.red,
+            AppRoutes.myPortal,
+          ),
+        );
       }
       final dueDate = DateTime.tryParse(row['due_date']?.toString() ?? '');
       if ((row['status'] ?? '') != 'done' && dueDate != null) {
         final dueOnly = DateTime(dueDate.year, dueDate.month, dueDate.day);
         final todayOnly = DateTime(now.year, now.month, now.day);
-        if (!dueOnly.isBefore(todayOnly) && !dueOnly.isAfter(todayOnly.add(const Duration(days: 2)))) {
-          items.add(_item(t.taskDueSoon, '$title - ${_dateLabel(row['due_date']?.toString())}', Icons.schedule_outlined, Colors.amber, AppRoutes.myPortal));
+        if (!dueOnly.isBefore(todayOnly) &&
+            !dueOnly.isAfter(todayOnly.add(const Duration(days: 2)))) {
+          items.add(
+            _item(
+              t.taskDueSoon,
+              '$title - ${_dateLabel(row['due_date']?.toString())}',
+              Icons.schedule_outlined,
+              Colors.amber,
+              AppRoutes.myPortal,
+            ),
+          );
         }
       }
     }
@@ -87,8 +140,14 @@ class NotificationsRepo {
     AppLocalizations t,
   ) async {
     if (employeeId == null) return const [];
-    final deptIdsRes = await _client.from('departments').select('id').eq('tenant_id', tenantId).eq('manager_id', employeeId);
-    final deptIds = (deptIdsRes as List).map((e) => e['id'].toString()).toList();
+    final deptIdsRes = await _client
+        .from('departments')
+        .select('id')
+        .eq('tenant_id', tenantId)
+        .eq('manager_id', employeeId);
+    final deptIds = (deptIdsRes as List)
+        .map((e) => e['id'].toString())
+        .toList();
     if (deptIds.isEmpty) return const [];
     final employeeRows = await _client
         .from('employees')
@@ -103,18 +162,38 @@ class NotificationsRepo {
     if (employeeMap.isEmpty) return const [];
     final taskRows = await _client
         .from('employee_tasks')
-        .select('title, employee_id, employee_review_status, employee_review_requested_at, status, qa_status, completed_at')
+        .select(
+          'title, employee_id, employee_review_status, employee_review_requested_at, status, qa_status, completed_at',
+        )
         .eq('tenant_id', tenantId)
         .inFilter('employee_id', employeeMap.keys.toList());
     final items = <NotificationItem>[];
     for (final row in (taskRows as List).cast<Map<String, dynamic>>()) {
-      final employeeName = employeeMap[row['employee_id']?.toString() ?? ''] ?? '-';
+      final employeeName =
+          employeeMap[row['employee_id']?.toString() ?? ''] ?? '-';
       final title = row['title'] ?? '-';
       if ((row['employee_review_status'] ?? 'none') == 'pending') {
-        items.add(_item(t.pendingTaskReviews, '$title - $employeeName - ${_dateLabel(row['employee_review_requested_at']?.toString())}', Icons.rate_review_outlined, Colors.orange, AppRoutes.dashboard));
+        items.add(
+          _item(
+            t.pendingTaskReviews,
+            '$title - $employeeName - ${_dateLabel(row['employee_review_requested_at']?.toString())}',
+            Icons.rate_review_outlined,
+            Colors.orange,
+            AppRoutes.dashboard,
+          ),
+        );
       }
-      if ((row['status'] ?? '') == 'done' && (row['qa_status'] ?? 'pending') == 'pending') {
-        items.add(_item(t.pendingTaskQa, '$title - $employeeName - ${_dateLabel(row['completed_at']?.toString())}', Icons.verified_outlined, Colors.blue, AppRoutes.dashboard));
+      if ((row['status'] ?? '') == 'done' &&
+          (row['qa_status'] ?? 'pending') == 'pending') {
+        items.add(
+          _item(
+            t.pendingTaskQa,
+            '$title - $employeeName - ${_dateLabel(row['completed_at']?.toString())}',
+            Icons.verified_outlined,
+            Colors.blue,
+            AppRoutes.dashboard,
+          ),
+        );
       }
     }
     return items.take(20).toList();
@@ -128,9 +207,13 @@ class NotificationsRepo {
     final items = <NotificationItem>[];
     final payrollRows = await _client
         .from('payroll_runs')
-        .select('period_start, period_end, status, disbursement_status, created_at')
+        .select(
+          'period_start, period_end, status, disbursement_status, created_at',
+        )
         .eq('tenant_id', tenantId)
-        .or('status.eq.pending_finance_manager,and(status.eq.approved,disbursement_status.eq.assigned_to_finance_manager)')
+        .or(
+          'status.eq.pending_finance_manager,and(status.eq.approved,disbursement_status.eq.assigned_to_finance_manager)',
+        )
         .order('created_at', ascending: false)
         .limit(20);
 
@@ -144,7 +227,11 @@ class NotificationsRepo {
       if (status == 'pending_finance_manager') {
         items.add(
           _item(
-            _txt(t, 'مسير رواتب بانتظار اعتمادك', 'Payroll waiting for your approval'),
+            _txt(
+              t,
+              'مسير رواتب بانتظار اعتمادك',
+              'Payroll waiting for your approval',
+            ),
             period,
             Icons.request_page_outlined,
             Colors.orange,
@@ -152,10 +239,15 @@ class NotificationsRepo {
           ),
         );
       }
-      if (status == 'approved' && disbursementStatus == 'assigned_to_finance_manager') {
+      if (status == 'approved' &&
+          disbursementStatus == 'assigned_to_finance_manager') {
         items.add(
           _item(
-            _txt(t, 'تم إنشاء مهمة صرف الرواتب', 'Payroll disbursement task created'),
+            _txt(
+              t,
+              'تم إنشاء مهمة صرف الرواتب',
+              'Payroll disbursement task created',
+            ),
             period,
             Icons.payments_outlined,
             Colors.deepPurple,
@@ -227,41 +319,54 @@ class NotificationsRepo {
     final items = <NotificationItem>[];
     final approvals = await _client
         .from('approval_requests')
-        .select('request_type, created_at, status')
+        .select('id, request_type, created_at, status')
         .eq('tenant_id', tenantId)
         .eq('status', 'pending')
         .order('created_at', ascending: false)
         .limit(12);
     items.addAll(
-      (approvals as List)
-          .cast<Map<String, dynamic>>()
-          .map(
-            (row) => _item(
-              t.pendingApprovalsKpi,
-              '${row['request_type'] ?? '-'} - ${_dateLabel(row['created_at']?.toString())}',
-              Icons.approval_outlined,
-              Colors.orange,
-              AppRoutes.approvals,
-            ),
-          ),
+      (approvals as List).cast<Map<String, dynamic>>().map(
+        (row) => _item(
+          t.pendingApprovalsKpi,
+          '${row['request_type'] ?? '-'} - ${_dateLabel(row['created_at']?.toString())}',
+          Icons.approval_outlined,
+          Colors.orange,
+          AppRoutes.approvals,
+          id: 'approval:${row['id']}:${row['created_at']}',
+          occurredAt: DateTime.tryParse(row['created_at']?.toString() ?? ''),
+          category: row['request_type'] == 'leave' ? 'leave' : 'reviews',
+        ),
+      ),
     );
 
     if (role == 'hr') {
       final payrollRows = await _client
           .from('payroll_runs')
-          .select('period_start, period_end, status, reject_reason, created_at')
+          .select(
+            'id, period_start, period_end, status, reject_reason, created_at',
+          )
           .eq('tenant_id', tenantId)
-          .inFilter('status', ['rejected_by_finance_manager', 'rejected_by_admin'])
+          .inFilter('status', [
+            'rejected_by_finance_manager',
+            'rejected_by_admin',
+          ])
           .order('created_at', ascending: false)
           .limit(10);
       for (final row in (payrollRows as List).cast<Map<String, dynamic>>()) {
         items.add(
           _item(
-            _txt(t, 'تمت إعادة مسير الرواتب للمراجعة', 'Payroll returned for revision'),
+            _txt(
+              t,
+              'تمت إعادة مسير الرواتب للمراجعة',
+              'Payroll returned for revision',
+            ),
             '${_payrollPeriodLabel(row['period_start']?.toString(), row['period_end']?.toString())} - ${(row['reject_reason'] ?? '-').toString()}',
             Icons.reply_outlined,
             Colors.red,
             AppRoutes.payroll,
+            id: 'payroll:${row['id']}:${row['status']}:${row['reject_reason']}',
+            occurredAt: DateTime.tryParse(row['created_at']?.toString() ?? ''),
+            category: 'payroll',
           ),
         );
       }
@@ -278,7 +383,11 @@ class NotificationsRepo {
       for (final row in (payrollRows as List).cast<Map<String, dynamic>>()) {
         items.add(
           _item(
-            _txt(t, 'مسير رواتب بانتظار الاعتماد النهائي', 'Payroll awaiting final approval'),
+            _txt(
+              t,
+              'مسير رواتب بانتظار الاعتماد النهائي',
+              'Payroll awaiting final approval',
+            ),
             _payrollPeriodLabel(
               row['period_start']?.toString(),
               row['period_end']?.toString(),
@@ -294,8 +403,28 @@ class NotificationsRepo {
     return items.take(20).toList();
   }
 
-  NotificationItem _item(String title, String subtitle, IconData icon, Color color, String route) {
-    return NotificationItem(title: title, subtitle: subtitle, icon: icon, color: color, route: route);
+  NotificationItem _item(
+    String title,
+    String subtitle,
+    IconData icon,
+    Color color,
+    String route, {
+    String? id,
+    DateTime? occurredAt,
+    String? category,
+  }) {
+    return NotificationItem(
+      title: title,
+      subtitle: subtitle,
+      icon: icon,
+      color: color,
+      route: route,
+      category:
+          category ??
+          (icon == Icons.schedule_outlined ? 'deadlines' : 'reviews'),
+      id: id,
+      occurredAt: occurredAt,
+    );
   }
 
   static String _dateLabel(String? raw) {

@@ -6,6 +6,14 @@ String dateOnly(String? raw) {
       '${dt.day.toString().padLeft(2, '0')}';
 }
 
+String taskLoggedTime(Object? raw, {required bool arabic}) {
+  if (raw is! num || !raw.isFinite || raw < 0) return '—';
+  final minutes = (raw * 60).round();
+  final hours = minutes ~/ 60;
+  final remaining = minutes % 60;
+  return arabic ? '$hours س $remaining د' : '${hours}h ${remaining}m';
+}
+
 String dateTimeLabel(String? raw) {
   final dt = DateTime.tryParse(raw ?? '');
   if (dt == null) return '-';

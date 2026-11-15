@@ -1,7 +1,8 @@
 part of 'employee_repo_impl.dart';
 
 mixin _EmployeesRepoSettlementsMixin on _EmployeesRepoSessionMixin {
-  Future<({List<EmployeeSettlementSummary> items, int total})> fetchSettlements({
+  Future<({List<EmployeeSettlementSummary> items, int total})>
+  fetchSettlements({
     required int page,
     required int pageSize,
     String? search,
@@ -70,24 +71,24 @@ mixin _EmployeesRepoSettlementsMixin on _EmployeesRepoSessionMixin {
       );
     }
 
-    final filtered = summaries.values.where((item) {
-      if (trimmedSearch == null || trimmedSearch.isEmpty) return true;
-      final haystacks = [
-        item.fullName,
-        item.employeeNumber ?? '',
-        item.jobTitleName ?? '',
-        item.status,
-      ];
-      for (final value in haystacks) {
-        if (value.toLowerCase().contains(trimmedSearch)) return true;
-      }
-      return false;
-    }).toList()
-      ..sort((a, b) {
-        final aDate = a.latestSettlementDate ?? a.hireDate ?? DateTime(1970);
-        final bDate = b.latestSettlementDate ?? b.hireDate ?? DateTime(1970);
-        return bDate.compareTo(aDate);
-      });
+    final filtered =
+        summaries.values.where((item) {
+          if (trimmedSearch == null || trimmedSearch.isEmpty) return true;
+          final haystacks = [
+            item.fullName,
+            item.employeeNumber ?? '',
+            item.jobTitleName ?? '',
+            item.status,
+          ];
+          for (final value in haystacks) {
+            if (value.toLowerCase().contains(trimmedSearch)) return true;
+          }
+          return false;
+        }).toList()..sort((a, b) {
+          final aDate = a.latestSettlementDate ?? a.hireDate ?? DateTime(1970);
+          final bDate = b.latestSettlementDate ?? b.hireDate ?? DateTime(1970);
+          return bDate.compareTo(aDate);
+        });
 
     final total = filtered.length;
     final from = page * pageSize;

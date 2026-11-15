@@ -18,6 +18,7 @@ class JobDepartmentField extends StatelessWidget {
     return BlocBuilder<DepartmentsCubit, DepartmentsState>(
       builder: (context, state) {
         return DropdownButtonFormField<String>(
+          isExpanded: true,
           initialValue: selectedDepartmentId,
           decoration: InputDecoration(
             labelText: t.department,

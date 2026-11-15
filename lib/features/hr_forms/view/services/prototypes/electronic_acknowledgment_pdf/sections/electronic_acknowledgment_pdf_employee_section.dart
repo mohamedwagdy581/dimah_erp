@@ -33,9 +33,7 @@ class ElectronicAcknowledgmentPdfEmployeeSection extends pw.StatelessWidget {
             pw.Expanded(
               child: electronicAcknowledgmentField(
                 theme,
-                theme.isArabic
-                    ? 'رقم الهوية / الإقامة'
-                    : 'ID / Iqama Number',
+                theme.isArabic ? 'رقم الهوية / الإقامة' : 'ID / Iqama Number',
                 payload.employeeId,
               ),
             ),

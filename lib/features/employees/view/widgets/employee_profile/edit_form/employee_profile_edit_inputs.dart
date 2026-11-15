@@ -24,7 +24,8 @@ class EmployeeProfileEditField extends StatelessWidget {
         border: const OutlineInputBorder(),
       ),
       validator: required
-          ? (value) => (value ?? '').trim().isEmpty ? '$label is required' : null
+          ? (value) =>
+                (value ?? '').trim().isEmpty ? '$label is required' : null
           : null,
     );
   }

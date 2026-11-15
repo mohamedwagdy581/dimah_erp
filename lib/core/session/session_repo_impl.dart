@@ -13,11 +13,15 @@ class SessionRepoImpl implements SessionRepo {
 
     final data = await _client
         .from('users')
-        .select('id,email,role,tenant_id,employee_id')
+        .select('id,email,role,tenant_id,employee_id,is_active')
         .eq('id', uid)
         .maybeSingle();
 
     if (data == null) return null;
+    if (data['is_active'] == false) {
+      await _client.auth.signOut();
+      return null;
+    }
     return AppUser.fromJson(Map<String, dynamic>.from(data));
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../core/widgets/page_navigation_buttons.dart';
 
 class EmployeeDocsPaginationBar extends StatelessWidget {
   const EmployeeDocsPaginationBar({
@@ -46,15 +47,11 @@ class EmployeeDocsPaginationBar extends StatelessWidget {
           ],
         ),
         const SizedBox(width: 8),
-        IconButton(
-          tooltip: t.previous,
-          onPressed: canPrev ? onPrev : null,
-          icon: const Icon(Icons.chevron_left),
-        ),
-        IconButton(
-          tooltip: t.next,
-          onPressed: canNext ? onNext : null,
-          icon: const Icon(Icons.chevron_right),
+        PageNavigationButtons(
+          previousTooltip: t.previous,
+          nextTooltip: t.next,
+          onPrevious: canPrev ? onPrev : null,
+          onNext: canNext ? onNext : null,
         ),
       ],
     );

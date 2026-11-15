@@ -2,6 +2,35 @@ part of 'app_router.dart';
 
 final List<RouteBase> _shellRoutes = [
   GoRoute(
+    path: AppRoutes.financeTeam,
+    builder: (_, state) =>
+        FinanceTeamPage(employeeId: state.uri.queryParameters['employeeId']),
+  ),
+  GoRoute(
+    path: AppRoutes.userManagement,
+    builder: (_, _) => const UserManagementPage(),
+  ),
+  GoRoute(
+    path: AppRoutes.managerAttendance,
+    builder: (_, _) => const ManagerAttendancePage(),
+  ),
+  GoRoute(
+    path: AppRoutes.managerTasks,
+    pageBuilder: (_, _) => const MaterialPage(child: ManagerTasksPage()),
+  ),
+  GoRoute(
+    path: AppRoutes.managerReviews,
+    builder: (context, state) => const ManagerReviewsPage(),
+  ),
+  GoRoute(
+    path: AppRoutes.managerRequests,
+    builder: (context, state) => const ManagerRequestsPage(),
+  ),
+  GoRoute(
+    path: AppRoutes.managerTeam,
+    pageBuilder: (_, _) => const MaterialPage(child: ManagerTeamPage()),
+  ),
+  GoRoute(
     path: AppRoutes.dashboard,
     pageBuilder: (_, _) => const MaterialPage(child: DashboardPage()),
   ),
@@ -59,20 +88,22 @@ final List<RouteBase> _shellRoutes = [
         initialDocType: state.uri.queryParameters['docType'],
         initialExpiryStatus: state.uri.queryParameters['expiry'],
         autoOpenCreate: state.uri.queryParameters['openCreate'] == '1',
-        initialIssuedAt:
-            issuedAtRaw == null ? null : DateTime.tryParse(issuedAtRaw),
-        initialExpiresAt:
-            expiresAtRaw == null ? null : DateTime.tryParse(expiresAtRaw),
-        initialOldExpiresAt:
-            oldExpiresAtRaw == null ? null : DateTime.tryParse(oldExpiresAtRaw),
+        initialIssuedAt: issuedAtRaw == null
+            ? null
+            : DateTime.tryParse(issuedAtRaw),
+        initialExpiresAt: expiresAtRaw == null
+            ? null
+            : DateTime.tryParse(expiresAtRaw),
+        initialOldExpiresAt: oldExpiresAtRaw == null
+            ? null
+            : DateTime.tryParse(oldExpiresAtRaw),
       );
     },
   ),
   GoRoute(
     path: AppRoutes.hrAlerts,
-    builder: (context, state) => HrAlertsPage(
-      initialTypeFilter: state.uri.queryParameters['type'],
-    ),
+    builder: (context, state) =>
+        HrAlertsPage(initialTypeFilter: state.uri.queryParameters['type']),
   ),
   GoRoute(
     path: AppRoutes.hrForms,
@@ -109,9 +140,28 @@ final List<RouteBase> _shellRoutes = [
     builder: (context, state) => const JournalPage(),
   ),
   GoRoute(
+    path: AppRoutes.ledger,
+    builder: (context, state) {
+      final q = state.uri.queryParameters;
+      return LedgerPage(
+        key: ValueKey(state.uri.toString()),
+        initialAccountId: q['account'],
+        initialFrom: DateTime.tryParse(q['from'] ?? ''),
+        initialTo: DateTime.tryParse(q['to'] ?? ''),
+      );
+    },
+  ),
+  GoRoute(
+    path: AppRoutes.trialBalance,
+    builder: (context, state) => const TrialBalancePage(),
+  ),
+  GoRoute(
     path: AppRoutes.employeeCreate,
     builder: (context, state) => BlocProvider(
-      create: (_) => EmployeeWizardCubit(AppDI.employeesRepo),
+      create: (_) => EmployeeWizardCubit(
+        AppDI.employeesRepo,
+        attendanceIdentityRepo: AppDI.attendanceIdentityRepo,
+      ),
       child: const EmployeeWizardPage(),
     ),
   ),
@@ -124,13 +174,17 @@ final List<RouteBase> _shellRoutes = [
       final oldEndRaw = state.uri.queryParameters['oldContractEnd'];
       return EmployeeProfilePage(
         employeeId: id,
-        autoOpenAddContract: state.uri.queryParameters['openAddContract'] == '1',
-        initialContractStartDate:
-            startRaw == null ? null : DateTime.tryParse(startRaw),
-        initialContractEndDate:
-            endRaw == null ? null : DateTime.tryParse(endRaw),
-        initialOldContractEndDate:
-            oldEndRaw == null ? null : DateTime.tryParse(oldEndRaw),
+        autoOpenAddContract:
+            state.uri.queryParameters['openAddContract'] == '1',
+        initialContractStartDate: startRaw == null
+            ? null
+            : DateTime.tryParse(startRaw),
+        initialContractEndDate: endRaw == null
+            ? null
+            : DateTime.tryParse(endRaw),
+        initialOldContractEndDate: oldEndRaw == null
+            ? null
+            : DateTime.tryParse(oldEndRaw),
       );
     },
   ),

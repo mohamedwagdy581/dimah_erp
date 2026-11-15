@@ -72,11 +72,11 @@ class _SplashPageState extends State<SplashPage>
                 children: [
                   Image.asset(
                     logoPath,
-                    height: 110,
+                    height: 160,
                     fit: BoxFit.contain,
                     errorBuilder: (_, __, ___) => Image.asset(
                       AppAssets.fullLogo,
-                      height: 110,
+                      height: 160,
                       fit: BoxFit.contain,
                     ),
                   ),

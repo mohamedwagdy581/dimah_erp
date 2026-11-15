@@ -1,45 +1,112 @@
 part of 'attendance_import_dialog.dart';
 
-Map<String, Map<String, String>> _indexEmployeesByNormalizedName(
+Map<String, Map<String, String>> _indexEmployeesByDeviceNumber(
   List<Map<String, String>> employees,
 ) {
-  final employeeByNorm = <String, Map<String, String>>{};
+  final employeeByNumber = <String, Map<String, String>>{};
   for (final employee in employees) {
-    final normalized = _normRaw(employee['full_name'] ?? '');
-    if (normalized.isEmpty) continue;
-    employeeByNorm[normalized] = employee;
+    final number = (employee['device_employee_number'] ?? '').trim();
+    if (number.isEmpty) continue;
+    if (employeeByNumber.containsKey(number)) {
+      throw FormatException(
+        'Duplicate device number in employee mappings: $number',
+      );
+    }
+    employeeByNumber[number] = employee;
   }
-  return employeeByNorm;
+  return employeeByNumber;
 }
 
 DateTime? _parseFlexibleDateTime(String value) {
-  var d = DateTime.tryParse(value);
-  if (d != null) return d;
-
-  // Manual parsing for formats like "4-Mar-26 13:46" or "10-Oct-2023"
-  try {
-    final cleanValue = value.trim().replaceAll(RegExp(r'\s+'), ' ');
-    final parts = cleanValue.split(RegExp(r'[\s\-\/]'));
-    if (parts.length >= 3) {
-      int? day = int.tryParse(parts[0]);
-      int? year = int.tryParse(parts[2]);
-      int month = _monthToNum(parts[1]);
-
-      if (day != null && year != null && month > 0) {
-        if (year < 100) year += 2000; // Handle 2-digit year "26" -> 2026
-        
-        int hour = 0;
-        int minute = 0;
-        if (parts.length >= 4) {
-          final timeParts = parts[3].split(':');
-          hour = int.tryParse(timeParts[0]) ?? 0;
-          if (timeParts.length > 1) minute = int.tryParse(timeParts[1]) ?? 0;
-        }
-        return DateTime(year, month, day, hour, minute);
-      }
+  final text = value.trim().replaceAll(RegExp(r'\s+'), ' ');
+  // iVMS numeric export uses month/day/year, including ambiguous dates such as 10/1.
+  // Do not guess day/month per row: it would mix September and October records.
+  final numeric = RegExp(
+    r'^(\d{1,2})/(\d{1,2})/(\d{4}) (\d{1,2}):(\d{2})(?::(\d{2}))?(?:\s*(AM|PM))?$',
+    caseSensitive: false,
+  ).firstMatch(text);
+  if (numeric != null) {
+    var hour = int.parse(numeric[4]!);
+    final meridiem = numeric[7]?.toUpperCase();
+    if (meridiem != null) {
+      if (hour < 1 || hour > 12) return null;
+      hour = hour % 12 + (meridiem == 'PM' ? 12 : 0);
     }
-  } catch (_) {}
+    return _validatedAttendanceDateTime(
+      int.parse(numeric[3]!),
+      int.parse(numeric[1]!),
+      int.parse(numeric[2]!),
+      hour,
+      int.parse(numeric[5]!),
+      int.parse(numeric[6] ?? '0'),
+    );
+  }
+
+  final isoDate = RegExp(
+    r'^(\d{4})-(\d{2})-(\d{2})(?:[ T]|$)',
+  ).firstMatch(text);
+  if (isoDate != null) {
+    final isoTime = RegExp(
+      r'[ T](\d{2}):(\d{2})(?::(\d{2}))?',
+    ).firstMatch(text);
+    if (_validatedAttendanceDateTime(
+          int.parse(isoDate[1]!),
+          int.parse(isoDate[2]!),
+          int.parse(isoDate[3]!),
+          int.parse(isoTime?[1] ?? '0'),
+          int.parse(isoTime?[2] ?? '0'),
+          int.parse(isoTime?[3] ?? '0'),
+        ) ==
+        null) {
+      return null;
+    }
+    return DateTime.tryParse(text);
+  }
+
+  final named = RegExp(
+    r'^(\d{1,2})[- /]([A-Za-z]{3,9})[- /](\d{2}|\d{4})(?: (\d{1,2}):(\d{2})(?::(\d{2}))?)?$',
+  ).firstMatch(text);
+  if (named != null) {
+    var year = int.parse(named[3]!);
+    if (named[3]!.length == 2) year += 2000;
+    return _validatedAttendanceDateTime(
+      year,
+      _monthToNum(named[2]!),
+      int.parse(named[1]!),
+      int.parse(named[4] ?? '0'),
+      int.parse(named[5] ?? '0'),
+      int.parse(named[6] ?? '0'),
+    );
+  }
   return null;
+}
+
+DateTime? _validatedAttendanceDateTime(
+  int year,
+  int month,
+  int day,
+  int hour,
+  int minute,
+  int second,
+) {
+  if (year < 1 ||
+      year > 9999 ||
+      month < 1 ||
+      month > 12 ||
+      day < 1 ||
+      day > 31 ||
+      hour < 0 ||
+      hour > 23 ||
+      minute < 0 ||
+      minute > 59 ||
+      second < 0 ||
+      second > 59) {
+    return null;
+  }
+  final result = DateTime(year, month, day, hour, minute, second);
+  return result.year == year && result.month == month && result.day == day
+      ? result
+      : null;
 }
 
 int _monthToNum(String m) {
@@ -70,31 +137,36 @@ Map<String, Map<String, dynamic>> _groupAttendanceRows(
   final grouped = <String, Map<String, dynamic>>{};
   for (var i = 1; i < lines.length; i++) {
     final cols = _parseCsvLineRaw(lines[i]);
-    
-    final personId = idxPersonId >= 0 && cols.length > idxPersonId 
-        ? cols[idxPersonId].replaceAll("'", '').trim() 
+
+    final personId = idxPersonId >= 0 && cols.length > idxPersonId
+        ? cols[idxPersonId].replaceAll("'", '').trim()
         : '';
-    final sourceName = idxName >= 0 && cols.length > idxName 
-        ? cols[idxName].trim() 
+    final sourceName = idxName >= 0 && cols.length > idxName
+        ? cols[idxName].trim()
         : '';
-    
+
     String? combinedTimeStr;
-    if (idxDate >= 0 && idxTime >= 0 && cols.length > idxDate && cols.length > idxTime) {
-       combinedTimeStr = '${cols[idxDate].trim()} ${cols[idxTime].trim()}';
+    if (idxDate >= 0 &&
+        idxTime >= 0 &&
+        cols.length > idxDate &&
+        cols.length > idxTime) {
+      combinedTimeStr = '${cols[idxDate].trim()} ${cols[idxTime].trim()}';
     } else if (idxTime >= 0 && cols.length > idxTime) {
-       combinedTimeStr = cols[idxTime].trim();
+      combinedTimeStr = cols[idxTime].trim();
     } else if (idxDate >= 0 && cols.length > idxDate) {
-       combinedTimeStr = cols[idxDate].trim();
+      combinedTimeStr = cols[idxDate].trim();
     }
 
     if (combinedTimeStr == null || combinedTimeStr.isEmpty) continue;
-    
+
     final time = _parseFlexibleDateTime(combinedTimeStr);
-    final status = idxType >= 0 && cols.length > idxType 
-        ? cols[idxType].trim().toLowerCase() 
+    final status = idxType >= 0 && cols.length > idxType
+        ? cols[idxType].trim().toLowerCase()
         : '';
-    
-    if (personId.isEmpty || sourceName.isEmpty || time == null) continue;
+
+    if (personId.isEmpty || time == null) continue;
+    // These events require separate overtime/break rules, not normal attendance.
+    if (status.contains('overtime') || status.contains('break')) continue;
 
     final day = DateTime(time.year, time.month, time.day);
     final key = '$personId|${day.toIso8601String()}';
@@ -109,15 +181,25 @@ Map<String, Map<String, dynamic>> _groupAttendanceRows(
       },
     );
 
-    final isIn = status.contains('in') || status == '0' || status.contains('entry');
-    final isOut = status.contains('out') || status == '1' || status.contains('exit');
+    final isIn =
+        status.contains('in') || status == '0' || status.contains('entry');
+    final isOut =
+        status.contains('out') || status == '1' || status.contains('exit');
 
     if (isIn) {
-      final old = row['check_in'] == null ? null : DateTime.tryParse(row['check_in'] as String);
-      if (old == null || time.isBefore(old)) row['check_in'] = time.toIso8601String();
+      final old = row['check_in'] == null
+          ? null
+          : DateTime.tryParse(row['check_in'] as String);
+      if (old == null || time.isBefore(old)) {
+        row['check_in'] = time.toIso8601String();
+      }
     } else if (isOut) {
-      final old = row['check_out'] == null ? null : DateTime.tryParse(row['check_out'] as String);
-      if (old == null || time.isAfter(old)) row['check_out'] = time.toIso8601String();
+      final old = row['check_out'] == null
+          ? null
+          : DateTime.tryParse(row['check_out'] as String);
+      if (old == null || time.isAfter(old)) {
+        row['check_out'] = time.toIso8601String();
+      }
     }
   }
   return grouped;
@@ -125,20 +207,30 @@ Map<String, Map<String, dynamic>> _groupAttendanceRows(
 
 List<Map<String, dynamic>> _buildPreviewMaps(
   Map<String, Map<String, dynamic>> grouped,
-  Map<String, Map<String, String>> employeeByNorm,
+  Map<String, Map<String, String>> employeeByNumber,
 ) {
   final out = <Map<String, dynamic>>[];
   for (final row in grouped.values) {
     final sourceName = row['source_name'] as String;
-    final matched = _findMatchRaw(sourceName, employeeByNorm);
-    final checkIn = row['check_in'] == null ? null : DateTime.parse(row['check_in'] as String);
-    final checkOut = row['check_out'] == null ? null : DateTime.parse(row['check_out'] as String);
-    
+    final matched = employeeByNumber[row['person_id']];
+    final checkIn = row['check_in'] == null
+        ? null
+        : DateTime.parse(row['check_in'] as String);
+    final checkOut = row['check_out'] == null
+        ? null
+        : DateTime.parse(row['check_out'] as String);
+
     final hasAnyPunch = checkIn != null || checkOut != null;
     if (!hasAnyPunch) continue;
 
-    final lateMinutes = _lateMinutesRaw(checkIn);
-    final overtimeMinutes = _overtimeMinutesRaw(checkOut);
+    if (checkIn != null && checkOut != null && !checkOut.isAfter(checkIn)) {
+      throw FormatException(
+        'Check-out must follow check-in for Person ID ${row['person_id']}',
+      );
+    }
+    // Shift rules are not configured: do not invent lateness or overtime.
+    const lateMinutes = 0;
+    const overtimeMinutes = 0;
 
     out.add({
       'source_person_id': row['person_id'],
@@ -151,12 +243,15 @@ List<Map<String, dynamic>> _buildPreviewMaps(
       'late_minutes': lateMinutes,
       'overtime_minutes': overtimeMinutes,
       'status': lateMinutes > 0 ? 'late' : 'present',
-      'notes': 'Imported from biometric CSV (Person ID: ${row['person_id'] as String})',
+      'notes':
+          'Imported from biometric CSV (Person ID: ${row['person_id'] as String})',
     });
   }
 
   out.sort((a, b) {
-    final dateCompare = DateTime.parse(b['date'] as String).compareTo(DateTime.parse(a['date'] as String));
+    final dateCompare = DateTime.parse(
+      b['date'] as String,
+    ).compareTo(DateTime.parse(a['date'] as String));
     if (dateCompare != 0) return dateCompare;
     return (a['source_name'] as String).compareTo(b['source_name'] as String);
   });
@@ -186,36 +281,4 @@ List<String> _parseCsvLineRaw(String line) {
   }
   result.add(buffer.toString().trim());
   return result;
-}
-
-Map<String, String>? _findMatchRaw(
-  String sourceName,
-  Map<String, Map<String, String>> byNorm,
-) {
-  final normalized = _normRaw(sourceName);
-  if (normalized.isEmpty) return null;
-  final exact = byNorm[normalized];
-  if (exact != null) return exact;
-
-  final candidates = byNorm.entries.where((e) {
-    return e.key.contains(normalized) ||
-        (normalized.length >= 4 && normalized.contains(e.key) && e.key.length >= 4);
-  }).toList();
-  return candidates.length == 1 ? candidates.first.value : null;
-}
-
-String _normRaw(String value) {
-  return value.toLowerCase().replaceAll(RegExp(r'[^a-z0-9؀-ۿ]'), '').trim();
-}
-
-int _lateMinutesRaw(DateTime? checkIn) {
-  if (checkIn == null) return 0;
-  final start = DateTime(checkIn.year, checkIn.month, checkIn.day, 9, 15);
-  return checkIn.isAfter(start) ? checkIn.difference(start).inMinutes : 0;
-}
-
-int _overtimeMinutesRaw(DateTime? checkOut) {
-  if (checkOut == null) return 0;
-  final end = DateTime(checkOut.year, checkOut.month, checkOut.day, 17, 0);
-  return checkOut.isAfter(end) ? checkOut.difference(end).inMinutes : 0;
 }

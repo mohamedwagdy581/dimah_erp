@@ -1,0 +1,52 @@
+{
+  "info": {
+    "name": "DIMAH ERP API",
+    "description": "First stage: hosting check and authenticated ERP profile. Enter configuration locally. Never share passwords or tokens in screenshots.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "https://api.dimahmusic.com" },
+    { "key": "supabase_url", "value": "" },
+    { "key": "supabase_anon_key", "value": "" },
+    { "key": "access_token", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "1 - Health Check",
+      "request": { "method": "GET", "url": "{{base_url}}/health" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+        "pm.test('API is healthy', () => { pm.response.to.have.status(200); pm.expect(pm.response.json()).to.eql({status: 'ok', service: 'dimah-api'}); });"
+      ] } }]
+    },
+    {
+      "name": "2 - Current User - No Token",
+      "request": { "method": "GET", "url": "{{base_url}}/v1/me" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+        "pm.test('Login is required', () => pm.response.to.have.status(401));"
+      ] } }]
+    },
+    {
+      "name": "3 - Supabase Sign In - Existing Account",
+      "request": {
+        "description": "Uses your existing Supabase Auth. Replace email and password locally before sending. The response contains sensitive tokens: do not share it. Copy access_token into your local environment variable; do not publish or export it.",
+        "method": "POST",
+        "url": "{{supabase_url}}/auth/v1/token?grant_type=password",
+        "header": [
+          { "key": "apikey", "value": "{{supabase_anon_key}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": { "mode": "raw", "raw": "{\n  \"email\": \"YOUR_EXISTING_ACCOUNT_EMAIL\",\n  \"password\": \"YOUR_PASSWORD\"\n}", "options": { "raw": { "language": "json" } } }
+      }
+    },
+    {
+      "name": "4 - Current User - Signed In",
+      "request": {
+        "method": "GET", "url": "{{base_url}}/v1/me",
+        "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] }
+      },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+        "pm.test('Active ERP profile returned', () => { pm.response.to.have.status(200); pm.expect(pm.response.json().user.is_active).to.eql(true); });"
+      ] } }]
+    }
+  ]
+}

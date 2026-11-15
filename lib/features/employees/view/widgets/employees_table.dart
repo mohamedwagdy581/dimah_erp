@@ -1,3 +1,4 @@
+import 'package:erp_sys/core/ui/app_data_state.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -41,7 +42,9 @@ class _EmployeesTableState extends State<EmployeesTable> {
       return Card(
         child: Padding(
           padding: const EdgeInsets.all(24),
-          child: Center(child: Text(t.noEmployeesFound)),
+          child: Center(
+            child: AppEmptyState(title: t.noEmployeesFound, compact: false),
+          ),
         ),
       );
     }
@@ -138,10 +141,17 @@ class _EmployeesTableState extends State<EmployeesTable> {
                                       ),
                                     ),
                                     DataCell(
-                                      Text(_employeeStatusLabel(employee.status, t)),
+                                      Text(
+                                        _employeeStatusLabel(
+                                          employee.status,
+                                          t,
+                                        ),
+                                      ),
                                     ),
                                     DataCell(
-                                      Text(formatEmployeeDate(employee.hireDate)),
+                                      Text(
+                                        formatEmployeeDate(employee.hireDate),
+                                      ),
                                     ),
                                     DataCell(
                                       IconButton(

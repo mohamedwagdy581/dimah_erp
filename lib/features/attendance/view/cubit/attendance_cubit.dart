@@ -8,7 +8,7 @@ import 'attendance_state.dart';
 
 class AttendanceCubit extends Cubit<AttendanceState> {
   AttendanceCubit(this._repo, {this.employeeId})
-      : super(AttendanceState.initial);
+    : super(AttendanceState.initial);
 
   final AttendanceRepo _repo;
   final String? employeeId;
@@ -150,8 +150,11 @@ class AttendanceCubit extends Cubit<AttendanceState> {
     await load();
   }
 
-  Future<void> importBatch(List<AttendanceImportRecord> records) async {
-    await _repo.upsertAttendanceBatch(records);
+  Future<void> importBatch(
+    List<AttendanceImportRecord> records, {
+    bool repairTimezone = false,
+  }) async {
+    await _repo.upsertAttendanceBatch(records, repairTimezone: repairTimezone);
     await load(resetPage: true);
   }
 }

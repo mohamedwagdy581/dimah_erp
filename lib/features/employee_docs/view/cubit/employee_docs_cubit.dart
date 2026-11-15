@@ -22,12 +22,12 @@ class EmployeeDocsCubit extends Cubit<EmployeeDocsState> {
     String? initialExpiryStatus,
     String? initialEmployeeId,
   }) : super(
-          EmployeeDocsState.initial.copyWith(
-            docType: initialDocType,
-            expiryStatus: initialExpiryStatus,
-            fixedEmployeeId: initialEmployeeId,
-          ),
-        );
+         EmployeeDocsState.initial.copyWith(
+           docType: initialDocType,
+           expiryStatus: initialExpiryStatus,
+           fixedEmployeeId: initialEmployeeId,
+         ),
+       );
 
   final EmployeeDocsRepo _repo;
   Timer? _debounce;
@@ -47,6 +47,14 @@ class EmployeeDocsCubit extends Cubit<EmployeeDocsState> {
       toggleEmployeeDocsExpansion(employeeId);
 
   void searchChanged(String value) => onEmployeeDocsSearchChanged(value);
+
+  Future<void> resetFilters() async {
+    _debounce?.cancel();
+    emit(
+      state.copyWith(search: '', docType: null, expiryStatus: null, page: 0),
+    );
+    await load(resetPage: true);
+  }
 
   Future<void> docTypeChanged(String? value) =>
       onEmployeeDocsDocTypeChanged(value);
@@ -96,11 +104,7 @@ class EmployeeDocsCubit extends Cubit<EmployeeDocsState> {
     required String id,
     required String employeeId,
     required String fileUrl,
-  }) => deleteEmployeeDoc(
-    id: id,
-    employeeId: employeeId,
-    fileUrl: fileUrl,
-  );
+  }) => deleteEmployeeDoc(id: id, employeeId: employeeId, fileUrl: fileUrl);
 }
 
 extension on Employee {

@@ -25,7 +25,9 @@ class ElectronicHeaderDecoration extends StatelessWidget {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: ElectronicFormColors.footerShadowB.withOpacity(0.20),
+                    color: ElectronicFormColors.footerShadowB.withValues(
+                      alpha: 0.20,
+                    ),
                     blurRadius: 24,
                     offset: const Offset(4, 8),
                   ),
@@ -46,8 +48,8 @@ class ElectronicHeaderDecoration extends StatelessWidget {
                     color: ElectronicFormColors.headerAccent,
                     boxShadow: [
                       BoxShadow(
-                        color: ElectronicFormColors.footerShadowB.withOpacity(
-                          0.18,
+                        color: ElectronicFormColors.footerShadowB.withValues(
+                          alpha: 0.18,
                         ),
                         blurRadius: 16,
                         offset: const Offset(0, 8),
@@ -104,8 +106,8 @@ class ElectronicFooterDecoration extends StatelessWidget {
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: ElectronicFormColors.footerShadowA.withOpacity(
-                        0.18,
+                      color: ElectronicFormColors.footerShadowA.withValues(
+                        alpha: 0.18,
                       ),
                       blurRadius: ElectronicFormDimensions.footerShadowBlur,
                       offset: const Offset(
@@ -133,8 +135,8 @@ class ElectronicFooterDecoration extends StatelessWidget {
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: ElectronicFormColors.footerShadowB.withOpacity(
-                        0.16,
+                      color: ElectronicFormColors.footerShadowB.withValues(
+                        alpha: 0.16,
                       ),
                       blurRadius: ElectronicFormDimensions.footerShadowBlur,
                       offset: const Offset(

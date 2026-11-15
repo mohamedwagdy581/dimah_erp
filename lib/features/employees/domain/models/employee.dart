@@ -52,8 +52,7 @@ class Employee {
           DateTime.fromMillisecondsSinceEpoch(0),
       departmentId: map['department_id']?.toString(),
       jobTitleId: map['job_title_id']?.toString(),
-      departmentName:
-          department is Map ? department['name']?.toString() : null,
+      departmentName: department is Map ? department['name']?.toString() : null,
       jobTitleName: jobTitle is Map ? jobTitle['name']?.toString() : null,
     );
   }

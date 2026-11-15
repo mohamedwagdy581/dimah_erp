@@ -1,112 +1,150 @@
-﻿import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-
+import 'package:erp_sys/core/ui/app_data_state.dart';
+import 'package:flutter/material.dart';
+import 'payroll_format.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/models/payroll_item.dart';
-import '../cubit/payroll_run_cubit.dart';
-import '../cubit/payroll_run_state.dart';
 
 class PayrollRunItemsTable extends StatelessWidget {
-  const PayrollRunItemsTable({super.key, required this.items});
-
+  const PayrollRunItemsTable({
+    super.key,
+    required this.items,
+    this.compact = false,
+  });
   final List<PayrollItem> items;
-
+  final bool compact;
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context)!;
+    final ar = Localizations.localeOf(context).languageCode == 'ar';
     if (items.isEmpty) {
-      return Card(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Center(child: Text(t.noPayrollItemsFound)),
-        ),
+      return Padding(
+        padding: const EdgeInsets.all(24),
+        child: AppEmptyState(title: t.noPayrollItemsFound, compact: false),
       );
     }
-
-    final totalBasic = items.fold<num>(0, (sum, r) => sum + r.basicSalary);
-    final totalHousing = items.fold<num>(0, (sum, r) => sum + r.housingAllowance);
-    final totalTransport = items.fold<num>(0, (sum, r) => sum + r.transportAllowance);
-    final totalOther = items.fold<num>(0, (sum, r) => sum + r.otherAllowance);
-    final totalAll = items.fold<num>(0, (sum, r) => sum + r.total);
-
-    return BlocBuilder<PayrollRunCubit, PayrollRunState>(
-      builder: (context, state) {
-        final status = state.run?.status ?? 'draft';
-        final rowColor = _getStatusRowColor(status);
-
-        return Card(
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-            side: BorderSide(color: Colors.grey.shade200),
-          ),
-          child: LayoutBuilder(
-            builder: (context, c) {
-              return SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(minWidth: c.maxWidth),
-                  child: DataTable(
-                    headingRowColor: WidgetStateProperty.all(Colors.grey.shade100),
-                    columns: [
-                      DataColumn(label: Text(t.employee, style: const TextStyle(fontWeight: FontWeight.bold))),
-                      DataColumn(label: Text(t.basic, style: const TextStyle(fontWeight: FontWeight.bold))),
-                      DataColumn(label: Text(t.housing, style: const TextStyle(fontWeight: FontWeight.bold))),
-                      DataColumn(label: Text(t.transport, style: const TextStyle(fontWeight: FontWeight.bold))),
-                      DataColumn(label: Text(t.other, style: const TextStyle(fontWeight: FontWeight.bold))),
-                      DataColumn(label: Text(t.total, style: const TextStyle(fontWeight: FontWeight.bold))),
-                    ],
-                    rows: [
-                      ...items.map((r) {
-                        return DataRow(
-                          color: WidgetStateProperty.all(rowColor),
-                          cells: [
-                            DataCell(Text(r.employeeName)),
-                            DataCell(Text(r.basicSalary.toStringAsFixed(2))),
-                            DataCell(Text(r.housingAllowance.toStringAsFixed(2))),
-                            DataCell(Text(r.transportAllowance.toStringAsFixed(2))),
-                            DataCell(Text(r.otherAllowance.toStringAsFixed(2))),
-                            DataCell(Text('${r.total.toStringAsFixed(2)} SAR',
-                                style: const TextStyle(fontWeight: FontWeight.w600))),
-                          ],
-                        );
-                      }),
-                      DataRow(
-                        color: WidgetStateProperty.all(Colors.grey.shade50),
-                        cells: [
-                          DataCell(Text(t.totalAllCaps, style: const TextStyle(fontWeight: FontWeight.bold))),
-                          DataCell(Text(totalBasic.toStringAsFixed(2), style: const TextStyle(fontWeight: FontWeight.bold))),
-                          DataCell(Text(totalHousing.toStringAsFixed(2), style: const TextStyle(fontWeight: FontWeight.bold))),
-                          DataCell(Text(totalTransport.toStringAsFixed(2), style: const TextStyle(fontWeight: FontWeight.bold))),
-                          DataCell(Text(totalOther.toStringAsFixed(2), style: const TextStyle(fontWeight: FontWeight.bold))),
-                          DataCell(Text('${totalAll.toStringAsFixed(2)} SAR',
-                              style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blue))),
+    return LayoutBuilder(
+      builder: (context, c) => SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(minWidth: c.maxWidth),
+          child: DataTable(
+            headingRowHeight: 42,
+            dataRowMinHeight: compact ? 42 : 54,
+            dataRowMaxHeight: compact ? 54 : 70,
+            horizontalMargin: 12,
+            columnSpacing: 24,
+            border: const TableBorder(
+              horizontalInside: BorderSide(color: Color(0xFFF0ECF5)),
+              verticalInside: BorderSide(color: Color(0xFFF4F1F8)),
+            ),
+            dividerThickness: 0,
+            headingRowColor: WidgetStateProperty.all(const Color(0xFFF8F6FB)),
+            headingTextStyle: Theme.of(context).textTheme.labelMedium?.copyWith(
+              color: const Color(0xFF55506F),
+              fontSize: compact ? 15 : 12,
+              fontWeight: FontWeight.w600,
+            ),
+            dataTextStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: const Color(0xFF21194E),
+              fontSize: compact ? 14 : 12,
+            ),
+            columns: [
+              for (final label in [
+                t.employee,
+                ar ? 'المسمى الوظيفي' : 'Job title',
+                compact && ar ? 'الراتب الأساسي' : t.basic,
+                compact && ar ? 'بدل السكن' : t.housing,
+                compact && ar ? 'بدل النقل' : t.transport,
+                compact && ar ? 'بدلات أخرى' : t.other,
+                t.total,
+              ])
+                DataColumn(label: Text(label)),
+            ],
+            rows: [
+              for (final r in items)
+                DataRow(
+                  cells: [
+                    DataCell(
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ClipOval(
+                            child: SizedBox(
+                              width: 30,
+                              height: 30,
+                              child: r.photoUrl?.isNotEmpty == true
+                                  ? Image.network(
+                                      r.photoUrl!,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, error, stack) =>
+                                          _initials(r.employeeName),
+                                    )
+                                  : _initials(r.employeeName),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          SizedBox(
+                            width: 180,
+                            child: Text(
+                              r.employeeName,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
                         ],
                       ),
-                    ],
-                  ),
+                    ),
+                    DataCell(
+                      SizedBox(
+                        width: 135,
+                        child: Text(
+                          r.jobTitle.isEmpty ? '?' : r.jobTitle,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ),
+                    for (final value in [
+                      r.basicSalary,
+                      r.housingAllowance,
+                      r.transportAllowance,
+                      r.otherAllowance,
+                      r.total,
+                    ])
+                      DataCell(
+                        Text(
+                          payrollMoney(value),
+                          textDirection: TextDirection.ltr,
+                        ),
+                      ),
+                  ],
                 ),
-              );
-            },
+            ],
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 
-  Color _getStatusRowColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'approved':
-        return Colors.green.withValues(alpha: 0.05);
-      case 'rejected_by_finance_manager':
-      case 'rejected_by_admin':
-      case 'rejected':
-        return Colors.red.withValues(alpha: 0.05);
-      case 'pending_finance_manager':
-      case 'pending_admin_approval':
-        return Colors.orange.withValues(alpha: 0.05);
-      default:
-        return Colors.transparent;
-    }
+  Widget _initials(String name) {
+    final initials = name
+        .trim()
+        .split(RegExp(r'\s+'))
+        .where((p) => p.isNotEmpty)
+        .take(2)
+        .map((p) => p.characters.first)
+        .join();
+    return Container(
+      color: const Color(0xFFF0E5FC),
+      alignment: Alignment.center,
+      child: Text(
+        initials.isEmpty ? '?' : initials,
+        style: const TextStyle(
+          color: Color(0xFF8659BB),
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../../../core/utils/request_id.dart';
 
 import '../../domain/models/account.dart';
 import '../../domain/repos/accounts_repo.dart';
@@ -28,6 +29,7 @@ class AccountsRepoImpl implements AccountsRepo {
     required int pageSize,
     String? search,
     String? type,
+    bool? isActive,
     String sortBy = 'code',
     bool ascending = true,
   }) async {
@@ -38,12 +40,15 @@ class AccountsRepoImpl implements AccountsRepo {
 
     dynamic listQ = _client
         .from('accounts')
-        .select('id, tenant_id, code, name, type, is_active, created_at')
+        .select(
+          'id, tenant_id, code, name, type, is_active, is_cash, created_at',
+        )
         .eq('tenant_id', tenantId);
 
     if (type != null && type.trim().isNotEmpty) {
       listQ = listQ.eq('type', type);
     }
+    if (isActive != null) listQ = listQ.eq('is_active', isActive);
 
     if (s != null && s.isNotEmpty) {
       final escaped = s.replaceAll('%', r'\%').replaceAll('_', r'\_');
@@ -65,6 +70,7 @@ class AccountsRepoImpl implements AccountsRepo {
     if (type != null && type.trim().isNotEmpty) {
       countQ = countQ.eq('type', type);
     }
+    if (isActive != null) countQ = countQ.eq('is_active', isActive);
 
     if (s != null && s.isNotEmpty) {
       final escaped = s.replaceAll('%', r'\%').replaceAll('_', r'\_');
@@ -82,15 +88,38 @@ class AccountsRepoImpl implements AccountsRepo {
     required String code,
     required String name,
     required String type,
+    bool isActive = true,
+    bool isCash = false,
   }) async {
-    final tenantId = await _tenantId();
+    await updateAccount(
+      id: newRequestId(),
+      code: code,
+      name: name,
+      type: type,
+      isActive: isActive,
+      isCash: isCash,
+    );
+  }
 
-    await _client.from('accounts').insert({
-      'tenant_id': tenantId,
-      'code': code.trim(),
-      'name': name.trim(),
-      'type': type,
-      'is_active': true,
-    });
+  @override
+  Future<void> updateAccount({
+    required String id,
+    required String code,
+    required String name,
+    required String type,
+    required bool isActive,
+    bool isCash = false,
+  }) async {
+    await _client.rpc(
+      'accounting_save_account',
+      params: {
+        'p_id': id,
+        'p_code': code.trim(),
+        'p_name': name.trim(),
+        'p_type': type,
+        'p_is_active': isActive,
+        'p_is_cash': isCash,
+      },
+    );
   }
 }

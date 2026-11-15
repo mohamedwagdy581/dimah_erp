@@ -10,21 +10,59 @@ class AlertsBand {
   final Color bg;
 }
 
+AlertsBand expiryAlertBand(BuildContext context, int daysLeft) {
+  final t = AppLocalizations.of(context)!;
+  if (daysLeft < 0) {
+    return AlertsBand(
+      label: t.hrBandExpired,
+      fg: const Color(0xFFEC3349),
+      bg: const Color(0xFFFFE8EA),
+    );
+  }
+  return AlertsBand(
+    label: Localizations.localeOf(context).languageCode == 'ar'
+        ? 'قريب من الانتهاء'
+        : 'Near expiry',
+    fg: const Color(0xFFBF700F),
+    bg: const Color(0xFFFFEECF),
+  );
+}
+
 AlertsBand alertBand(BuildContext context, int daysLeft) {
   final t = AppLocalizations.of(context)!;
   if (daysLeft < 0) {
-    return AlertsBand(label: t.hrBandExpired, fg: Colors.red.shade800, bg: Colors.red.withValues(alpha: 0.18));
+    return AlertsBand(
+      label: t.hrBandExpired,
+      fg: Colors.red.shade800,
+      bg: Colors.red.withValues(alpha: 0.18),
+    );
   }
   if (daysLeft < 30) {
-    return AlertsBand(label: t.hrBandUrgent, fg: Colors.red.shade700, bg: Colors.red.withValues(alpha: 0.12));
+    return AlertsBand(
+      label: t.hrBandUrgent,
+      fg: Colors.red.shade700,
+      bg: Colors.red.withValues(alpha: 0.12),
+    );
   }
   if (daysLeft < 90) {
-    return AlertsBand(label: t.hrBandWarning, fg: Colors.amber.shade800, bg: Colors.amber.withValues(alpha: 0.20));
+    return AlertsBand(
+      label: t.hrBandWarning,
+      fg: Colors.amber.shade800,
+      bg: Colors.amber.withValues(alpha: 0.20),
+    );
   }
   if (daysLeft <= 120) {
-    return AlertsBand(label: t.hrBandUpcoming, fg: Colors.yellow.shade900, bg: Colors.yellow.withValues(alpha: 0.18));
+    return AlertsBand(
+      label: t.hrBandUpcoming,
+      fg: Colors.yellow.shade900,
+      bg: Colors.yellow.withValues(alpha: 0.18),
+    );
   }
-  return AlertsBand(label: t.hrBandSafe, fg: Colors.green.shade800, bg: Colors.green.withValues(alpha: 0.14));
+  return AlertsBand(
+    label: t.hrBandSafe,
+    fg: Colors.green.shade800,
+    bg: Colors.green.withValues(alpha: 0.14),
+  );
 }
 
 String formatAlertDate(DateTime d) {

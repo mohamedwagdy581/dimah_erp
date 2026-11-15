@@ -1,3 +1,4 @@
+import 'package:erp_sys/core/ui/app_search_field.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../l10n/app_localizations.dart';
@@ -12,9 +13,10 @@ class LeavesSearchField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context)!;
-    return SizedBox(
-      width: 280,
-      child: TextField(
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 280),
+      child: AppSearchField(
+        value: cubit.state.search,
         onChanged: cubit.searchChanged,
         decoration: InputDecoration(
           prefixIcon: const Icon(Icons.search),
@@ -54,11 +56,7 @@ class LeavesStatusFilter extends StatelessWidget {
 }
 
 class LeavesTypeFilter extends StatelessWidget {
-  const LeavesTypeFilter({
-    super.key,
-    required this.cubit,
-    required this.state,
-  });
+  const LeavesTypeFilter({super.key, required this.cubit, required this.state});
 
   final LeavesCubit cubit;
   final LeavesState state;

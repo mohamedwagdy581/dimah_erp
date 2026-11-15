@@ -61,5 +61,13 @@ class SettlementsState extends Equatable {
   );
 
   @override
-  List<Object?> get props => [items, total, loading, page, pageSize, search, error];
+  List<Object?> get props => [
+    items,
+    total,
+    loading,
+    page,
+    pageSize,
+    search,
+    error,
+  ];
 }

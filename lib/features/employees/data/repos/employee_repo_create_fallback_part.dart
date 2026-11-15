@@ -85,58 +85,57 @@ mixin _EmployeesRepoCreateFallbackMixin on _EmployeesRepoCreatePayloadMixin {
       'other_allowance': otherAllowance,
     });
 
-    await _client.from('employee_personal').upsert(
-      _employeePersonalPayload(
-        tenantId: tenantId,
-        employeeId: empId,
-        nationality: nationality,
-        maritalStatus: maritalStatus,
-        address: address,
-        city: city,
-        country: country,
-        passportNo: passportNo,
-        passportExpiry: passportExpiry,
-        residencyIssueDate: residencyIssueDate,
-        residencyExpiryDate: residencyExpiryDate,
-        insuranceStartDate: insuranceStartDate,
-        insuranceExpiryDate: insuranceExpiryDate,
-        insuranceProvider: insuranceProvider,
-        insurancePolicyNo: insurancePolicyNo,
-        educationLevel: educationLevel,
-        major: major,
-        university: university,
-      ),
-    );
+    await _client
+        .from('employee_personal')
+        .upsert(
+          _employeePersonalPayload(
+            tenantId: tenantId,
+            employeeId: empId,
+            nationality: nationality,
+            maritalStatus: maritalStatus,
+            address: address,
+            city: city,
+            country: country,
+            passportNo: passportNo,
+            passportExpiry: passportExpiry,
+            residencyIssueDate: residencyIssueDate,
+            residencyExpiryDate: residencyExpiryDate,
+            insuranceStartDate: insuranceStartDate,
+            insuranceExpiryDate: insuranceExpiryDate,
+            insuranceProvider: insuranceProvider,
+            insurancePolicyNo: insurancePolicyNo,
+            educationLevel: educationLevel,
+            major: major,
+            university: university,
+          ),
+        );
 
-    await _client.from('employee_financial').upsert(
-      _employeeFinancialPayload(
-        tenantId: tenantId,
-        employeeId: empId,
-        bankName: bankName,
-        iban: iban,
-        accountNumber: accountNumber,
-        paymentMethod: paymentMethod,
-      ),
-    );
+    await _client
+        .from('employee_financial')
+        .upsert(
+          _employeeFinancialPayload(
+            tenantId: tenantId,
+            employeeId: empId,
+            bankName: bankName,
+            iban: iban,
+            accountNumber: accountNumber,
+            paymentMethod: paymentMethod,
+          ),
+        );
 
-    await _client.from('employee_contracts').insert(
-      _employeeContractPayload(
-        tenantId: tenantId,
-        employeeId: empId,
-        contractType: contractType,
-        contractStart: contractStart,
-        contractEnd: contractEnd,
-        probationMonths: probationMonths,
-        contractFileUrl: contractFileUrl,
-      ),
-    );
-
-    await _createAndLinkTestLogin(
-      tenantId: tenantId,
-      employeeId: empId,
-      fullName: fullName,
-      email: email,
-    );
+    await _client
+        .from('employee_contracts')
+        .insert(
+          _employeeContractPayload(
+            tenantId: tenantId,
+            employeeId: empId,
+            contractType: contractType,
+            contractStart: contractStart,
+            contractEnd: contractEnd,
+            probationMonths: probationMonths,
+            contractFileUrl: contractFileUrl,
+          ),
+        );
     return empId;
   }
 }

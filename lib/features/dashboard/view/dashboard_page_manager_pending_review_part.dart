@@ -8,7 +8,8 @@ class _ManagerPendingReviewSection extends StatelessWidget {
   });
 
   final _ManagerDashboardData data;
-  final void Function(Map<String, dynamic> task, {required bool approved}) onReviewDecision;
+  final void Function(Map<String, dynamic> task, {required bool approved})
+  onReviewDecision;
   final ValueChanged<String> onOpenExternalUrl;
 
   String _formatTimestamp(dynamic raw) {
@@ -31,42 +32,80 @@ class _ManagerPendingReviewSection extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(t.pendingTaskReviews, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+            Text(
+              t.pendingTaskReviews,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+            ),
             const SizedBox(height: 8),
             if (data.pendingReviewRequests.isEmpty)
-              Text(t.noPendingTaskReviews)
+              AppEmptyState(title: t.noPendingTaskReviews, compact: false)
             else
-              ...data.pendingReviewRequests.map((request) => Card(
-                margin: const EdgeInsets.only(bottom: 10),
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(child: Text(request['title']?.toString() ?? '-', style: const TextStyle(fontWeight: FontWeight.w700))),
-                          Text(request['employee_name']?.toString() ?? '-', style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      Text('${t.reviewRequestedAt}: ${_formatTimestamp(request['employee_review_requested_at'])}'),
-                      const SizedBox(height: 4),
-                      Text('${t.reviewNote}: ${request['employee_review_note'] ?? '-'}'),
-                      _AttachmentWrap(attachments: ((request['attachments'] as List?) ?? const []).cast<Map<String, dynamic>>(), onOpenExternalUrl: onOpenExternalUrl),
-                      const SizedBox(height: 10),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: [
-                          OutlinedButton.icon(onPressed: () => onReviewDecision(request, approved: false), icon: const Icon(Icons.close_outlined), label: Text(t.reject)),
-                          ElevatedButton.icon(onPressed: () => onReviewDecision(request, approved: true), icon: const Icon(Icons.check_outlined), label: Text(t.approveAndUpdate)),
-                        ],
-                      ),
-                    ],
+              ...data.pendingReviewRequests.map(
+                (request) => Card(
+                  margin: const EdgeInsets.only(bottom: 10),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                request['title']?.toString() ?? '-',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                            Text(
+                              request['employee_name']?.toString() ?? '-',
+                              style: TextStyle(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          '${t.reviewRequestedAt}: ${_formatTimestamp(request['employee_review_requested_at'])}',
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${t.reviewNote}: ${request['employee_review_note'] ?? '-'}',
+                        ),
+                        _AttachmentWrap(
+                          attachments:
+                              ((request['attachments'] as List?) ?? const [])
+                                  .cast<Map<String, dynamic>>(),
+                          onOpenExternalUrl: onOpenExternalUrl,
+                        ),
+                        const SizedBox(height: 10),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            OutlinedButton.icon(
+                              onPressed: () =>
+                                  onReviewDecision(request, approved: false),
+                              icon: const Icon(Icons.close_outlined),
+                              label: Text(t.reject),
+                            ),
+                            ElevatedButton.icon(
+                              onPressed: () =>
+                                  onReviewDecision(request, approved: true),
+                              icon: const Icon(Icons.check_outlined),
+                              label: Text(t.approveAndUpdate),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              )),
+              ),
           ],
         ),
       ),

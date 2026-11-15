@@ -1,4 +1,4 @@
-﻿import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../domain/models/payroll_assignee_option.dart';
 import '../../domain/models/payroll_item.dart';
@@ -8,6 +8,57 @@ import '../../domain/repos/payroll_repo.dart';
 class PayrollRepoImpl implements PayrollRepo {
   PayrollRepoImpl(this._client);
   final SupabaseClient _client;
+
+  @override
+  Future<List<PayrollItem>> fetchPreparationItems() async {
+    final actor = await _actor();
+    if (actor.role != 'hr' && actor.role != 'admin') {
+      throw StateError('Payroll preparation requires HR or admin');
+    }
+    final employees = <Map<String, dynamic>>[];
+    final compensation = <String, Map<String, dynamic>>{};
+    for (var page = 0; ; page++) {
+      final rows = await _client
+          .from('employees')
+          .select('id, full_name, photo_url, job_title:job_titles(name)')
+          .eq('tenant_id', actor.tenantId)
+          .eq('status', 'active')
+          .order('id')
+          .range(page * 500, page * 500 + 499);
+      employees.addAll(rows);
+      if (rows.length < 500) break;
+    }
+    for (var page = 0; ; page++) {
+      final rows = await _client
+          .from('employee_compensation')
+          .select(
+            'employee_id, basic_salary, housing_allowance, transport_allowance, other_allowance',
+          )
+          .eq('tenant_id', actor.tenantId)
+          .order('employee_id')
+          .range(page * 500, page * 500 + 499);
+      for (final row in rows) {
+        compensation[row['employee_id'].toString()] = row;
+      }
+      if (rows.length < 500) break;
+    }
+    return employees.map((employee) {
+      final c = compensation[employee['id'].toString()] ?? <String, dynamic>{};
+      num amount(String key) => (c[key] ?? 0) as num;
+      return PayrollItem.fromMap({
+        ...c,
+        'id': employee['id'],
+        'run_id': '',
+        'employee_id': employee['id'],
+        'employee': employee,
+        'total_amount':
+            amount('basic_salary') +
+            amount('housing_allowance') +
+            amount('transport_allowance') +
+            amount('other_allowance'),
+      });
+    }).toList()..sort((a, b) => a.employeeName.compareTo(b.employeeName));
+  }
 
   Future<({String tenantId, String? employeeId, String role})> _actor() async {
     final uid = _client.auth.currentUser?.id;
@@ -40,85 +91,6 @@ class PayrollRepoImpl implements PayrollRepo {
     if (role == 'finance_manager') return 'rejected_by_finance_manager';
     if (role == 'admin') return 'rejected_by_admin';
     return 'rejected';
-  }
-
-  Future<String> _resolveRequesterEmployeeId({
-    required String tenantId,
-    required String role,
-    String? preferredEmployeeId,
-  }) async {
-    if (preferredEmployeeId != null && preferredEmployeeId.isNotEmpty) {
-      return preferredEmployeeId;
-    }
-
-    final rows = await _client
-        .from('users')
-        .select('employee_id')
-        .eq('tenant_id', tenantId)
-        .eq('role', role)
-        .not('employee_id', 'is', null)
-        .limit(1);
-
-    final list = (rows as List).cast<Map<String, dynamic>>();
-    if (list.isEmpty) {
-      throw Exception('No employee profile linked to role "$role" in this tenant');
-    }
-
-    final employeeId = list.first['employee_id']?.toString();
-    if (employeeId == null || employeeId.isEmpty) {
-      throw Exception('Role "$role" is missing employee mapping');
-    }
-    return employeeId;
-  }
-
-  Future<String> _resolveFinanceManagerEmployeeId({
-    required String tenantId,
-  }) async {
-    final rows = await _client
-        .from('users')
-        .select('employee_id')
-        .eq('tenant_id', tenantId)
-        .eq('role', 'finance_manager')
-        .not('employee_id', 'is', null)
-        .limit(1);
-
-    final list = (rows as List).cast<Map<String, dynamic>>();
-    if (list.isEmpty) {
-      throw Exception('No finance manager account found');
-    }
-    final employeeId = list.first['employee_id']?.toString();
-    if (employeeId == null || employeeId.isEmpty) {
-      throw Exception('Finance manager is missing employee mapping');
-    }
-    return employeeId;
-  }
-
-  Future<String> _createFinanceDisbursementTask({
-    required String tenantId,
-    required String financeManagerEmployeeId,
-    required PayrollRun run,
-    required String? assignedByEmployeeId,
-  }) async {
-    final inserted = await _client
-        .from('employee_tasks')
-        .insert({
-          'tenant_id': tenantId,
-          'employee_id': financeManagerEmployeeId,
-          'assigned_by_employee_id': assignedByEmployeeId,
-          'title': 'Payroll Disbursement ${_toDateOnly(run.periodStart)} - ${_toDateOnly(run.periodEnd)}',
-          'description': 'Approved payroll run ${run.id} is ready for salary disbursement. Review the payroll and assign it to an accountant for payment processing.',
-          'task_type': 'payroll',
-          'estimate_hours': 8,
-          'priority': 'high',
-          'weight': 4,
-          'status': 'todo',
-          'progress': 0,
-          'due_date': _toDateOnly(DateTime.now().add(const Duration(days: 2))),
-        })
-        .select('id')
-        .single();
-
-    return inserted['id'].toString();
   }
 
   @override
@@ -211,17 +183,27 @@ class PayrollRepoImpl implements PayrollRepo {
 
   @override
   Future<List<PayrollItem>> fetchRunItems({required String runId}) async {
-    final res = await _client
-        .from('payroll_items')
-        .select(
-          'id, run_id, employee_id, basic_salary, housing_allowance, transport_allowance, other_allowance, total_amount, '
-          'employee:employees(full_name)',
-        )
-        .eq('run_id', runId);
-
-    return (res as List)
-        .map((e) => PayrollItem.fromMap(e as Map<String, dynamic>))
-        .toList();
+    final tenantId = await _tenantId();
+    final items = <PayrollItem>[];
+    for (var page = 0; ; page++) {
+      final res = await _client
+          .from('payroll_items')
+          .select(
+            'id, run_id, employee_id, basic_salary, housing_allowance, transport_allowance, other_allowance, total_amount, '
+            'employee:employees(full_name, employee_number, photo_url, job_title:job_titles(name))',
+          )
+          .eq('tenant_id', tenantId)
+          .eq('run_id', runId)
+          .order('id')
+          .range(page * 500, page * 500 + 499);
+      items.addAll(
+        (res as List)
+            .map((e) => PayrollItem.fromMap(e as Map<String, dynamic>))
+            .toList(),
+      );
+      if (res.length < 500) break;
+    }
+    return items;
   }
 
   @override
@@ -231,100 +213,39 @@ class PayrollRepoImpl implements PayrollRepo {
 
   @override
   Future<void> submitToFinanceManager({required String runId}) async {
-    final actor = await _actor();
-    final requesterEmployeeId = await _resolveRequesterEmployeeId(
-      tenantId: actor.tenantId,
-      role: 'hr',
-      preferredEmployeeId: actor.employeeId,
-    );
-
-    await _client
-        .from('payroll_runs')
-        .update({
-          'status': 'pending_finance_manager',
-          'reject_reason': null,
-          'hr_approved_at': DateTime.now().toIso8601String(),
-        })
-        .eq('tenant_id', actor.tenantId)
-        .eq('id', runId);
-
-    await _client.from('approval_requests').insert({
-      'tenant_id': actor.tenantId,
-      'request_type': 'payroll_run',
-      'employee_id': requesterEmployeeId,
-      'status': 'pending',
-      'payload': {'run_id': runId},
-      'requested_by_role': 'hr',
-      'current_approver_role': 'finance_manager',
-    });
+    await _client.rpc('hr_submit_payroll', params: {'p_run_id': runId});
   }
 
   @override
-  Future<void> financeManagerApprove({required String runId}) async {
-    final tenantId = await _tenantId();
-    await _client
-        .from('payroll_runs')
-        .update({
-          'status': 'pending_admin_approval',
-          'finance_manager_approved_at': DateTime.now().toIso8601String(),
-          'reject_reason': null,
-        })
-        .eq('tenant_id', tenantId)
-        .eq('id', runId);
+  Future<void> financeManagerApprove({
+    required String runId,
+    String? notes,
+  }) async {
+    await _client.rpc(
+      'finance_review_payroll',
+      params: {'p_run_id': runId, 'p_approve': true, 'p_notes': notes?.trim()},
+    );
+  }
 
-    await _client
+  @override
+  Future<String?> fetchFinanceReviewNotes({required String runId}) async {
+    final tenantId = await _tenantId();
+    final rows = await _client
         .from('approval_requests')
-        .update({'current_approver_role': 'admin'})
+        .select('payload')
         .eq('tenant_id', tenantId)
+        .eq('request_type', 'payroll_run')
         .contains('payload', {'run_id': runId})
-        .eq('status', 'pending');
+        .order('created_at', ascending: false)
+        .limit(1);
+    if (rows.isEmpty) return null;
+    final payload = rows.first['payload'];
+    return payload is Map ? payload['finance_review_notes']?.toString() : null;
   }
 
   @override
   Future<void> adminApprove({required String runId}) async {
-    final actor = await _actor();
-    final rows = await _client
-        .from('payroll_runs')
-        .select(
-          'id, tenant_id, period_start, period_end, status, total_employees, total_amount, '
-          'created_at, reject_reason, disbursement_status, disbursement_task_id, '
-          'disbursement_assignee_employee_id, hr_approved_at, finance_manager_approved_at, admin_approved_at',
-        )
-        .eq('tenant_id', actor.tenantId)
-        .eq('id', runId)
-        .limit(1);
-
-    final list = (rows as List).cast<Map<String, dynamic>>();
-    if (list.isEmpty) throw Exception('Payroll run not found');
-    final run = PayrollRun.fromMap(list.first);
-    final financeManagerEmployeeId = await _resolveFinanceManagerEmployeeId(
-      tenantId: actor.tenantId,
-    );
-    final taskId = await _createFinanceDisbursementTask(
-      tenantId: actor.tenantId,
-      financeManagerEmployeeId: financeManagerEmployeeId,
-      run: run,
-      assignedByEmployeeId: actor.employeeId,
-    );
-
-    await _client
-        .from('payroll_runs')
-        .update({
-          'status': 'approved',
-          'admin_approved_at': DateTime.now().toIso8601String(),
-          'disbursement_status': 'assigned_to_finance_manager',
-          'disbursement_task_id': taskId,
-          'disbursement_assignee_employee_id': financeManagerEmployeeId,
-        })
-        .eq('tenant_id', actor.tenantId)
-        .eq('id', runId);
-
-    await _client
-        .from('approval_requests')
-        .update({'status': 'approved'})
-        .eq('tenant_id', actor.tenantId)
-        .contains('payload', {'run_id': runId})
-        .eq('status', 'pending');
+    await _client.rpc('admin_approve_payroll', params: {'p_run_id': runId});
   }
 
   @override
@@ -333,6 +254,17 @@ class PayrollRepoImpl implements PayrollRepo {
     required String reason,
     required String rejectedByRole,
   }) async {
+    if (rejectedByRole == 'finance_manager') {
+      await _client.rpc(
+        'finance_review_payroll',
+        params: {
+          'p_run_id': runId,
+          'p_approve': false,
+          'p_notes': reason.trim(),
+        },
+      );
+      return;
+    }
     final tenantId = await _tenantId();
     await _client
         .from('payroll_runs')
@@ -353,26 +285,15 @@ class PayrollRepoImpl implements PayrollRepo {
 
   @override
   Future<List<PayrollAssigneeOption>> fetchAssignableAccountants() async {
-    final actor = await _actor();
-    final financeManagerEmployeeId = actor.employeeId;
-    if (financeManagerEmployeeId == null || financeManagerEmployeeId.isEmpty) {
-      return const [];
-    }
-
-    final rows = await _client
-        .from('employees')
-        .select('id, full_name')
-        .eq('tenant_id', actor.tenantId)
-        .eq('manager_id', financeManagerEmployeeId)
-        .eq('status', 'active')
-        .order('full_name');
-
-    return (rows as List)
+    final rows = await _client.rpc('finance_payroll_assignees') as List;
+    return rows
         .cast<Map<String, dynamic>>()
         .map(
           (row) => PayrollAssigneeOption(
             employeeId: row['id'].toString(),
             fullName: (row['full_name'] ?? '').toString(),
+            employeeNumber: row['employee_number']?.toString(),
+            jobLevel: row['job_level']?.toString(),
           ),
         )
         .toList();
@@ -383,52 +304,10 @@ class PayrollRepoImpl implements PayrollRepo {
     required String runId,
     required String accountantEmployeeId,
   }) async {
-    final actor = await _actor();
-    final managerEmployeeId = actor.employeeId;
-    if (managerEmployeeId == null || managerEmployeeId.isEmpty) {
-      throw Exception('Finance manager employee profile is missing');
-    }
-
-    final rows = await _client
-        .from('payroll_runs')
-        .select('disbursement_task_id')
-        .eq('tenant_id', actor.tenantId)
-        .eq('id', runId)
-        .limit(1);
-    final list = (rows as List).cast<Map<String, dynamic>>();
-    if (list.isEmpty) throw Exception('Payroll run not found');
-
-    final taskId = list.first['disbursement_task_id']?.toString();
-    if (taskId == null || taskId.isEmpty) {
-      throw Exception('Disbursement task is missing');
-    }
-
-    await _client.from('employee_tasks').update({
-      'employee_id': accountantEmployeeId,
-      'assigned_by_employee_id': managerEmployeeId,
-      'status': 'todo',
-      'progress': 0,
-      'qa_status': 'pending',
-      'employee_review_status': 'none',
-      'employee_review_note': null,
-      'employee_review_requested_at': null,
-      'manager_review_note': null,
-      'manager_reviewed_at': null,
-      'assignee_received_at': null,
-      'assignee_started_at': null,
-      'active_timer_started_at': null,
-      'completed_at': null,
-      'updated_at': DateTime.now().toIso8601String(),
-    }).eq('id', taskId);
-
-    await _client
-        .from('payroll_runs')
-        .update({
-          'disbursement_status': 'assigned_to_accountant',
-          'disbursement_assignee_employee_id': accountantEmployeeId,
-        })
-        .eq('tenant_id', actor.tenantId)
-        .eq('id', runId);
+    await _client.rpc(
+      'finance_assign_payroll',
+      params: {'p_run_id': runId, 'p_employee_id': accountantEmployeeId},
+    );
   }
 
   @override
@@ -448,7 +327,8 @@ class PayrollRepoImpl implements PayrollRepo {
     final list = (rows as List).cast<Map<String, dynamic>>();
     if (list.isEmpty) throw Exception('Payroll run not found');
 
-    final assigneeEmployeeId = list.first['disbursement_assignee_employee_id']?.toString();
+    final assigneeEmployeeId = list.first['disbursement_assignee_employee_id']
+        ?.toString();
     if (assigneeEmployeeId != actorEmployeeId) {
       throw Exception('This payroll is not assigned to you');
     }
@@ -461,12 +341,15 @@ class PayrollRepoImpl implements PayrollRepo {
         .eq('id', runId);
 
     if (taskId != null && taskId.isNotEmpty) {
-      await _client.from('employee_tasks').update({
-        'status': 'in_progress',
-        'progress': 50,
-        'assignee_started_at': DateTime.now().toIso8601String(),
-        'updated_at': DateTime.now().toIso8601String(),
-      }).eq('id', taskId);
+      await _client
+          .from('employee_tasks')
+          .update({
+            'status': 'in_progress',
+            'progress': 50,
+            'assignee_started_at': DateTime.now().toIso8601String(),
+            'updated_at': DateTime.now().toIso8601String(),
+          })
+          .eq('id', taskId);
     }
   }
 
@@ -487,7 +370,8 @@ class PayrollRepoImpl implements PayrollRepo {
     final list = (rows as List).cast<Map<String, dynamic>>();
     if (list.isEmpty) throw Exception('Payroll run not found');
 
-    final assigneeEmployeeId = list.first['disbursement_assignee_employee_id']?.toString();
+    final assigneeEmployeeId = list.first['disbursement_assignee_employee_id']
+        ?.toString();
     if (assigneeEmployeeId != actorEmployeeId) {
       throw Exception('This payroll is not assigned to you');
     }
@@ -501,14 +385,17 @@ class PayrollRepoImpl implements PayrollRepo {
 
     if (taskId != null && taskId.isNotEmpty) {
       final now = DateTime.now().toIso8601String();
-      await _client.from('employee_tasks').update({
-        'status': 'done',
-        'progress': 100,
-        'qa_status': 'accepted',
-        'completed_at': now,
-        'updated_at': now,
-        'active_timer_started_at': null,
-      }).eq('id', taskId);
+      await _client
+          .from('employee_tasks')
+          .update({
+            'status': 'done',
+            'progress': 100,
+            'qa_status': 'accepted',
+            'completed_at': now,
+            'updated_at': now,
+            'active_timer_started_at': null,
+          })
+          .eq('id', taskId);
     }
   }
 }

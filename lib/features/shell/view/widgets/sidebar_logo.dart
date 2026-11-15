@@ -8,21 +8,15 @@ class SidebarLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final logoPath = isDark ? AppAssets.darkLogo : AppAssets.fullLogo;
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 6),
       child: Row(
         children: [
           Image.asset(
-            logoPath,
+            AppAssets.logoMark,
             height: 32,
+            width: 32,
             fit: BoxFit.contain,
-            errorBuilder: (_, __, ___) => Image.asset(
-              AppAssets.fullLogo,
-              height: 32,
-              fit: BoxFit.contain,
-            ),
           ),
           const SizedBox(width: 10),
           Expanded(

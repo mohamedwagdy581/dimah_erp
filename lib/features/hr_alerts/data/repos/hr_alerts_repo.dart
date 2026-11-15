@@ -1,4 +1,4 @@
-﻿import 'dart:typed_data';
+import 'dart:typed_data';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -25,25 +25,22 @@ class HrAlertsRepo {
     final filteredEmployeeItems = includeHidden
         ? items
         : items
-            .where(
-              (item) => !_isAlertHidden(
-                states,
-                scope: 'employee_expiry',
-                key: employeeAlertKey(item),
-              ),
-            )
-            .toList();
+              .where(
+                (item) => !_isAlertHidden(
+                  states,
+                  scope: 'employee_expiry',
+                  key: employeeAlertKey(item),
+                ),
+              )
+              .toList();
     final filteredGovernmentItems = includeHidden
         ? governmentItems
         : governmentItems
-            .where(
-              (item) => !_isAlertHidden(
-                states,
-                scope: 'government',
-                key: item.id,
-              ),
-            )
-            .toList();
+              .where(
+                (item) =>
+                    !_isAlertHidden(states, scope: 'government', key: item.id),
+              )
+              .toList();
     final employeeStates = <String, HrAlertStateInfo>{};
     for (final item in items) {
       final key = employeeAlertKey(item);
@@ -85,9 +82,11 @@ class HrAlertsRepo {
     final today = DateTime.now();
     final todayOnly = DateTime(today.year, today.month, today.day);
     return (rows as List).cast<Map<String, dynamic>>().map((row) {
-      final endDate = DateTime.tryParse(row['end_date']?.toString() ?? '') ??
+      final endDate =
+          DateTime.tryParse(row['end_date']?.toString() ?? '') ??
           DateTime.fromMillisecondsSinceEpoch(0);
-      final startDate = DateTime.tryParse(row['start_date']?.toString() ?? '') ??
+      final startDate =
+          DateTime.tryParse(row['start_date']?.toString() ?? '') ??
           DateTime.fromMillisecondsSinceEpoch(0);
       final endOnly = DateTime(endDate.year, endDate.month, endDate.day);
       return GovernmentAlertItem(
@@ -121,8 +120,11 @@ class HrAlertsRepo {
     if (fileBytes != null && (fileName ?? '').trim().isNotEmpty) {
       final normalizedFileName = fileName!.trim();
       final safeFileName = _safeStorageFileName(normalizedFileName);
-      final path = '$tenantId/${DateTime.now().millisecondsSinceEpoch}_$safeFileName';
-      await _client.storage.from('government_alerts').uploadBinary(
+      final path =
+          '$tenantId/${DateTime.now().millisecondsSinceEpoch}_$safeFileName';
+      await _client.storage
+          .from('government_alerts')
+          .uploadBinary(
             path,
             fileBytes,
             fileOptions: FileOptions(contentType: mimeType),
@@ -163,8 +165,11 @@ class HrAlertsRepo {
     if (fileBytes != null && (fileName ?? '').trim().isNotEmpty) {
       final normalizedFileName = fileName!.trim();
       final safeFileName = _safeStorageFileName(normalizedFileName);
-      final path = '$tenantId/${DateTime.now().millisecondsSinceEpoch}_$safeFileName';
-      await _client.storage.from('government_alerts').uploadBinary(
+      final path =
+          '$tenantId/${DateTime.now().millisecondsSinceEpoch}_$safeFileName';
+      await _client.storage
+          .from('government_alerts')
+          .uploadBinary(
             path,
             fileBytes,
             fileOptions: FileOptions(contentType: mimeType),
@@ -239,7 +244,10 @@ class HrAlertsRepo {
   }
 
   Future<void> restoreEmployeeAlert(ExpiryAlertItem item) {
-    return _clearAlertState(scope: 'employee_expiry', key: employeeAlertKey(item));
+    return _clearAlertState(
+      scope: 'employee_expiry',
+      key: employeeAlertKey(item),
+    );
   }
 
   Future<void> _upsertAlertState({
@@ -296,7 +304,9 @@ class HrAlertsRepo {
     final row = states['$scope::$key'];
     if (row == null) return false;
     if (row['resolved_at'] != null) return true;
-    final snoozeUntil = DateTime.tryParse(row['snooze_until']?.toString() ?? '');
+    final snoozeUntil = DateTime.tryParse(
+      row['snooze_until']?.toString() ?? '',
+    );
     return snoozeUntil != null && snoozeUntil.isAfter(DateTime.now());
   }
 
@@ -312,11 +322,12 @@ class HrAlertsRepo {
     if (uid == null) {
       throw Exception('Not authenticated');
     }
-    final me = await _client.from('users').select('tenant_id').eq('id', uid).single();
-    return {
-      'user_id': uid,
-      'tenant_id': me['tenant_id'].toString(),
-    };
+    final me = await _client
+        .from('users')
+        .select('tenant_id')
+        .eq('id', uid)
+        .single();
+    return {'user_id': uid, 'tenant_id': me['tenant_id'].toString()};
   }
 
   Future<String> _tenantId() async => (await _currentAuth())['tenant_id']!;
@@ -325,7 +336,9 @@ class HrAlertsRepo {
     final dotIndex = fileName.lastIndexOf('.');
     final hasExtension = dotIndex > 0 && dotIndex < fileName.length - 1;
     final baseName = hasExtension ? fileName.substring(0, dotIndex) : fileName;
-    final extension = hasExtension ? fileName.substring(dotIndex + 1).toLowerCase() : '';
+    final extension = hasExtension
+        ? fileName.substring(dotIndex + 1).toLowerCase()
+        : '';
 
     final sanitizedBase = baseName
         .replaceAll(RegExp(r'[^A-Za-z0-9_-]+'), '_')
@@ -344,6 +357,10 @@ class HrAlertsRepo {
 }
 
 String employeeAlertKey(ExpiryAlertItem item) {
-  final date = DateTime(item.expiryDate.year, item.expiryDate.month, item.expiryDate.day).toIso8601String().split('T').first;
+  final date = DateTime(
+    item.expiryDate.year,
+    item.expiryDate.month,
+    item.expiryDate.day,
+  ).toIso8601String().split('T').first;
   return '${item.employeeId}|${item.type}|$date';
 }

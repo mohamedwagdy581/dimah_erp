@@ -28,7 +28,9 @@ class EmployeeProfilePhotoSection extends StatelessWidget {
             CircleAvatar(
               radius: 24,
               backgroundImage: resolveEmployeePhotoProvider(photoUrl.text),
-              child: photoUrl.text.trim().isEmpty ? const Icon(Icons.person) : null,
+              child: photoUrl.text.trim().isEmpty
+                  ? const Icon(Icons.person)
+                  : null,
             ),
             const SizedBox(width: 10),
             Expanded(
@@ -123,11 +125,23 @@ class EmployeeProfileBasicFields extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        EmployeeProfileEditField(controller: fullName, label: 'Full Name', required: true),
+        EmployeeProfileEditField(
+          controller: fullName,
+          label: 'Full Name',
+          required: true,
+        ),
         const SizedBox(height: 10),
-        EmployeeProfileEditField(controller: email, label: 'Email', required: true),
+        EmployeeProfileEditField(
+          controller: email,
+          label: 'Email',
+          required: true,
+        ),
         const SizedBox(height: 10),
-        EmployeeProfileEditField(controller: phone, label: 'Phone', required: true),
+        EmployeeProfileEditField(
+          controller: phone,
+          label: 'Phone',
+          required: true,
+        ),
       ],
     );
   }

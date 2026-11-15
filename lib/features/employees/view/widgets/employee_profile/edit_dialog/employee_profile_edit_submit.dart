@@ -45,9 +45,7 @@ Future<void> submitEmployeeProfileEdits({
     contractType: controllers['contractType']!.text.trim(),
     contractStart: contractStart,
     contractEnd: contractEnd,
-    probationMonths: int.tryParse(
-      controllers['probationMonths']!.text.trim(),
-    ),
+    probationMonths: int.tryParse(controllers['probationMonths']!.text.trim()),
     contractFileUrl: controllers['contractFileUrl']!.text.trim(),
   );
 }

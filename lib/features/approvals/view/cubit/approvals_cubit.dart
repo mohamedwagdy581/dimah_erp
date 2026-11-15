@@ -11,11 +11,11 @@ class ApprovalsCubit extends Cubit<ApprovalsState> {
     String? initialStatus,
     String? initialRequestType,
   }) : super(
-          ApprovalsState.initial.copyWith(
-            status: initialStatus,
-            requestType: initialRequestType,
-          ),
-        );
+         ApprovalsState.initial.copyWith(
+           status: initialStatus,
+           requestType: initialRequestType,
+         ),
+       );
 
   final ApprovalsRepo _repo;
   final String? employeeId;
@@ -62,6 +62,11 @@ class ApprovalsCubit extends Cubit<ApprovalsState> {
 
   Future<void> statusFilterChanged(String? v) async {
     emit(state.copyWith(status: v));
+    await load(resetPage: true);
+  }
+
+  Future<void> resetFilters() async {
+    emit(state.copyWith(status: null, requestType: null, page: 0));
     await load(resetPage: true);
   }
 

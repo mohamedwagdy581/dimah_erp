@@ -74,7 +74,9 @@ class ElectronicAcknowledgmentFormController extends ChangeNotifier {
 
   Future<void> _loadEmployees() async {
     try {
-      employeeOptions = await AppDI.employeesRepo.fetchEmployeeLookup(limit: 200);
+      employeeOptions = await AppDI.employeesRepo.fetchEmployeeLookup(
+        limit: 200,
+      );
     } catch (_) {
       employeeOptions = const [];
     } finally {

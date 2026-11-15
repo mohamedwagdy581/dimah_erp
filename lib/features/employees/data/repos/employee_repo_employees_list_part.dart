@@ -53,12 +53,17 @@ mixin _EmployeesRepoEmployeesListMixin on _EmployeesRepoAuthMixin {
       );
     }
 
-    final listRes = await listQ.order(sortBy, ascending: ascending).range(from, to);
+    final listRes = await listQ
+        .order(sortBy, ascending: ascending)
+        .range(from, to);
     final items = (listRes as List)
         .map((e) => Employee.fromMap(e as Map<String, dynamic>))
         .toList();
 
-    dynamic countQ = _client.from('employees').select('id').eq('tenant_id', tenantId);
+    dynamic countQ = _client
+        .from('employees')
+        .select('id')
+        .eq('tenant_id', tenantId);
 
     if (actorRole == 'manager' &&
         actorEmployeeId != null &&

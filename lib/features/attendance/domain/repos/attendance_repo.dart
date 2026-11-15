@@ -31,5 +31,8 @@ abstract class AttendanceRepo {
     String? reason,
   });
 
-  Future<void> upsertAttendanceBatch(List<AttendanceImportRecord> records);
+  Future<void> upsertAttendanceBatch(
+    List<AttendanceImportRecord> records, {
+    bool repairTimezone = false,
+  });
 }

@@ -37,7 +37,9 @@ class EmployeeProfileEducationInsuranceSection extends StatelessWidget {
           children: [
             Expanded(
               child: EmployeeProfileDateButton(
-                label: insuranceStartDate == null ? t.insuranceStart : formatEmployeeDate(insuranceStartDate),
+                label: insuranceStartDate == null
+                    ? t.insuranceStart
+                    : formatEmployeeDate(insuranceStartDate),
                 icon: Icons.health_and_safety_outlined,
                 onPressed: onPickInsuranceStartDate,
               ),
@@ -45,7 +47,9 @@ class EmployeeProfileEducationInsuranceSection extends StatelessWidget {
             const SizedBox(width: 10),
             Expanded(
               child: EmployeeProfileDateButton(
-                label: insuranceExpiryDate == null ? t.insuranceExpiry : formatEmployeeDate(insuranceExpiryDate),
+                label: insuranceExpiryDate == null
+                    ? t.insuranceExpiry
+                    : formatEmployeeDate(insuranceExpiryDate),
                 icon: Icons.health_and_safety,
                 onPressed: onPickInsuranceExpiryDate,
               ),
@@ -55,17 +59,37 @@ class EmployeeProfileEducationInsuranceSection extends StatelessWidget {
         const SizedBox(height: 10),
         Row(
           children: [
-            Expanded(child: EmployeeProfileEditField(controller: insuranceProvider, label: t.insuranceProvider)),
+            Expanded(
+              child: EmployeeProfileEditField(
+                controller: insuranceProvider,
+                label: t.insuranceProvider,
+              ),
+            ),
             const SizedBox(width: 10),
-            Expanded(child: EmployeeProfileEditField(controller: insurancePolicyNo, label: t.insurancePolicyNo)),
+            Expanded(
+              child: EmployeeProfileEditField(
+                controller: insurancePolicyNo,
+                label: t.insurancePolicyNo,
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 10),
         Row(
           children: [
-            Expanded(child: EmployeeProfileEditField(controller: educationLevel, label: t.educationLevel)),
+            Expanded(
+              child: EmployeeProfileEditField(
+                controller: educationLevel,
+                label: t.educationLevel,
+              ),
+            ),
             const SizedBox(width: 10),
-            Expanded(child: EmployeeProfileEditField(controller: major, label: t.major)),
+            Expanded(
+              child: EmployeeProfileEditField(
+                controller: major,
+                label: t.major,
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 10),

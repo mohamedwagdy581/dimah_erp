@@ -1,3 +1,4 @@
+import 'package:erp_sys/core/ui/app_data_state.dart';
 import 'package:flutter/material.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/models/job_title.dart';
@@ -21,7 +22,9 @@ class JobTitlesTable extends StatelessWidget {
       return Card(
         child: Padding(
           padding: const EdgeInsets.all(24),
-          child: Center(child: Text(t.noJobTitlesFound)),
+          child: Center(
+            child: AppEmptyState(title: t.noJobTitlesFound, compact: false),
+          ),
         ),
       );
     }

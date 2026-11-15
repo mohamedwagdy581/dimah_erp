@@ -1,3 +1,4 @@
+import 'package:erp_sys/core/ui/app_data_state.dart';
 import 'package:flutter/material.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/models/department.dart';
@@ -21,7 +22,9 @@ class DepartmentTable extends StatelessWidget {
       return Card(
         child: Padding(
           padding: const EdgeInsets.all(24),
-          child: Center(child: Text(t.noDepartmentsFound)),
+          child: Center(
+            child: AppEmptyState(title: t.noDepartmentsFound, compact: false),
+          ),
         ),
       );
     }
@@ -46,7 +49,13 @@ class DepartmentTable extends StatelessWidget {
                     cells: [
                       DataCell(Text(d.name)),
                       DataCell(Text(d.code ?? '-')),
-                      DataCell(Text((d.managerName ?? '').trim().isEmpty ? '-' : d.managerName!)),
+                      DataCell(
+                        Text(
+                          (d.managerName ?? '').trim().isEmpty
+                              ? '-'
+                              : d.managerName!,
+                        ),
+                      ),
                       DataCell(Text(d.isActive ? t.active : t.inactive)),
                       DataCell(
                         Row(

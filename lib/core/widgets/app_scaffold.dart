@@ -11,6 +11,7 @@ class AppScaffold extends StatelessWidget {
     required this.sidebar,
     required this.body,
     this.actions = const [],
+    this.employeeStyle = false,
   });
 
   final String title;
@@ -19,6 +20,7 @@ class AppScaffold extends StatelessWidget {
   final Widget sidebar;
   final Widget body;
   final List<Widget> actions;
+  final bool employeeStyle;
 
   @override
   Widget build(BuildContext context) {
@@ -26,33 +28,49 @@ class AppScaffold extends StatelessWidget {
       builder: (context, c) {
         final isMobile = AppBreakpoints.isMobile(c.maxWidth);
 
-        return Scaffold(
-          appBar: AppBar(
-            title: Text(title),
-            actions: [
-              if (!isMobile)
-                IconButton(
-                  tooltip: isCollapsed
-                      ? AppLocalizations.of(context)!.expandSidebar
-                      : AppLocalizations.of(context)!.collapseSidebar,
-                  onPressed: onToggle,
-                  icon: Icon(
-                    isCollapsed
-                        ? Icons.keyboard_double_arrow_right
-                        : Icons.keyboard_double_arrow_left,
+        final appBar = AppBar(
+          title: Text(title),
+          actions: [
+            if (!isMobile)
+              IconButton(
+                tooltip: isCollapsed
+                    ? AppLocalizations.of(context)!.expandSidebar
+                    : AppLocalizations.of(context)!.collapseSidebar,
+                onPressed: onToggle,
+                icon: Icon(
+                  isCollapsed
+                      ? Icons.keyboard_double_arrow_right
+                      : Icons.keyboard_double_arrow_left,
+                ),
+              ),
+            ...actions,
+          ],
+          leading: isMobile
+              ? Builder(
+                  builder: (context) => IconButton(
+                    icon: const Icon(Icons.menu),
+                    onPressed: () => Scaffold.of(context).openDrawer(),
+                  ),
+                )
+              : null,
+        );
+        if (employeeStyle && !isMobile) {
+          return Scaffold(
+            body: Row(
+              children: [
+                sidebar,
+                Expanded(
+                  child: Scaffold(
+                    appBar: appBar,
+                    body: SafeArea(child: body),
                   ),
                 ),
-              ...actions,
-            ],
-            leading: isMobile
-                ? Builder(
-                    builder: (context) => IconButton(
-                      icon: const Icon(Icons.menu),
-                      onPressed: () => Scaffold.of(context).openDrawer(),
-                    ),
-                  )
-                : null,
-          ),
+              ],
+            ),
+          );
+        }
+        return Scaffold(
+          appBar: appBar,
           drawer: isMobile ? Drawer(child: SafeArea(child: sidebar)) : null,
           body: isMobile
               ? SafeArea(

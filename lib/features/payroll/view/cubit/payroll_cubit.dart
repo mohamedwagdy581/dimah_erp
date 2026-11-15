@@ -96,11 +96,15 @@ class PayrollCubit extends Cubit<PayrollState> {
     await load(resetPage: true);
   }
 
-  Future<void> createRun({
+  Future<String> createRun({
     required DateTime startDate,
     required DateTime endDate,
   }) async {
-    await _repo.createRun(periodStart: startDate, periodEnd: endDate);
+    final id = await _repo.createRun(
+      periodStart: startDate,
+      periodEnd: endDate,
+    );
     await load(resetPage: true);
+    return id;
   }
 }

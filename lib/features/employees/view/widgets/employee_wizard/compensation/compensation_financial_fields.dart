@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../wizard_layout.dart';
 
 import '../../../../../../l10n/app_localizations.dart';
 import '../../../cubit/employee_wizard_cubit.dart';
@@ -17,7 +18,7 @@ class CompensationFinancialFields extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context)!;
-    return Column(
+    return WizardFieldsGrid(
       children: [
         TextFormField(
           initialValue: state.bankName,
@@ -27,7 +28,6 @@ class CompensationFinancialFields extends StatelessWidget {
           ),
           onChanged: cubit.setBankName,
         ),
-        const SizedBox(height: 12),
         TextFormField(
           initialValue: state.iban,
           decoration: InputDecoration(
@@ -36,7 +36,6 @@ class CompensationFinancialFields extends StatelessWidget {
           ),
           onChanged: cubit.setIban,
         ),
-        const SizedBox(height: 12),
         TextFormField(
           initialValue: state.accountNumber,
           decoration: InputDecoration(
@@ -45,8 +44,8 @@ class CompensationFinancialFields extends StatelessWidget {
           ),
           onChanged: cubit.setAccountNumber,
         ),
-        const SizedBox(height: 12),
         DropdownButtonFormField<String>(
+          isExpanded: true,
           initialValue: state.paymentMethod,
           decoration: InputDecoration(
             labelText: t.paymentMethod,

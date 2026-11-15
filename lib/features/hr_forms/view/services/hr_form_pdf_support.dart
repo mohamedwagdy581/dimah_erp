@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:pdf/widgets.dart' as pw;
+import '../../../../core/ui/app_assets.dart';
 
 Future<pw.ThemeData?> loadHrFormPdfTheme() async {
   if (!Platform.isWindows) return null;
@@ -29,6 +30,6 @@ Future<pw.Font?> _loadFont(List<String> candidates) async {
 }
 
 Future<pw.MemoryImage> loadHrFormLogo() async {
-  final data = await rootBundle.load('assets/images/fullLogo.png');
+  final data = await rootBundle.load(AppAssets.fullLogo);
   return pw.MemoryImage(data.buffer.asUint8List());
 }

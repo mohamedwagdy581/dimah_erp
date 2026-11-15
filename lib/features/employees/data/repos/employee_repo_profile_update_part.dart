@@ -58,7 +58,9 @@ mixin _EmployeesRepoProfileUpdateMixin on _EmployeesRepoProfileFetchMixin {
       'city': _normalizeOptionalText(city),
       'country': _normalizeOptionalText(country),
       'passport_no': _normalizeOptionalText(passportNo),
-      'passport_expiry': passportExpiry == null ? null : _toDateOnly(passportExpiry),
+      'passport_expiry': passportExpiry == null
+          ? null
+          : _toDateOnly(passportExpiry),
       'residency_issue_date': residencyIssueDate == null
           ? null
           : _toDateOnly(residencyIssueDate),

@@ -41,11 +41,6 @@ class JournalCubit extends Cubit<JournalState> {
         ),
       );
     } catch (e) {
-      if (AppError.isTransient(e)) {
-        if (isClosed) return;
-        emit(state.copyWith(loading: false));
-        return;
-      }
       if (isClosed) return;
       emit(state.copyWith(loading: false, error: AppError.message(e)));
     }
@@ -90,6 +85,22 @@ class JournalCubit extends Cubit<JournalState> {
     if (!state.canPrev) return;
     emit(state.copyWith(page: state.page - 1));
     await load();
+  }
+
+  /// Posts a draft. Returns null on success, otherwise the error.
+  Future<Object?> postEntry(String id) async {
+    if (state.postingId != null) return null;
+    emit(state.copyWith(postingId: id));
+    try {
+      await _repo.postEntry(id);
+      if (isClosed) return null;
+      emit(state.copyWith(postingId: null));
+      await load();
+      return null;
+    } catch (e) {
+      if (!isClosed) emit(state.copyWith(postingId: null));
+      return e;
+    }
   }
 
   Future<void> createEntry({

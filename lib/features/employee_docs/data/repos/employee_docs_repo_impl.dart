@@ -72,6 +72,7 @@ class EmployeeDocsRepoImpl implements EmployeeDocsRepo {
 
     final listRes = await listQ
         .order(sortBy, ascending: ascending)
+        .order('id')
         .range(from, to);
 
     final items = (listRes as List)
@@ -146,10 +147,7 @@ class EmployeeDocsRepoImpl implements EmployeeDocsRepo {
   }
 
   @override
-  Future<void> deleteDoc({
-    required String id,
-    required String fileUrl,
-  }) async {
+  Future<void> deleteDoc({required String id, required String fileUrl}) async {
     final tenantId = await _tenantId();
     final storagePath = _storagePathFromPublicUrl(fileUrl);
     if (storagePath != null && storagePath.isNotEmpty) {

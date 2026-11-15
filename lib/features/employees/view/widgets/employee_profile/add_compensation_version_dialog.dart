@@ -107,9 +107,9 @@ class _AddCompensationVersionDialogState
     } catch (error) {
       if (!mounted) return;
       setState(() => _saving = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(t.saveFailed(error.toString()))),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(t.saveFailed(error.toString()))));
     }
   }
 }

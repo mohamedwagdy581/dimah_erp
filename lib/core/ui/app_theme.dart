@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'employee_theme.dart';
 
 class AppTheme {
   static ThemeData light() {
@@ -11,8 +12,9 @@ class AppTheme {
       useMaterial3: true,
       scaffoldBackgroundColor: const Color(0xFFF7F9FC),
       appBarTheme: AppBarTheme(
-        backgroundColor: scheme.surface,
-        foregroundColor: scheme.onSurface,
+        backgroundColor: EmployeeTheme.primary,
+        foregroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
         elevation: 0,
       ),
       cardTheme: CardThemeData(
@@ -38,8 +40,9 @@ class AppTheme {
       useMaterial3: true,
       scaffoldBackgroundColor: const Color(0xFF0E141B),
       appBarTheme: AppBarTheme(
-        backgroundColor: scheme.surface,
-        foregroundColor: scheme.onSurface,
+        backgroundColor: EmployeeTheme.primary,
+        foregroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
         elevation: 0,
       ),
       cardTheme: CardThemeData(

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../shared/electronic_form_theme.dart';
 import '../../shared/electronic_section_card.dart';
 import '../electronic_leave_request_form_controller.dart';
 import '../widgets/electronic_leave_form_field.dart';

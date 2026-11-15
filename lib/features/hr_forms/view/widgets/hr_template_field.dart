@@ -24,20 +24,29 @@ class HrTemplateField extends StatelessWidget {
   Widget build(BuildContext context) {
     final hasLabel = label.trim().isNotEmpty;
     return Container(
-      decoration: BoxDecoration(border: Border.all(color: Colors.black54, width: .8)),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.black54, width: .8),
+      ),
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           if (hasLabel)
-            Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+            Text(
+              label,
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+            ),
           if (hasLabel) const SizedBox(height: 6),
           TextField(
             controller: controller,
             textAlign: textAlign,
             minLines: minLines,
             maxLines: maxLines,
-            decoration: const InputDecoration(isDense: true, border: InputBorder.none, contentPadding: EdgeInsets.zero),
+            decoration: const InputDecoration(
+              isDense: true,
+              border: InputBorder.none,
+              contentPadding: EdgeInsets.zero,
+            ),
             style: TextStyle(fontSize: fontSize, fontWeight: fontWeight),
           ),
         ],

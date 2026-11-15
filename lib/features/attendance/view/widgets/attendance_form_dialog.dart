@@ -36,7 +36,8 @@ class _AttendanceFormDialogState extends State<AttendanceFormDialog> {
 
   void _setEmployeeId(String? value) => setState(() => _employeeId = value);
 
-  void _setStatus(String? value) => setState(() => _status = value ?? 'present');
+  void _setStatus(String? value) =>
+      setState(() => _status = value ?? 'present');
 
   void _setDate(DateTime picked) {
     setState(() {
@@ -129,13 +130,13 @@ class _AttendanceFormDialogState extends State<AttendanceFormDialog> {
     }
 
     await context.read<AttendanceCubit>().create(
-          employeeId: _employeeId!,
-          date: _date!,
-          status: _status,
-          checkIn: checkIn,
-          checkOut: checkOut,
-          notes: _notes.text.trim(),
-        );
+      employeeId: _employeeId!,
+      date: _date!,
+      status: _status,
+      checkIn: checkIn,
+      checkOut: checkOut,
+      notes: _notes.text.trim(),
+    );
 
     if (!mounted) return;
     Navigator.pop(context, true);

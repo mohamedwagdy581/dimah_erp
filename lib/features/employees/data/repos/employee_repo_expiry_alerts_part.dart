@@ -1,6 +1,7 @@
 part of 'employee_repo_impl.dart';
 
-mixin _EmployeesRepoExpiryAlertsMixin on _EmployeesRepoExpiryAlertsHelpersMixin {
+mixin _EmployeesRepoExpiryAlertsMixin
+    on _EmployeesRepoExpiryAlertsHelpersMixin {
   Future<List<ExpiryAlertItem>> fetchExpiryAlerts() async {
     final tenantId = await _tenantId();
     final today = DateTime.now();
@@ -12,8 +13,11 @@ mixin _EmployeesRepoExpiryAlertsMixin on _EmployeesRepoExpiryAlertsHelpersMixin 
       settings.documentsAlertDays,
       120,
     ].reduce((a, b) => a > b ? a : b);
-    final threshold = DateTime(today.year, today.month, today.day)
-        .add(Duration(days: maxDays + 1));
+    final threshold = DateTime(
+      today.year,
+      today.month,
+      today.day,
+    ).add(Duration(days: maxDays + 1));
 
     final employeesRes = await _client
         .from('employees')
@@ -46,7 +50,9 @@ mixin _EmployeesRepoExpiryAlertsMixin on _EmployeesRepoExpiryAlertsHelpersMixin 
     for (final row in (contractsRes as List)) {
       final map = row as Map<String, dynamic>;
       final employeeId = map['employee_id']?.toString();
-      if (employeeId == null || employeeId.isEmpty || latestContractEndByEmployee.containsKey(employeeId)) {
+      if (employeeId == null ||
+          employeeId.isEmpty ||
+          latestContractEndByEmployee.containsKey(employeeId)) {
         continue;
       }
       final endDate = DateTime.tryParse((map['end_date'] ?? '').toString());
@@ -62,7 +68,9 @@ mixin _EmployeesRepoExpiryAlertsMixin on _EmployeesRepoExpiryAlertsHelpersMixin 
       String? fileUrl,
     }) {
       final left = _daysLeftFrom(today, expiryDate);
-      if (left > alertDays || left > maxDays || expiryDate.isAfter(threshold)) return;
+      if (left > alertDays || left > maxDays || expiryDate.isAfter(threshold)) {
+        return;
+      }
       items.add(
         ExpiryAlertItem(
           employeeId: employeeId,
@@ -89,14 +97,28 @@ mixin _EmployeesRepoExpiryAlertsMixin on _EmployeesRepoExpiryAlertsHelpersMixin 
       final employeeId = map['employee_id']?.toString();
       if (employeeId == null || employeeId.isEmpty) continue;
 
-      final residencyExpiry = DateTime.tryParse((map['residency_expiry_date'] ?? '').toString());
+      final residencyExpiry = DateTime.tryParse(
+        (map['residency_expiry_date'] ?? '').toString(),
+      );
       if (residencyExpiry != null) {
-        maybeAdd(employeeId: employeeId, type: 'residency', expiryDate: residencyExpiry, alertDays: settings.residencyAlertDays);
+        maybeAdd(
+          employeeId: employeeId,
+          type: 'residency',
+          expiryDate: residencyExpiry,
+          alertDays: settings.residencyAlertDays,
+        );
       }
 
-      final insuranceExpiry = DateTime.tryParse((map['insurance_expiry_date'] ?? '').toString());
+      final insuranceExpiry = DateTime.tryParse(
+        (map['insurance_expiry_date'] ?? '').toString(),
+      );
       if (insuranceExpiry != null) {
-        maybeAdd(employeeId: employeeId, type: 'insurance', expiryDate: insuranceExpiry, alertDays: settings.insuranceAlertDays);
+        maybeAdd(
+          employeeId: employeeId,
+          type: 'insurance',
+          expiryDate: insuranceExpiry,
+          alertDays: settings.insuranceAlertDays,
+        );
       }
     }
 

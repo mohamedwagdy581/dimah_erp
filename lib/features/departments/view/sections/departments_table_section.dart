@@ -1,3 +1,4 @@
+import 'package:erp_sys/core/ui/app_data_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -22,25 +23,29 @@ class DepartmentsTableSection extends StatelessWidget {
             children: [
               DepartmentsTableSectionHeader(cubit: cubit, state: state),
               const SizedBox(height: 12),
-              if (state.loading) const LinearProgressIndicator(),
-              if (state.error != null) ...[
-                const SizedBox(height: 10),
-                Text(state.error!, style: const TextStyle(color: Colors.red)),
-              ],
               const SizedBox(height: 12),
               Expanded(
-                child: DepartmentTable(
-                  items: state.items,
-                  onEdit: (d) => openDepartmentEditDialog(context, d),
-                  onToggleActive: (d) {
-                    cubit.update(
-                      id: d.id,
-                      name: d.name,
-                      code: d.code,
-                      description: d.description,
-                      isActive: !d.isActive,
-                    );
-                  },
+                child: AppDataRegion(
+                  loading: state.loading,
+                  error: state.error,
+                  empty: state.items.isEmpty,
+                  filtered:
+                      state.search.trim().isNotEmpty || state.isActive != null,
+                  onClear: cubit.resetFilters,
+                  onRetry: cubit.load,
+                  child: DepartmentTable(
+                    items: state.items,
+                    onEdit: (d) => openDepartmentEditDialog(context, d),
+                    onToggleActive: (d) {
+                      cubit.update(
+                        id: d.id,
+                        name: d.name,
+                        code: d.code,
+                        description: d.description,
+                        isActive: !d.isActive,
+                      );
+                    },
+                  ),
                 ),
               ),
             ],

@@ -1,3 +1,4 @@
+import 'package:erp_sys/core/ui/app_data_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -27,45 +28,74 @@ class ApprovalsTableSection extends StatelessWidget {
                   : session.user.role)
             : '';
 
-        return Padding(
+        final workspace = Padding(
           padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ApprovalsTableSectionHeader(cubit: cubit, state: state),
-              const SizedBox(height: 12),
-              if (state.loading) const LinearProgressIndicator(),
-              if (state.error != null) ...[
-                const SizedBox(height: 10),
-                Text(state.error!, style: const TextStyle(color: Colors.red)),
-              ],
-              const SizedBox(height: 12),
-              Expanded(
-                child: ApprovalsTable(
-                  items: state.items,
-                  onApprove: readOnly ? null : cubit.approve,
-                  onReject: readOnly
-                      ? null
-                      : (id) => openApprovalRejectDialog(context, id, cubit),
-                  actorRole: actorRole,
-                  showActions: !readOnly,
-                  onViewDetails: (req) => showApprovalDetailsDialog(context, req),
+          child: Container(
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: const Color(0xFFE5DDF2)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ApprovalsTableSectionHeader(cubit: cubit, state: state),
+                const SizedBox(height: 12),
+                Expanded(
+                  child: AppDataRegion(
+                    loading: state.loading,
+                    error: state.error,
+                    empty: state.items.isEmpty,
+                    filtered: state.status != null || state.requestType != null,
+                    onClear: cubit.resetFilters,
+                    onRetry: cubit.load,
+                    child: ApprovalsTable(
+                      items: state.items,
+                      onApprove: readOnly ? null : cubit.approve,
+                      onReject: readOnly
+                          ? null
+                          : (id) =>
+                                openApprovalRejectDialog(context, id, cubit),
+                      actorRole: actorRole,
+                      showActions: !readOnly,
+                      onViewDetails: (req) =>
+                          showApprovalDetailsDialog(context, req),
+                    ),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 12),
-              ApprovalsPaginationBar(
-                page: state.page,
-                totalPages: state.totalPages,
-                total: state.total,
-                canPrev: state.canPrev,
-                canNext: state.canNext,
-                onPrev: cubit.prevPage,
-                onNext: cubit.nextPage,
-                pageSize: state.pageSize,
-                onPageSizeChanged: cubit.setPageSize,
-              ),
-            ],
+                const SizedBox(height: 12),
+                ApprovalsPaginationBar(
+                  page: state.page,
+                  totalPages: state.totalPages,
+                  total: state.total,
+                  canPrev: state.canPrev,
+                  canNext: state.canNext,
+                  onPrev: cubit.prevPage,
+                  onNext: cubit.nextPage,
+                  pageSize: state.pageSize,
+                  onPageSizeChanged: cubit.setPageSize,
+                ),
+              ],
+            ),
           ),
+        );
+        return LayoutBuilder(
+          builder: (context, box) {
+            final minimumHeight =
+                (box.maxWidth < 600 ? 820.0 : 620.0) *
+                MediaQuery.textScalerOf(context).scale(1);
+            if (box.maxHeight < minimumHeight) {
+              return SingleChildScrollView(
+                child: SizedBox(
+                  height: minimumHeight,
+                  width: box.maxWidth,
+                  child: workspace,
+                ),
+              );
+            }
+            return workspace;
+          },
         );
       },
     );

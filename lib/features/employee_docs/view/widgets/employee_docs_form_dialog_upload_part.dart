@@ -4,6 +4,12 @@ extension _EmployeeDocsFormDialogUpload on _EmployeeDocsFormDialogState {
   Future<void> _pickFile() async {
     final t = AppLocalizations.of(context)!;
     if (_uploading || _saving) return;
+    if (widget.embedded && _employeeId == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(t.employeeRequired)));
+      return;
+    }
     try {
       final file = await SafeFilePicker.openSingle(
         context: context,
@@ -14,7 +20,7 @@ extension _EmployeeDocsFormDialogUpload on _EmployeeDocsFormDialogState {
           ),
         ],
       );
-      if (file == null) return;
+      if (file == null || !mounted) return;
       _setUploading(true);
 
       final bytes = await file.readAsBytes();
@@ -26,9 +32,12 @@ extension _EmployeeDocsFormDialogUpload on _EmployeeDocsFormDialogState {
       final timestamp = DateTime.now().millisecondsSinceEpoch;
       // We keep it simple: timestamp + extension, or a cleaned version of the name
       final safeName = file.name
-          .replaceAll(RegExp(r'[^\x00-\x7F]+'), 'doc') // Replace non-ascii with 'doc'
+          .replaceAll(
+            RegExp(r'[^\x00-\x7F]+'),
+            'doc',
+          ) // Replace non-ascii with 'doc'
           .replaceAll(' ', '_');
-      
+
       final path = '$tenantId/$employeeId/${timestamp}_$safeName';
 
       await client.storage
@@ -41,11 +50,11 @@ extension _EmployeeDocsFormDialogUpload on _EmployeeDocsFormDialogState {
           .timeout(const Duration(minutes: 2));
 
       final url = client.storage.from('employee_docs').getPublicUrl(path);
-      _setUploadedFileUrl(url);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(t.fileUploadedSuccessfully)),
-      );
+      _setUploadedFileUrl(url);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(t.fileUploadedSuccessfully)));
     } catch (e) {
       debugPrint('EMPLOYEE_DOC_UPLOAD_ERROR: $e');
       if (!mounted) return;
@@ -53,7 +62,7 @@ extension _EmployeeDocsFormDialogUpload on _EmployeeDocsFormDialogState {
         SnackBar(
           content: Text(
             e is StorageException && e.statusCode == '403'
-                ? (t.employeeDocsStorageUnauthorized ?? 'Storage Unauthorized')
+                ? t.employeeDocsStorageUnauthorized
                 : t.fileUploadFailed(e.toString()),
           ),
         ),

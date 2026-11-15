@@ -1,0 +1,10 @@
+{
+  "name": "dimah-api-hosting-check",
+  "version": "0.3.0",
+  "private": true,
+  "description": "DIMAH ERP API: health and authenticated current-user profile",
+  "main": "app.js",
+  "type": "commonjs",
+  "engines": { "node": ">=22" },
+  "scripts": { "start": "node app.js" }
+}

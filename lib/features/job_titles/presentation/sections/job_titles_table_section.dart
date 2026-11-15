@@ -1,3 +1,5 @@
+import 'package:erp_sys/core/ui/app_search_field.dart';
+import 'package:erp_sys/core/ui/app_data_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -23,34 +25,38 @@ class JobTitlesTableSection extends StatelessWidget {
             children: [
               _Header(cubit: cubit, state: state, t: t),
               const SizedBox(height: 12),
-              if (state.loading) const LinearProgressIndicator(),
-              if (state.error != null) ...[
-                const SizedBox(height: 10),
-                Text(state.error!, style: const TextStyle(color: Colors.red)),
-              ],
               const SizedBox(height: 12),
               Expanded(
-                child: JobTitlesTable(
-                  items: state.items,
-                  onEdit: (jt) async {
-                    final ok = await showDialog<bool>(
-                      context: context,
-                      builder: (_) => JobTitleFormDialog(edit: jt),
-                    );
-                    if (ok == true && context.mounted) {
-                      cubit.load();
-                    }
-                  },
-                  onToggleActive: (jt) {
-                    cubit.update(
-                      id: jt.id,
-                      name: jt.name,
-                      code: jt.code,
-                      description: jt.description,
-                      level: jt.level,
-                      isActive: !jt.isActive,
-                    );
-                  },
+                child: AppDataRegion(
+                  loading: state.loading,
+                  error: state.error,
+                  empty: state.items.isEmpty,
+                  filtered:
+                      state.search.trim().isNotEmpty || state.isActive != null,
+                  onClear: cubit.resetFilters,
+                  onRetry: cubit.load,
+                  child: JobTitlesTable(
+                    items: state.items,
+                    onEdit: (jt) async {
+                      final ok = await showDialog<bool>(
+                        context: context,
+                        builder: (_) => JobTitleFormDialog(edit: jt),
+                      );
+                      if (ok == true && context.mounted) {
+                        cubit.load();
+                      }
+                    },
+                    onToggleActive: (jt) {
+                      cubit.update(
+                        id: jt.id,
+                        name: jt.name,
+                        code: jt.code,
+                        description: jt.description,
+                        level: jt.level,
+                        isActive: !jt.isActive,
+                      );
+                    },
+                  ),
                 ),
               ),
             ],
@@ -85,7 +91,8 @@ class _Header extends StatelessWidget {
           children: [
             SizedBox(
               width: 280,
-              child: TextField(
+              child: AppSearchField(
+                value: cubit.state.search,
                 onChanged: cubit.searchChanged,
                 decoration: InputDecoration(
                   prefixIcon: const Icon(Icons.search),

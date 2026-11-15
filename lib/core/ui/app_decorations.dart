@@ -53,19 +53,19 @@ class AppDecorations {
   static final chipDecorationGreen = BoxDecoration(
     color: AppColors.chipBgGreen,
     borderRadius: BorderRadius.circular(AppRadius.chip),
-    border: Border.all(color: AppColors.chipFgGreen.withOpacity(0.18)),
+    border: Border.all(color: AppColors.chipFgGreen.withValues(alpha: 0.18)),
   );
 
   static final chipDecorationBlue = BoxDecoration(
     color: AppColors.chipBgBlue,
     borderRadius: BorderRadius.circular(AppRadius.chip),
-    border: Border.all(color: AppColors.chipFgBlue.withOpacity(0.18)),
+    border: Border.all(color: AppColors.chipFgBlue.withValues(alpha: 0.18)),
   );
 
   static final chipDecorationBrown = BoxDecoration(
     color: AppColors.chipBgBrown,
     borderRadius: BorderRadius.circular(AppRadius.chip),
-    border: Border.all(color: AppColors.chipFgBrown.withOpacity(0.18)),
+    border: Border.all(color: AppColors.chipFgBrown.withValues(alpha: 0.18)),
   );
 
   // Button decorations

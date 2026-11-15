@@ -15,6 +15,7 @@
         "nقسم",
         "officedocument",
         "openxmlformats",
+        "pgrst",
         "plpgsql",
         "schemaname",
         "Segoe",
@@ -661,5 +662,5 @@
         "يومًا",
         "يومية"
     ],
-    "cmake.sourceDirectory": "D:/Flutter Projects/ERP_SYS/erp_sys/windows/flutter"
+    "cmake.sourceDirectory": "D:/Flutter Projects/ERP_SYS/erp_sys/windows"
 }

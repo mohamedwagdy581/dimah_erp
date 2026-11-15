@@ -1,3 +1,5 @@
+import 'package:erp_sys/core/ui/app_search_field.dart';
+import 'package:erp_sys/core/ui/app_data_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -24,12 +26,16 @@ class SettlementsTableSection extends StatelessWidget {
             children: [
               Text(
                 t.menuSettlements,
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
               const SizedBox(height: 10),
               SizedBox(
                 width: 320,
-                child: TextField(
+                child: AppSearchField(
+                  value: cubit.state.search,
                   onChanged: cubit.searchChanged,
                   decoration: InputDecoration(
                     prefixIcon: const Icon(Icons.search),
@@ -45,13 +51,15 @@ class SettlementsTableSection extends StatelessWidget {
                 style: Theme.of(context).textTheme.bodySmall,
               ),
               const SizedBox(height: 12),
-              if (state.loading) const LinearProgressIndicator(),
-              if (state.error != null) ...[
-                const SizedBox(height: 10),
-                Text(state.error!, style: const TextStyle(color: Colors.red)),
-              ],
               const SizedBox(height: 12),
-              Expanded(child: SettlementsTable(items: state.items)),
+              Expanded(
+                child: AppDataRegion(
+                  loading: state.loading,
+                  error: state.error,
+                  onRetry: cubit.load,
+                  child: SettlementsTable(items: state.items),
+                ),
+              ),
               const SizedBox(height: 12),
               EmployeesPaginationBar(
                 page: state.page,

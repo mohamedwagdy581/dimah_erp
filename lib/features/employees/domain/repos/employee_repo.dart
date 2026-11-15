@@ -1,3 +1,4 @@
+import '../models/employee_login_result.dart';
 import '../models/employee.dart';
 import '../models/employee_settlement_summary.dart';
 import '../models/expiry_alert.dart';
@@ -5,6 +6,12 @@ import '../models/employee_profile_details.dart';
 import '../models/employee_lookup.dart';
 
 abstract class EmployeesRepo {
+  Future<void> checkEmployeeCreationReady();
+  Future<EmployeeLoginResult> provisionEmployeeLogin({
+    required String employeeId,
+    required String role,
+    required String initialPassword,
+  });
   Future<({List<Employee> items, int total})> fetchEmployees({
     required int page,
     required int pageSize,
@@ -17,6 +24,7 @@ abstract class EmployeesRepo {
   });
 
   Future<String> createEmployee({
+    String? requestId,
     required String fullName,
     required String email,
     required String phone,
@@ -66,20 +74,14 @@ abstract class EmployeesRepo {
     String? paymentMethod,
   });
 
-  Future<List<EmployeeLookup>> fetchEmployeeLookup({
-    String? search,
-    int limit,
-  });
+  Future<List<EmployeeLookup>> fetchEmployeeLookup({String? search, int limit});
 
   Future<EmployeeProfileDetails> fetchEmployeeProfile({
     required String employeeId,
   });
 
-  Future<({List<EmployeeSettlementSummary> items, int total})> fetchSettlements({
-    required int page,
-    required int pageSize,
-    String? search,
-  });
+  Future<({List<EmployeeSettlementSummary> items, int total})>
+  fetchSettlements({required int page, required int pageSize, String? search});
 
   Future<void> addEmployeeSettlement({
     required String employeeId,

@@ -36,7 +36,10 @@ pw.Widget buildElectronicAcknowledgmentPdfPage(
       pw.SizedBox(height: 16),
       ElectronicAcknowledgmentPdfSummary(theme: theme),
       pw.SizedBox(height: 14),
-      ElectronicAcknowledgmentPdfEmployeeSection(payload: payload, theme: theme),
+      ElectronicAcknowledgmentPdfEmployeeSection(
+        payload: payload,
+        theme: theme,
+      ),
       ElectronicAcknowledgmentPdfClausesSection(theme: theme),
       ElectronicAcknowledgmentPdfApprovalSection(
         signature: payload.signature,

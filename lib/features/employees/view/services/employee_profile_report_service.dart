@@ -36,8 +36,12 @@ class EmployeeProfileReportService {
         ),
       ),
     );
-    if (choice == 'pdf') await _downloadPdf(context, profile);
-    if (choice == 'html') await _downloadHtml(context, profile);
+    if (choice == null || !context.mounted) return;
+    if (choice == 'pdf') {
+      await _downloadPdf(context, profile);
+    } else if (choice == 'html') {
+      await _downloadHtml(context, profile);
+    }
   }
 
   static Future<void> _downloadHtml(
@@ -45,6 +49,8 @@ class EmployeeProfileReportService {
     EmployeeProfileDetails profile,
   ) async {
     final t = AppLocalizations.of(context)!;
+    // Read locale before any await: the page may be gone afterwards.
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
     final fileName =
         'employee_report_${profile.fullName.replaceAll(' ', '_')}_${DateTime.now().millisecondsSinceEpoch}.html';
     final saveLocation = await SafeFilePicker.saveLocation(
@@ -59,7 +65,7 @@ class EmployeeProfileReportService {
     final html = buildEmployeeProfileHtmlReport(
       profile,
       t: t,
-      isArabic: Localizations.localeOf(context).languageCode == 'ar',
+      isArabic: isArabic,
     );
     await XFile.fromData(
       Uint8List.fromList(utf8.encode(html)),
@@ -78,6 +84,8 @@ class EmployeeProfileReportService {
     EmployeeProfileDetails profile,
   ) async {
     final t = AppLocalizations.of(context)!;
+    // Read locale before any await: the page may be gone afterwards.
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
     final fileName =
         'employee_report_${profile.fullName.replaceAll(' ', '_')}_${DateTime.now().millisecondsSinceEpoch}.pdf';
     final saveLocation = await SafeFilePicker.saveLocation(
@@ -92,7 +100,7 @@ class EmployeeProfileReportService {
     final bytes = await buildEmployeeProfilePdfReport(
       profile,
       t: t,
-      isArabic: Localizations.localeOf(context).languageCode == 'ar',
+      isArabic: isArabic,
     );
     await XFile.fromData(
       bytes,

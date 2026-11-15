@@ -1,3 +1,4 @@
+import 'package:erp_sys/core/ui/app_data_state.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -6,10 +7,7 @@ import '../../domain/models/employee_settlement_summary.dart';
 import '../utils/employee_profile_utils.dart';
 
 class SettlementsTable extends StatelessWidget {
-  const SettlementsTable({
-    super.key,
-    required this.items,
-  });
+  const SettlementsTable({super.key, required this.items});
 
   final List<EmployeeSettlementSummary> items;
 
@@ -20,7 +18,9 @@ class SettlementsTable extends StatelessWidget {
       return Card(
         child: Padding(
           padding: const EdgeInsets.all(24),
-          child: Center(child: Text(t.noSettlementsFound)),
+          child: Center(
+            child: AppEmptyState(title: t.noSettlementsFound, compact: false),
+          ),
         ),
       );
     }
@@ -52,8 +52,9 @@ class SettlementsTable extends StatelessWidget {
                       DataCell(
                         CircleAvatar(
                           radius: 18,
-                          backgroundImage:
-                              resolveEmployeePhotoProvider(item.photoUrl),
+                          backgroundImage: resolveEmployeePhotoProvider(
+                            item.photoUrl,
+                          ),
                           child: (item.photoUrl ?? '').trim().isEmpty
                               ? const Icon(Icons.person, size: 18)
                               : null,
@@ -74,7 +75,9 @@ class SettlementsTable extends StatelessWidget {
                       DataCell(
                         Text(item.status == 'active' ? t.active : t.inactive),
                       ),
-                      DataCell(Text(formatEmployeeDate(item.latestSettlementDate))),
+                      DataCell(
+                        Text(formatEmployeeDate(item.latestSettlementDate)),
+                      ),
                       DataCell(Text('${item.settlementsCount}')),
                       DataCell(
                         Text(

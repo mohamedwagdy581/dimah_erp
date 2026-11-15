@@ -6,11 +6,8 @@ import '../../domain/repos/employee_repo.dart';
 import 'employees_state.dart';
 
 class EmployeesCubit extends Cubit<EmployeesState> {
-  EmployeesCubit(
-    this._repo, {
-    this.actorRole,
-    this.actorEmployeeId,
-  }) : super(EmployeesState.initial);
+  EmployeesCubit(this._repo, {this.actorRole, this.actorEmployeeId})
+    : super(EmployeesState.initial);
 
   final EmployeesRepo _repo;
   final String? actorRole;

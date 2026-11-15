@@ -62,7 +62,10 @@ class DepartmentsRepoImpl implements DepartmentsRepo {
     }
 
     // ترتيب + pagination
-    listQ = listQ.order(sortBy, ascending: ascending).range(from, to);
+    listQ = listQ
+        .order(sortBy, ascending: ascending)
+        .order('id')
+        .range(from, to);
 
     final listRes = await listQ;
     final items = (listRes as List)
@@ -94,6 +97,7 @@ class DepartmentsRepoImpl implements DepartmentsRepo {
     String? code,
     String? description,
     String? managerId,
+    bool isActive = true,
   }) async {
     final tenantId = await _tenantId();
 
@@ -107,7 +111,7 @@ class DepartmentsRepoImpl implements DepartmentsRepo {
       // manager_id اختياري (لو موجود في الجدول)
       if (managerId != null && managerId.trim().isNotEmpty)
         'manager_id': managerId.trim(),
-      'is_active': true,
+      'is_active': isActive,
       'updated_at': DateTime.now().toIso8601String(),
     });
   }

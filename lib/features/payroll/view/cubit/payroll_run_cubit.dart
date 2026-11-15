@@ -15,22 +15,24 @@ class PayrollRunCubit extends Cubit<PayrollRunState> {
       if (isClosed) return;
       emit(state.copyWith(loading: true, error: null));
 
-      // Fetch items and all runs to find the specific one
       final List<PayrollItem> items = await _repo.fetchRunItems(runId: runId);
-      final runsResult = await _repo.fetchRuns(
-        page: 0,
-        pageSize: 100,
-        sortBy: 'created_at',
-      );
-
-      final List<PayrollRun> allRuns = runsResult.items;
       PayrollRun? currentRun;
-      for (final run in allRuns) {
-        if (run.id == runId) {
-          currentRun = run;
-          break;
+      // Continue across pages so older runs remain accessible from their URL.
+      for (var page = 0; currentRun == null; page++) {
+        final result = await _repo.fetchRuns(
+          page: page,
+          pageSize: 100,
+          sortBy: 'created_at',
+        );
+        for (final run in result.items) {
+          if (run.id == runId) {
+            currentRun = run;
+            break;
+          }
         }
+        if (result.items.isEmpty || (page + 1) * 100 >= result.total) break;
       }
+      if (currentRun == null) throw StateError('Payroll run not found');
 
       if (isClosed) return;
       emit(

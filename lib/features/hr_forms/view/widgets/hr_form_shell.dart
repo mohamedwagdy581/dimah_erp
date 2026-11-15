@@ -30,9 +30,18 @@ class HrFormShell extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900)),
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
                   const SizedBox(height: 6),
-                  Text(subtitle, style: TextStyle(color: Theme.of(context).hintColor)),
+                  Text(
+                    subtitle,
+                    style: TextStyle(color: Theme.of(context).hintColor),
+                  ),
                 ],
               ),
               Wrap(spacing: 8, runSpacing: 8, children: actions),
@@ -40,9 +49,7 @@ class HrFormShell extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Expanded(
-            child: SingleChildScrollView(
-              child: Center(child: child),
-            ),
+            child: SingleChildScrollView(child: Center(child: child)),
           ),
         ],
       ),

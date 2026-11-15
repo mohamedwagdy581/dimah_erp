@@ -40,17 +40,24 @@ mixin _AttendanceRepoFetchMixin on _AttendanceRepoHelpersMixin {
       listQ = listQ.inFilter('employee_id', subordinateIds);
     }
 
-    if (status != null && status.trim().isNotEmpty) listQ = listQ.eq('status', status);
+    if (status != null && status.trim().isNotEmpty) {
+      listQ = listQ.eq('status', status);
+    }
     if (date != null) listQ = listQ.eq('date', _toDateOnly(date));
     if (employeeId != null && employeeId.trim().isNotEmpty) {
       listQ = listQ.eq('employee_id', employeeId);
     }
     if (trimmedSearch != null && trimmedSearch.isNotEmpty) {
-      final escaped = trimmedSearch.replaceAll('%', r'\%').replaceAll('_', r'\_');
+      final escaped = trimmedSearch
+          .replaceAll('%', r'\%')
+          .replaceAll('_', r'\_');
       listQ = listQ.or('employee.full_name.ilike.%$escaped%');
     }
 
-    final listRes = await listQ.order(sortBy, ascending: ascending).range(from, to);
+    final listRes = await listQ
+        .order(sortBy, ascending: ascending)
+        .order('id')
+        .range(from, to);
     final items = (listRes as List)
         .map((e) => AttendanceRecord.fromMap(e as Map<String, dynamic>))
         .toList();
@@ -74,13 +81,17 @@ mixin _AttendanceRepoFetchMixin on _AttendanceRepoHelpersMixin {
       countQ = countQ.inFilter('employee_id', subordinateIds);
     }
 
-    if (status != null && status.trim().isNotEmpty) countQ = countQ.eq('status', status);
+    if (status != null && status.trim().isNotEmpty) {
+      countQ = countQ.eq('status', status);
+    }
     if (date != null) countQ = countQ.eq('date', _toDateOnly(date));
     if (employeeId != null && employeeId.trim().isNotEmpty) {
       countQ = countQ.eq('employee_id', employeeId);
     }
     if (trimmedSearch != null && trimmedSearch.isNotEmpty) {
-      final escaped = trimmedSearch.replaceAll('%', r'\%').replaceAll('_', r'\_');
+      final escaped = trimmedSearch
+          .replaceAll('%', r'\%')
+          .replaceAll('_', r'\_');
       countQ = countQ.or('employee.full_name.ilike.%$escaped%');
     }
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../wizard_layout.dart';
 
 import '../../../../../../l10n/app_localizations.dart';
 import '../../../cubit/employee_wizard_cubit.dart';
@@ -25,7 +26,7 @@ class CompensationSalaryFields extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context)!;
-    return Column(
+    return WizardFieldsGrid(
       children: [
         CompensationNumberField(
           controller: basic,
@@ -37,19 +38,16 @@ class CompensationSalaryFields extends StatelessWidget {
             return null;
           },
         ),
-        const SizedBox(height: 12),
         CompensationNumberField(
           controller: housing,
           label: t.housingAllowance,
           onChanged: (v) => cubit.setHousingAllowance(parse(v)),
         ),
-        const SizedBox(height: 12),
         CompensationNumberField(
           controller: transport,
           label: t.transportAllowance,
           onChanged: (v) => cubit.setTransportAllowance(parse(v)),
         ),
-        const SizedBox(height: 12),
         CompensationNumberField(
           controller: other,
           label: t.otherAllowance,

@@ -22,9 +22,7 @@ Map<String, TextEditingController> buildEmployeeProfileEditControllers(
     'insurancePolicyNo': TextEditingController(
       text: profile.insurancePolicyNo ?? '',
     ),
-    'educationLevel': TextEditingController(
-      text: profile.educationLevel ?? '',
-    ),
+    'educationLevel': TextEditingController(text: profile.educationLevel ?? ''),
     'major': TextEditingController(text: profile.major ?? ''),
     'university': TextEditingController(text: profile.university ?? ''),
     'bankName': TextEditingController(text: profile.bankName ?? ''),

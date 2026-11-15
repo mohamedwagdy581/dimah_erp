@@ -20,8 +20,9 @@ mixin _EmployeesRepoExpirySettingsMixin on _EmployeesRepoProfileUpdateMixin {
       );
     }
 
-    int asInt(dynamic value, int fallback) =>
-        value is int ? value : int.tryParse(value?.toString() ?? '') ?? fallback;
+    int asInt(dynamic value, int fallback) => value is int
+        ? value
+        : int.tryParse(value?.toString() ?? '') ?? fallback;
 
     return ExpiryAlertSettings(
       contractAlertDays: asInt(row['contract_alert_days'], 90),
@@ -30,6 +31,7 @@ mixin _EmployeesRepoExpirySettingsMixin on _EmployeesRepoProfileUpdateMixin {
       documentsAlertDays: asInt(row['documents_alert_days'], 90),
     );
   }
+
   Future<void> upsertExpiryAlertSettings(ExpiryAlertSettings settings) async {
     final tenantId = await _tenantId();
     try {

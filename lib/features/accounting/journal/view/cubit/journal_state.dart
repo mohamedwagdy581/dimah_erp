@@ -14,6 +14,7 @@ class JournalState extends Equatable {
     required this.sortBy,
     required this.ascending,
     this.error,
+    this.postingId,
   });
 
   final List<JournalEntry> items;
@@ -27,6 +28,9 @@ class JournalState extends Equatable {
   final String sortBy;
   final bool ascending;
   final String? error;
+
+  /// Id of the entry currently being posted, if any.
+  final String? postingId;
 
   static const Object _unset = Object();
 
@@ -51,6 +55,7 @@ class JournalState extends Equatable {
     bool? ascending,
     String? error,
     bool clearError = false,
+    Object? postingId = _unset,
   }) {
     return JournalState(
       items: items ?? this.items,
@@ -59,12 +64,12 @@ class JournalState extends Equatable {
       page: page ?? this.page,
       pageSize: pageSize ?? this.pageSize,
       status: status == _unset ? this.status : status as String?,
-      startDate:
-          startDate == _unset ? this.startDate : startDate as DateTime?,
+      startDate: startDate == _unset ? this.startDate : startDate as DateTime?,
       endDate: endDate == _unset ? this.endDate : endDate as DateTime?,
       sortBy: sortBy ?? this.sortBy,
       ascending: ascending ?? this.ascending,
       error: clearError ? null : (error ?? this.error),
+      postingId: postingId == _unset ? this.postingId : postingId as String?,
     );
   }
 
@@ -95,5 +100,6 @@ class JournalState extends Equatable {
     sortBy,
     ascending,
     error,
+    postingId,
   ];
 }

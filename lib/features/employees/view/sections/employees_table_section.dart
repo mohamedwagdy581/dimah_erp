@@ -1,3 +1,5 @@
+import 'package:erp_sys/core/ui/app_search_field.dart';
+import 'package:erp_sys/core/ui/app_data_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -30,22 +32,22 @@ class EmployeesTableSection extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _Header(
-                cubit: cubit,
-                state: state,
-                canCreate: canCreate,
-              ),
+              _Header(cubit: cubit, state: state, canCreate: canCreate),
               const SizedBox(height: 12),
-              if (state.loading) const LinearProgressIndicator(),
-              if (state.error != null) ...[
-                const SizedBox(height: 10),
-                Text(state.error!, style: const TextStyle(color: Colors.red)),
-              ],
               const SizedBox(height: 12),
               Expanded(
-                child: EmployeesTable(
-                  items: state.items,
-                  canOpenProfile: true,
+                child: AppDataRegion(
+                  loading: state.loading,
+                  error: state.error,
+                  empty: state.items.isEmpty,
+                  filtered:
+                      state.search.trim().isNotEmpty || state.status != null,
+                  onClear: cubit.resetFilters,
+                  onRetry: cubit.load,
+                  child: EmployeesTable(
+                    items: state.items,
+                    canOpenProfile: true,
+                  ),
                 ),
               ),
               const SizedBox(height: 12),
@@ -97,7 +99,8 @@ class _Header extends StatelessWidget {
           children: [
             SizedBox(
               width: 280,
-              child: TextField(
+              child: AppSearchField(
+                value: cubit.state.search,
                 onChanged: cubit.searchChanged,
                 decoration: InputDecoration(
                   prefixIcon: const Icon(Icons.search),

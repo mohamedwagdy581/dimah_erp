@@ -1,3 +1,5 @@
+import 'package:erp_sys/core/ui/app_search_field.dart';
+import 'package:erp_sys/core/ui/app_data_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -24,13 +26,15 @@ class AccountsTableSection extends StatelessWidget {
             children: [
               _Header(cubit: cubit, state: state),
               const SizedBox(height: 12),
-              if (state.loading) const LinearProgressIndicator(),
-              if (state.error != null) ...[
-                const SizedBox(height: 10),
-                Text(state.error!, style: const TextStyle(color: Colors.red)),
-              ],
               const SizedBox(height: 12),
-              Expanded(child: AccountsTable(items: state.items)),
+              Expanded(
+                child: AppDataRegion(
+                  loading: state.loading,
+                  error: state.error,
+                  onRetry: cubit.load,
+                  child: AccountsTable(items: state.items),
+                ),
+              ),
               const SizedBox(height: 12),
               AccountsPaginationBar(
                 page: state.page,
@@ -75,7 +79,8 @@ class _Header extends StatelessWidget {
           children: [
             SizedBox(
               width: 280,
-              child: TextField(
+              child: AppSearchField(
+                value: cubit.state.search,
                 onChanged: cubit.searchChanged,
                 decoration: InputDecoration(
                   prefixIcon: const Icon(Icons.search),
@@ -90,11 +95,26 @@ class _Header extends StatelessWidget {
               onChanged: (v) => cubit.typeFilterChanged(v),
               items: [
                 DropdownMenuItem(value: null, child: Text(t.allTypes)),
-                DropdownMenuItem(value: 'asset', child: Text(t.accountTypeAsset)),
-                DropdownMenuItem(value: 'liability', child: Text(t.accountTypeLiability)),
-                DropdownMenuItem(value: 'equity', child: Text(t.accountTypeEquity)),
-                DropdownMenuItem(value: 'income', child: Text(t.accountTypeIncome)),
-                DropdownMenuItem(value: 'expense', child: Text(t.accountTypeExpense)),
+                DropdownMenuItem(
+                  value: 'asset',
+                  child: Text(t.accountTypeAsset),
+                ),
+                DropdownMenuItem(
+                  value: 'liability',
+                  child: Text(t.accountTypeLiability),
+                ),
+                DropdownMenuItem(
+                  value: 'equity',
+                  child: Text(t.accountTypeEquity),
+                ),
+                DropdownMenuItem(
+                  value: 'income',
+                  child: Text(t.accountTypeIncome),
+                ),
+                DropdownMenuItem(
+                  value: 'expense',
+                  child: Text(t.accountTypeExpense),
+                ),
               ],
             ),
             OutlinedButton.icon(

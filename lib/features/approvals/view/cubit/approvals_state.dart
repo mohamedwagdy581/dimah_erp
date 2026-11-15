@@ -56,8 +56,9 @@ class ApprovalsState extends Equatable {
       page: page ?? this.page,
       pageSize: pageSize ?? this.pageSize,
       status: status == _unset ? this.status : status as String?,
-      requestType:
-          requestType == _unset ? this.requestType : requestType as String?,
+      requestType: requestType == _unset
+          ? this.requestType
+          : requestType as String?,
       sortBy: sortBy ?? this.sortBy,
       ascending: ascending ?? this.ascending,
       error: clearError ? null : (error ?? this.error),

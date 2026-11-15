@@ -70,9 +70,7 @@ class _DepartmentFormDialogState extends State<DepartmentFormDialog> {
               const SizedBox(height: 10),
               TextFormField(
                 controller: _desc,
-                decoration: InputDecoration(
-                  labelText: t.descriptionOptional,
-                ),
+                decoration: InputDecoration(labelText: t.descriptionOptional),
                 maxLines: 3,
               ),
               const SizedBox(height: 10),

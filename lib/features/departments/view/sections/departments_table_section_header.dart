@@ -1,3 +1,4 @@
+import 'package:erp_sys/core/ui/app_search_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -71,7 +72,8 @@ class _DepartmentsSearchField extends StatelessWidget {
     final t = AppLocalizations.of(context)!;
     return SizedBox(
       width: 280,
-      child: TextField(
+      child: AppSearchField(
+        value: cubit.state.search,
         onChanged: cubit.searchChanged,
         decoration: InputDecoration(
           prefixIcon: const Icon(Icons.search),
@@ -85,10 +87,7 @@ class _DepartmentsSearchField extends StatelessWidget {
 }
 
 class _DepartmentsActiveFilter extends StatelessWidget {
-  const _DepartmentsActiveFilter({
-    required this.cubit,
-    required this.state,
-  });
+  const _DepartmentsActiveFilter({required this.cubit, required this.state});
 
   final DepartmentsCubit cubit;
   final DepartmentsState state;

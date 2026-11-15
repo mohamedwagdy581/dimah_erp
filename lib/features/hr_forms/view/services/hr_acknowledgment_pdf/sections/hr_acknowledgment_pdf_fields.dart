@@ -22,7 +22,9 @@ class HrAcknowledgmentPdfLineField extends pw.StatelessWidget {
           child: pw.Container(
             padding: const pw.EdgeInsets.only(bottom: 4),
             decoration: const pw.BoxDecoration(
-              border: pw.Border(bottom: pw.BorderSide(color: PdfColors.black, width: 1)),
+              border: pw.Border(
+                bottom: pw.BorderSide(color: PdfColors.black, width: 1),
+              ),
             ),
             child: theme.text(value, align: pw.TextAlign.right),
           ),
@@ -69,7 +71,9 @@ class HrAcknowledgmentPdfDualLineField extends pw.StatelessWidget {
       child: pw.Container(
         padding: const pw.EdgeInsets.only(bottom: 4),
         decoration: const pw.BoxDecoration(
-          border: pw.Border(bottom: pw.BorderSide(color: PdfColors.black, width: 1)),
+          border: pw.Border(
+            bottom: pw.BorderSide(color: PdfColors.black, width: 1),
+          ),
         ),
         child: theme.text(value, align: pw.TextAlign.right),
       ),

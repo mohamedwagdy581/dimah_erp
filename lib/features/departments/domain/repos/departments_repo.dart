@@ -17,6 +17,7 @@ abstract class DepartmentsRepo {
     String? code,
     String? description,
     String? managerId, // optional
+    bool isActive = true,
   });
 
   Future<void> updateDepartment({

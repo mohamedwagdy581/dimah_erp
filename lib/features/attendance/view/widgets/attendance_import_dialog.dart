@@ -8,7 +8,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/di/app_di.dart';
 import '../../../../core/utils/safe_file_picker.dart';
-import '../../../employees/domain/models/employee_lookup.dart';
 import '../../domain/models/attendance_import_record.dart';
 import '../cubit/attendance_cubit.dart';
 
@@ -19,7 +18,13 @@ part 'attendance_import_dialog_preview_part.dart';
 part 'attendance_import_dialog_table_part.dart';
 
 class AttendanceImportDialog extends StatefulWidget {
-  const AttendanceImportDialog({super.key});
+  const AttendanceImportDialog({
+    super.key,
+    this.embedded = false,
+    this.onClosed,
+  });
+  final bool embedded;
+  final ValueChanged<bool>? onClosed;
 
   @override
   State<AttendanceImportDialog> createState() => _AttendanceImportDialogState();
@@ -28,6 +33,7 @@ class AttendanceImportDialog extends StatefulWidget {
 class _AttendanceImportDialogState extends State<AttendanceImportDialog> {
   bool _parsing = false;
   bool _saving = false;
+  bool _repairTimezone = false;
   String? _error;
   String? _sourceName;
   String _search = '';
@@ -38,9 +44,15 @@ class _AttendanceImportDialogState extends State<AttendanceImportDialog> {
 
   void _setSearch(String value) => setState(() => _search = value);
 
+  void _setRepairTimezone(bool value) {
+    setState(() {
+      _repairTimezone = value;
+    });
+  }
+
   Future<void> _pickAndParse() async {
     if (_parsing || _saving) return;
-    
+
     try {
       final file = await SafeFilePicker.openSingle(
         context: context,
@@ -58,8 +70,8 @@ class _AttendanceImportDialogState extends State<AttendanceImportDialog> {
         _rows = const [];
       });
 
-      dev.log('Starting fetchEmployeeLookup...');
-      final employees = await AppDI.employeesRepo.fetchEmployeeLookup(limit: 5000);
+      dev.log('Loading verified attendance device mappings...');
+      final employees = await AppDI.attendanceIdentityRepo.fetchAll();
       dev.log('Fetched ${employees.length} employees.');
 
       dev.log('Reading file bytes...');
@@ -75,9 +87,11 @@ class _AttendanceImportDialogState extends State<AttendanceImportDialog> {
         _rows = rows;
         _parsing = false;
       });
-      
+
       if (rows.isEmpty) {
-        setState(() => _error = 'No valid attendance records found in the file.');
+        setState(
+          () => _error = 'No valid attendance records found in the file.',
+        );
       }
     } catch (e, stack) {
       dev.log('Error during parse: $e', stackTrace: stack);
@@ -102,21 +116,26 @@ class _AttendanceImportDialogState extends State<AttendanceImportDialog> {
     setState(() => _saving = true);
     try {
       await context.read<AttendanceCubit>().importBatch(
-            matched
-                .map(
-                  (e) => AttendanceImportRecord(
-                    employeeId: e.matchedEmployeeId!,
-                    date: e.date,
-                    status: e.status,
-                    checkIn: e.checkIn,
-                    checkOut: e.checkOut,
-                    notes: e.notes,
-                  ),
-                )
-                .toList(),
-          );
+        matched
+            .map(
+              (e) => AttendanceImportRecord(
+                employeeId: e.matchedEmployeeId!,
+                date: e.date,
+                status: e.status,
+                checkIn: e.checkIn,
+                checkOut: e.checkOut,
+                notes: e.notes,
+              ),
+            )
+            .toList(),
+        repairTimezone: _repairTimezone,
+      );
       if (!mounted) return;
-      Navigator.pop(context, true);
+      if (widget.embedded) {
+        widget.onClosed?.call(true);
+      } else {
+        Navigator.pop(context, true);
+      }
     } catch (e) {
       if (!mounted) return;
       setState(() => _error = e.toString());
@@ -126,7 +145,9 @@ class _AttendanceImportDialogState extends State<AttendanceImportDialog> {
   }
 
   @override
-  Widget build(BuildContext context) => buildAttendanceImportDialog(context);
+  Widget build(BuildContext context) => widget.embedded
+      ? buildInlinePreview(context)
+      : buildAttendanceImportDialog(context);
 }
 
 class _PreviewRow {

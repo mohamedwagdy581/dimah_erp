@@ -9,12 +9,14 @@ import '../../../../core/utils/safe_file_picker.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../employees/domain/models/employee_lookup.dart';
 import '../../domain/models/employee_document.dart';
+import '../../domain/repos/employee_docs_repo.dart';
 import '../cubit/employee_docs_cubit.dart';
 
 part 'employee_docs_form_dialog_build_part.dart';
 part 'employee_docs_form_dialog_fields_part.dart';
 part 'employee_docs_form_dialog_doc_types_part.dart';
 part 'employee_docs_form_dialog_upload_part.dart';
+part 'employee_docs_form_inline_part.dart';
 
 class EmployeeDocsFormDialog extends StatefulWidget {
   const EmployeeDocsFormDialog({
@@ -25,6 +27,11 @@ class EmployeeDocsFormDialog extends StatefulWidget {
     this.initialExpiresAt,
     this.initialOldExpiresAt,
     this.initialDocument,
+    this.embedded = false,
+    this.employees,
+    this.repo,
+    this.onClosed,
+    this.onBusyChanged,
   });
 
   final String? initialEmployeeId;
@@ -33,6 +40,11 @@ class EmployeeDocsFormDialog extends StatefulWidget {
   final DateTime? initialExpiresAt;
   final DateTime? initialOldExpiresAt;
   final EmployeeDocument? initialDocument;
+  final bool embedded;
+  final List<EmployeeLookup>? employees;
+  final EmployeeDocsRepo? repo;
+  final ValueChanged<bool>? onClosed;
+  final ValueChanged<bool>? onBusyChanged;
 
   @override
   State<EmployeeDocsFormDialog> createState() => _EmployeeDocsFormDialogState();
@@ -57,10 +69,17 @@ class _EmployeeDocsFormDialogState extends State<EmployeeDocsFormDialog> {
   void _setIssuedAt(DateTime value) => setState(() => _issuedAt = value);
 
   void _setExpiresAt(DateTime value) => setState(() => _expiresAt = value);
+  void _setDocType(String value) => setState(() {
+    _docType.text = value;
+  });
 
-  void _setUploading(bool value) => setState(() => _uploading = value);
+  void _setUploading(bool value) {
+    setState(() => _uploading = value);
+    widget.onBusyChanged?.call(value || _saving);
+  }
 
-  void _setUploadedFileUrl(String value) => setState(() => _uploadedFileUrl = value);
+  void _setUploadedFileUrl(String value) =>
+      setState(() => _uploadedFileUrl = value);
 
   String get _selectedFileName {
     final raw = _uploadedFileUrl.trim();
@@ -74,13 +93,23 @@ class _EmployeeDocsFormDialogState extends State<EmployeeDocsFormDialog> {
   @override
   void initState() {
     super.initState();
-    _employeeId = widget.initialEmployeeId ?? widget.initialDocument?.employeeId;
+    _employeeId =
+        widget.initialDocument?.employeeId ?? widget.initialEmployeeId;
     _docType.text =
         widget.initialDocument?.docType ?? widget.initialDocType ?? 'id_card';
-    _issuedAt = widget.initialDocument?.issuedAt ?? widget.initialIssuedAt;
-    _expiresAt = widget.initialDocument?.expiresAt ?? widget.initialExpiresAt;
+    _issuedAt = widget.initialDocument != null
+        ? widget.initialDocument!.issuedAt
+        : widget.initialIssuedAt;
+    _expiresAt = widget.initialDocument != null
+        ? widget.initialDocument!.expiresAt
+        : widget.initialExpiresAt;
     _uploadedFileUrl = widget.initialDocument?.fileUrl ?? '';
-    _loadEmployees();
+    if (widget.employees != null) {
+      _employees = widget.employees!;
+      _filtered = _employees;
+    } else {
+      _loadEmployees();
+    }
   }
 
   @override
@@ -121,9 +150,12 @@ class _EmployeeDocsFormDialogState extends State<EmployeeDocsFormDialog> {
     if (_uploading || _saving) return;
 
     setState(() => _saving = true);
+    widget.onBusyChanged?.call(true);
     try {
       if (widget.initialDocument == null) {
-        await context.read<EmployeeDocsCubit>().create(
+        final create =
+            widget.repo?.createDoc ?? context.read<EmployeeDocsCubit>().create;
+        await create(
           employeeId: _employeeId!,
           docType: _docType.text.trim(),
           fileUrl: _uploadedFileUrl.trim(),
@@ -131,7 +163,9 @@ class _EmployeeDocsFormDialogState extends State<EmployeeDocsFormDialog> {
           expiresAt: _expiresAt,
         );
       } else {
-        await context.read<EmployeeDocsCubit>().update(
+        final update =
+            widget.repo?.updateDoc ?? context.read<EmployeeDocsCubit>().update;
+        await update(
           id: widget.initialDocument!.id,
           employeeId: _employeeId!,
           docType: _docType.text.trim(),
@@ -141,20 +175,28 @@ class _EmployeeDocsFormDialogState extends State<EmployeeDocsFormDialog> {
         );
       }
       if (!mounted) return;
-      Navigator.pop(context, true);
+      widget.onBusyChanged?.call(false);
+      if (widget.embedded) {
+        widget.onClosed?.call(true);
+      } else {
+        Navigator.pop(context, true);
+      }
     } catch (e) {
       if (kDebugMode) {
         debugPrint('EMPLOYEE_DOC_SAVE_ERROR: $e');
         debugPrint('EMPLOYEE_DOC_SAVE_STACK: ${StackTrace.current}');
       }
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(t.saveFailed(e.toString()))),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(t.saveFailed(e.toString()))));
       setState(() => _saving = false);
+      widget.onBusyChanged?.call(false);
     }
   }
 
   @override
-  Widget build(BuildContext context) => buildEmployeeDocsFormDialog(context);
+  Widget build(BuildContext context) => widget.embedded
+      ? buildInlineDocumentForm(context)
+      : buildEmployeeDocsFormDialog(context);
 }

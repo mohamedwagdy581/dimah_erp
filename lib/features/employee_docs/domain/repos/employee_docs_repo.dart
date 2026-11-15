@@ -28,8 +28,5 @@ abstract class EmployeeDocsRepo {
     DateTime? expiresAt,
   });
 
-  Future<void> deleteDoc({
-    required String id,
-    required String fileUrl,
-  });
+  Future<void> deleteDoc({required String id, required String fileUrl});
 }

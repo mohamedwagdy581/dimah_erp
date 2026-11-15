@@ -11,20 +11,14 @@ class HrFormFileService {
   }) async {
     await Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => _HrPdfPreviewPage(
-          title: title,
-          buildBytes: buildBytes,
-        ),
+        builder: (_) => _HrPdfPreviewPage(title: title, buildBytes: buildBytes),
       ),
     );
   }
 }
 
 class _HrPdfPreviewPage extends StatelessWidget {
-  const _HrPdfPreviewPage({
-    required this.title,
-    required this.buildBytes,
-  });
+  const _HrPdfPreviewPage({required this.title, required this.buildBytes});
 
   final String title;
   final Future<Uint8List> Function() buildBytes;
@@ -32,9 +26,7 @@ class _HrPdfPreviewPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
-      ),
+      appBar: AppBar(title: Text(title)),
       body: PdfPreview(
         build: (_) => buildBytes(),
         canChangeOrientation: false,
@@ -44,7 +36,8 @@ class _HrPdfPreviewPage extends StatelessWidget {
         pdfFileName: title,
         onError: (context, error) {
           final message = error.toString();
-          final isMissingPlugin = message.contains('MissingPluginException') ||
+          final isMissingPlugin =
+              message.contains('MissingPluginException') ||
               message.contains('printingInfo');
           return Center(
             child: ConstrainedBox(

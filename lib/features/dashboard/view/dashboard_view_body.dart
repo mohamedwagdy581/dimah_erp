@@ -9,16 +9,22 @@ class _DashboardViewBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context)!;
     if (state is! SessionReady) {
-      return const Center(child: CircularProgressIndicator());
+      return const AppLoadingState();
     }
 
     final user = (state as SessionReady).user;
+    if (user.role == 'admin') {
+      return const AdminHomePage();
+    }
+    if (user.role == 'finance_manager' || user.role == 'accountant') {
+      return const FinanceHomePage();
+    }
     if (user.role == 'hr') {
-      return const _HrDashboard();
+      return const HrHomePage();
     }
     if ((user.role == 'manager' || user.role == 'direct_manager') &&
         user.employeeId != null) {
-      return _ManagerDashboard(managerEmployeeId: user.employeeId!);
+      return const ManagerHomePage();
     }
     if (user.role == 'employee' && user.employeeId != null) {
       return _EmployeeDashboard(employeeId: user.employeeId!);

@@ -74,14 +74,26 @@ class _AccountsFormDialogState extends State<AccountsFormDialog> {
               DropdownButtonFormField<String>(
                 initialValue: _type,
                 items: [
-                  DropdownMenuItem(value: 'asset', child: Text(t.accountTypeAsset)),
+                  DropdownMenuItem(
+                    value: 'asset',
+                    child: Text(t.accountTypeAsset),
+                  ),
                   DropdownMenuItem(
                     value: 'liability',
                     child: Text(t.accountTypeLiability),
                   ),
-                  DropdownMenuItem(value: 'equity', child: Text(t.accountTypeEquity)),
-                  DropdownMenuItem(value: 'income', child: Text(t.accountTypeIncome)),
-                  DropdownMenuItem(value: 'expense', child: Text(t.accountTypeExpense)),
+                  DropdownMenuItem(
+                    value: 'equity',
+                    child: Text(t.accountTypeEquity),
+                  ),
+                  DropdownMenuItem(
+                    value: 'income',
+                    child: Text(t.accountTypeIncome),
+                  ),
+                  DropdownMenuItem(
+                    value: 'expense',
+                    child: Text(t.accountTypeExpense),
+                  ),
                 ],
                 onChanged: (v) => setState(() => _type = v ?? 'expense'),
                 decoration: InputDecoration(

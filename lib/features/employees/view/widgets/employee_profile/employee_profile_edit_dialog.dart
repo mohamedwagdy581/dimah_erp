@@ -18,7 +18,8 @@ class EmployeeProfileEditDialog extends StatefulWidget {
   final EmployeeProfileDetails profile;
 
   @override
-  State<EmployeeProfileEditDialog> createState() => _EmployeeProfileEditDialogState();
+  State<EmployeeProfileEditDialog> createState() =>
+      _EmployeeProfileEditDialogState();
 }
 
 class _EmployeeProfileEditDialogState extends State<EmployeeProfileEditDialog> {
@@ -38,10 +39,9 @@ class _EmployeeProfileEditDialogState extends State<EmployeeProfileEditDialog> {
   bool _saving = false;
 
   TextEditingController get _photoUrl => _c['photoUrl']!;
-  String get _displayName =>
-      _c['fullName']!.text.trim().isEmpty
-          ? widget.profile.fullName
-          : _c['fullName']!.text.trim();
+  String get _displayName => _c['fullName']!.text.trim().isEmpty
+      ? widget.profile.fullName
+      : _c['fullName']!.text.trim();
 
   @override
   void initState() {
@@ -49,9 +49,16 @@ class _EmployeeProfileEditDialogState extends State<EmployeeProfileEditDialog> {
     final p = widget.profile;
     _c = buildEmployeeProfileEditControllers(p);
     _status = p.status.isEmpty ? 'active' : p.status;
-    _paymentMethod = (p.paymentMethod ?? 'bank').isEmpty ? 'bank' : p.paymentMethod!;
-    _passportExpiry = p.passportExpiry; _residencyIssueDate = p.residencyIssueDate; _residencyExpiryDate = p.residencyExpiryDate;
-    _insuranceStartDate = p.insuranceStartDate; _insuranceExpiryDate = p.insuranceExpiryDate; _contractStart = p.contractStart; _contractEnd = p.contractEnd;
+    _paymentMethod = (p.paymentMethod ?? 'bank').isEmpty
+        ? 'bank'
+        : p.paymentMethod!;
+    _passportExpiry = p.passportExpiry;
+    _residencyIssueDate = p.residencyIssueDate;
+    _residencyExpiryDate = p.residencyExpiryDate;
+    _insuranceStartDate = p.insuranceStartDate;
+    _insuranceExpiryDate = p.insuranceExpiryDate;
+    _contractStart = p.contractStart;
+    _contractEnd = p.contractEnd;
   }
 
   @override
@@ -102,12 +109,23 @@ class _EmployeeProfileEditDialogState extends State<EmployeeProfileEditDialog> {
         onPickContractEnd: () =>
             _pickDate(_contractEnd ?? _contractStart, (v) => _contractEnd = v),
       ),
-      actions: [EmployeeProfileDialogActions(saving: _saving || _pickingPhoto, onSave: _save)],
+      actions: [
+        EmployeeProfileDialogActions(
+          saving: _saving || _pickingPhoto,
+          onSave: _save,
+        ),
+      ],
     );
   }
 
-  Future<void> _pickDate(DateTime? initialDate, ValueChanged<DateTime> onSelected) async {
-    final picked = await pickEmployeeProfileDate(context, initialDate: initialDate);
+  Future<void> _pickDate(
+    DateTime? initialDate,
+    ValueChanged<DateTime> onSelected,
+  ) async {
+    final picked = await pickEmployeeProfileDate(
+      context,
+      initialDate: initialDate,
+    );
     if (picked != null) setState(() => onSelected(picked));
   }
 
@@ -115,17 +133,26 @@ class _EmployeeProfileEditDialogState extends State<EmployeeProfileEditDialog> {
     final t = AppLocalizations.of(context)!;
     setState(() => _pickingPhoto = true);
     try {
-      final url = await pickEmployeeProfilePhoto(context: context, uploadService: _photoUploadService, displayName: _displayName, employeeId: widget.profile.id);
+      final url = await pickEmployeeProfilePhoto(
+        context: context,
+        uploadService: _photoUploadService,
+        displayName: _displayName,
+        employeeId: widget.profile.id,
+      );
       if (url == null) return;
       _photoUrl.text = url;
       if (!mounted) return;
       setState(() {});
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t.photoUploadedSuccessfully)));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(t.photoUploadedSuccessfully)));
     } catch (error, stackTrace) {
       debugPrint('PHOTO_UPLOAD_ERROR: $error');
       debugPrint('PHOTO_UPLOAD_STACK: $stackTrace');
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t.photoUploadFailed(error.toString()))));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(t.photoUploadFailed(error.toString()))),
+      );
     } finally {
       if (mounted) setState(() => _pickingPhoto = false);
     }
@@ -136,13 +163,27 @@ class _EmployeeProfileEditDialogState extends State<EmployeeProfileEditDialog> {
     if (!(_formKey.currentState?.validate() ?? false)) return;
     setState(() => _saving = true);
     try {
-      await submitEmployeeProfileEdits(employeeId: widget.profile.id, controllers: _c, status: _status, paymentMethod: _paymentMethod, passportExpiry: _passportExpiry, residencyIssueDate: _residencyIssueDate, residencyExpiryDate: _residencyExpiryDate, insuranceStartDate: _insuranceStartDate, insuranceExpiryDate: _insuranceExpiryDate, contractStart: _contractStart, contractEnd: _contractEnd);
+      await submitEmployeeProfileEdits(
+        employeeId: widget.profile.id,
+        controllers: _c,
+        status: _status,
+        paymentMethod: _paymentMethod,
+        passportExpiry: _passportExpiry,
+        residencyIssueDate: _residencyIssueDate,
+        residencyExpiryDate: _residencyExpiryDate,
+        insuranceStartDate: _insuranceStartDate,
+        insuranceExpiryDate: _insuranceExpiryDate,
+        contractStart: _contractStart,
+        contractEnd: _contractEnd,
+      );
       if (!mounted) return;
       Navigator.pop(context, true);
     } catch (error) {
       if (!mounted) return;
       setState(() => _saving = false);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t.saveFailed(error.toString()))));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(t.saveFailed(error.toString()))));
     }
   }
 }

@@ -21,6 +21,7 @@ class TaskCard extends StatelessWidget {
     required this.onStartTimer,
     required this.onStopTimer,
     required this.onOpenAttachment,
+    this.employeeLayout = false,
   });
 
   final Map<String, dynamic> task;
@@ -32,6 +33,7 @@ class TaskCard extends StatelessWidget {
   final VoidCallback onStartTimer;
   final VoidCallback onStopTimer;
   final ValueChanged<String> onOpenAttachment;
+  final bool employeeLayout;
 
   @override
   Widget build(BuildContext context) {
@@ -41,8 +43,8 @@ class TaskCard extends StatelessWidget {
     final progress = (task['progress'] as num?)?.toInt() ?? 0;
     final timerStartedAt = (task['active_timer_started_at'] ?? '').toString();
     final timerRunning = timerStartedAt.isNotEmpty;
-    final attachments =
-        ((task['attachments'] as List?) ?? const []).cast<Map<String, dynamic>>();
+    final attachments = ((task['attachments'] as List?) ?? const [])
+        .cast<Map<String, dynamic>>();
     return Card(
       key: ValueKey(task['id']),
       child: Padding(
@@ -92,6 +94,7 @@ class TaskCard extends StatelessWidget {
               TaskCardReviewInfo(task: task),
             const SizedBox(height: 8),
             TaskCardStatusSection(
+              responsive: employeeLayout,
               status: status,
               progress: progress,
               onStatusChanged: onStatusChanged,
@@ -139,6 +142,7 @@ class TaskCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             TaskCardAttachments(
+              responsive: employeeLayout,
               attachments: attachments,
               onAttachFile: onAttachFile,
               onOpenAttachment: onOpenAttachment,

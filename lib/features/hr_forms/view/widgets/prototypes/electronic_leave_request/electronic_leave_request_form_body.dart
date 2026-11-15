@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../../../core/ui/app_assets.dart';
 
 import '../shared/electronic_form_frame.dart';
 import 'electronic_leave_request_form_controller.dart';
@@ -36,7 +37,7 @@ class ElectronicLeaveRequestFormBody extends StatelessWidget {
           ? 'نسخة تصميمية للتجربة قبل اعتماد الشكل النهائي'
           : 'Design prototype before final approval',
       showDecoration: readOnly,
-      headerLogo: Image.asset('assets/images/fullLogo.png', width: 80),
+      headerLogo: Image.asset(AppAssets.fullLogo, width: 80),
       actions: readOnly
           ? const []
           : [

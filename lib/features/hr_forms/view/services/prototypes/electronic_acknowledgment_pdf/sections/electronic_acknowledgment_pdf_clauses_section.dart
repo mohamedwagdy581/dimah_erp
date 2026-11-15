@@ -32,7 +32,6 @@ class ElectronicAcknowledgmentPdfClausesSection extends pw.StatelessWidget {
               ? 'أتعهد بعدم الاحتفاظ بأي نسخة من المعلومات أو المستندات الخاصة بالمؤسسة بعد انتهاء الحاجة العملية إليها، سواء خلال العمل أو بعد انتهاء العلاقة التعاقدية.'
               : 'I undertake not to retain or disclose company documents or data beyond operational need, whether during employment or after it ends.',
         ),
-          
       ],
     );
   }

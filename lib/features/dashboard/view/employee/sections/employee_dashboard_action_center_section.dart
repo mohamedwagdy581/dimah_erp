@@ -3,7 +3,7 @@ part of '../../dashboard_page.dart';
 class _EmployeeActionCenterCard extends StatelessWidget {
   const _EmployeeActionCenterCard({required this.data});
 
-  final _EmployeeDashboardData data;
+  final EmployeeDashboardData data;
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +24,11 @@ class _EmployeeActionCenterCard extends StatelessWidget {
               runSpacing: 8,
               children: [
                 Chip(label: Text(t.pendingWithValue(data.pendingTasks))),
-                Chip(label: Text(t.reviewPendingWithValue(data.reviewPendingTasks))),
+                Chip(
+                  label: Text(
+                    t.reviewPendingWithValue(data.reviewPendingTasks),
+                  ),
+                ),
                 Chip(label: Text(t.qaPendingWithValue(data.qaPendingTasks))),
                 Chip(label: Text(t.dueSoonWithValue(data.dueSoonTasks))),
               ],

@@ -31,8 +31,9 @@ mixin _EmployeesRepoCreatePayloadMixin on _EmployeesRepoCreateHelpersMixin {
       'gender': _normalizeOptionalText(gender),
       'nationality': _normalizeOptionalText(nationality),
       'education': _normalizeOptionalText(education),
-      'national_id_expiry':
-          nationalIdExpiry == null ? null : _toDateOnly(nationalIdExpiry),
+      'national_id_expiry': nationalIdExpiry == null
+          ? null
+          : _toDateOnly(nationalIdExpiry),
       'manager_id': managerId,
       'notes': _normalizeOptionalText(notes),
       'department_id': departmentId,
@@ -72,15 +73,21 @@ mixin _EmployeesRepoCreatePayloadMixin on _EmployeesRepoCreateHelpersMixin {
       'city': _normalizeOptionalText(city),
       'country': _normalizeOptionalText(country),
       'passport_no': _normalizeOptionalText(passportNo),
-      'passport_expiry': passportExpiry == null ? null : _toDateOnly(passportExpiry),
-      'residency_issue_date':
-          residencyIssueDate == null ? null : _toDateOnly(residencyIssueDate),
-      'residency_expiry_date':
-          residencyExpiryDate == null ? null : _toDateOnly(residencyExpiryDate),
-      'insurance_start_date':
-          insuranceStartDate == null ? null : _toDateOnly(insuranceStartDate),
-      'insurance_expiry_date':
-          insuranceExpiryDate == null ? null : _toDateOnly(insuranceExpiryDate),
+      'passport_expiry': passportExpiry == null
+          ? null
+          : _toDateOnly(passportExpiry),
+      'residency_issue_date': residencyIssueDate == null
+          ? null
+          : _toDateOnly(residencyIssueDate),
+      'residency_expiry_date': residencyExpiryDate == null
+          ? null
+          : _toDateOnly(residencyExpiryDate),
+      'insurance_start_date': insuranceStartDate == null
+          ? null
+          : _toDateOnly(insuranceStartDate),
+      'insurance_expiry_date': insuranceExpiryDate == null
+          ? null
+          : _toDateOnly(insuranceExpiryDate),
       'insurance_provider': _normalizeOptionalText(insuranceProvider),
       'insurance_policy_no': _normalizeOptionalText(insurancePolicyNo),
       'education_level': _normalizeOptionalText(educationLevel),

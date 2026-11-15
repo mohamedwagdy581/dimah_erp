@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../../../core/ui/app_assets.dart';
 
 import '../shared/electronic_form_frame.dart';
 import 'electronic_acknowledgment_form_controller.dart';
@@ -36,7 +37,7 @@ class ElectronicAcknowledgmentFormBody extends StatelessWidget {
           ? 'تصميم إلكتروني مرن لمراجعة العميل واعتماد الاتجاه البصري'
           : 'A flexible electronic layout for client review and visual direction approval',
       showDecoration: readOnly,
-      headerLogo: Image.asset('assets/images/fullLogo.png', width: 80),
+      headerLogo: Image.asset(AppAssets.fullLogo, width: 80),
       actions: readOnly
           ? const []
           : [

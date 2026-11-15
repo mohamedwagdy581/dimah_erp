@@ -1,6 +1,7 @@
 part of 'employee_repo_impl.dart';
 
-mixin _EmployeesRepoProfileFetchHelpersMixin on _EmployeesRepoEmployeeCreateMixin {
+mixin _EmployeesRepoProfileFetchHelpersMixin
+    on _EmployeesRepoEmployeeCreateMixin {
   Future<Map<String, dynamic>?> _legacyFinancialFromEmployees({
     required String tenantId,
     required String employeeId,

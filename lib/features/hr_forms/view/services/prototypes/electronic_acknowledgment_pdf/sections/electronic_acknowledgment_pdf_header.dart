@@ -4,10 +4,7 @@ import 'package:pdf/widgets.dart' as pw;
 import '../electronic_acknowledgment_pdf_theme.dart';
 
 class ElectronicAcknowledgmentPdfHeader extends pw.StatelessWidget {
-  ElectronicAcknowledgmentPdfHeader({
-    required this.theme,
-    required this.logo,
-  });
+  ElectronicAcknowledgmentPdfHeader({required this.theme, required this.logo});
 
   final ElectronicAcknowledgmentPdfTheme theme;
   final pw.MemoryImage logo;

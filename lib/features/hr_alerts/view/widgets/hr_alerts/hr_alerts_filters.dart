@@ -37,8 +37,14 @@ class HrAlertsFilters extends StatelessWidget {
           items: [
             DropdownMenuItem(value: null, child: Text(t.allTypes)),
             DropdownMenuItem(value: 'contract', child: Text(t.hrTypeContract)),
-            DropdownMenuItem(value: 'residency', child: Text(t.hrTypeResidency)),
-            DropdownMenuItem(value: 'insurance', child: Text(t.hrTypeInsurance)),
+            DropdownMenuItem(
+              value: 'residency',
+              child: Text(t.hrTypeResidency),
+            ),
+            DropdownMenuItem(
+              value: 'insurance',
+              child: Text(t.hrTypeInsurance),
+            ),
             DropdownMenuItem(value: 'document', child: Text(t.hrTypeDocument)),
           ],
         ),

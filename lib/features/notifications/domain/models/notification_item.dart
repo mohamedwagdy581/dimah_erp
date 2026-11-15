@@ -7,6 +7,9 @@ class NotificationItem {
     required this.icon,
     required this.color,
     this.route,
+    this.category = 'updates',
+    this.id,
+    this.occurredAt,
   });
 
   final String title;
@@ -14,4 +17,7 @@ class NotificationItem {
   final IconData icon;
   final Color color;
   final String? route;
+  final String category;
+  final String? id;
+  final DateTime? occurredAt;
 }

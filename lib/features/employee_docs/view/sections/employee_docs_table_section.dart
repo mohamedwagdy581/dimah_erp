@@ -1,3 +1,4 @@
+import 'package:erp_sys/core/ui/app_data_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -23,13 +24,15 @@ class EmployeeDocsTableSection extends StatelessWidget {
             children: [
               EmployeeDocsTableSectionHeader(cubit: cubit, state: state),
               const SizedBox(height: 12),
-              if (state.loading) const LinearProgressIndicator(),
-              if (state.error != null) ...[
-                const SizedBox(height: 10),
-                Text(state.error!, style: const TextStyle(color: Colors.red)),
-              ],
               const SizedBox(height: 12),
-              const Expanded(child: EmployeeDocsTable()),
+              Expanded(
+                child: AppDataRegion(
+                  loading: state.loading,
+                  error: state.error,
+                  onRetry: cubit.load,
+                  child: const EmployeeDocsTable(),
+                ),
+              ),
               const SizedBox(height: 12),
               EmployeeDocsPaginationBar(
                 page: state.page,

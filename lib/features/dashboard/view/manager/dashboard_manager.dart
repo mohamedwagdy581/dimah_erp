@@ -1,9 +1,15 @@
 part of '../dashboard_page.dart';
 
 class _ManagerDashboard extends StatefulWidget {
-  const _ManagerDashboard({required this.managerEmployeeId});
+  const _ManagerDashboard({
+    required this.managerEmployeeId,
+    this.assignmentOnly = false,
+    this.reviewsOnly = false,
+  });
 
   final String managerEmployeeId;
+  final bool assignmentOnly;
+  final bool reviewsOnly;
 
   @override
   State<_ManagerDashboard> createState() => _ManagerDashboardState();
@@ -19,6 +25,9 @@ class _ManagerDashboardState extends State<_ManagerDashboard> {
   String _taskType = 'general';
   List<String> _visibleTaskCatalog = const ['general'];
   bool _saving = false;
+  bool _pickingAttachment = false;
+  ManagerTaskAttachment? _assignmentAttachment;
+  final _submission = ManagerTaskSubmission();
   DateTime? _dueDate;
   late Future<_ManagerDashboardData> _future;
 
@@ -54,6 +63,11 @@ class _ManagerDashboardState extends State<_ManagerDashboard> {
     });
   }
 
+  void _setPickingAttachment(bool value) =>
+      setState(() => _pickingAttachment = value);
+  void _setAssignmentAttachment(ManagerTaskAttachment value) =>
+      setState(() => _assignmentAttachment = value);
+
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context)!;
@@ -61,9 +75,12 @@ class _ManagerDashboardState extends State<_ManagerDashboard> {
       future: _future,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          return const AppLoadingState();
         }
         final data = snapshot.data ?? const _ManagerDashboardData();
+        if (snapshot.hasError) {
+          return AppFailureState(error: snapshot.error, onRetry: _refreshData);
+        }
         final taskCatalog = _taskCatalogForDepartments(
           data.managedDepartmentNames,
         );
@@ -72,6 +89,114 @@ class _ManagerDashboardState extends State<_ManagerDashboard> {
           data.managedDepartmentNames,
         );
         _syncVisibleTaskCatalog(taskCatalog: taskCatalog, templates: templates);
+        if (widget.reviewsOnly) {
+          final rows = <String, Map<String, dynamic>>{};
+          for (final row in [
+            ...data.pendingReviewRequests,
+            ...data.pendingQaTasks,
+          ]) {
+            rows[row['id'].toString()] = row;
+          }
+          return ManagerTaskReviewsView(
+            tasks: rows.values.toList(),
+            members: data.members
+                .map(
+                  (m) => TeamMember(
+                    id: m.employeeId,
+                    name: m.name,
+                    jobTitle: m.jobTitle,
+                  ),
+                )
+                .toList(),
+            onRefresh: _refreshData,
+            onOpenFile: _openExternalUrl,
+            onDecision: _reviewTaskFromPage,
+          );
+        }
+        if (widget.assignmentOnly) {
+          return ManagerTaskAssignmentView(
+            members: data.members
+                .map(
+                  (m) => TeamMember(
+                    id: m.employeeId,
+                    name: m.name,
+                    jobTitle: m.jobTitle,
+                  ),
+                )
+                .toList(),
+            activeTasks: {
+              for (final m in data.members)
+                m.employeeId: m.totalTasks - m.doneTasks,
+            },
+            completion: {
+              for (final m in data.members)
+                m.employeeId: m.totalTasks == 0
+                    ? 0.0
+                    : m.doneTasks / m.totalTasks,
+            },
+            upcoming: data.dueSoonTasks,
+            averageProgress: {
+              for (final m in data.members)
+                m.employeeId: m.averageProgressPercent / 100,
+            },
+            onRefresh: _refreshData,
+            taskTypes: {
+              for (final type in taskCatalog) type: _taskTypeLabel(t, type),
+            },
+            title: _title,
+            description: _description,
+            hours: _estimateHours,
+            employeeId: _employeeId,
+            taskType: _taskType,
+            priority: _priority,
+            dueDate: _dueDate,
+            saving: _saving,
+            attachmentName: _assignmentAttachment?.name,
+            attachmentBytes: _assignmentAttachment?.bytes.length,
+            pickingAttachment: _pickingAttachment,
+            attachmentRetry: _submission.taskId != null,
+            onPickAttachment: _pickAssignmentAttachment,
+            onRemoveAttachment: () =>
+                setState(() => _assignmentAttachment = null),
+            onEmployee: (value) => setState(() => _employeeId = value),
+            onType: (value) {
+              if (value != null) setState(() => _taskType = value);
+            },
+            onPriority: (value) {
+              if (value != null) setState(() => _priority = value);
+            },
+            onDate: _pickDueDate,
+            onSubmit: _assignTask,
+            onCancel: () {
+              if (_saving) return;
+              setState(() {
+                _employeeId = null;
+                _assignmentAttachment = null;
+                _submission.clear();
+                _title.clear();
+                _description.clear();
+                _estimateHours.text = '8';
+                _dueDate = null;
+                _priority = 'medium';
+                _taskType = taskCatalog.first;
+              });
+            },
+            onWeight: (employee, type) async {
+              if (employee == null) return _defaultWeightForType(type);
+              final client = Supabase.instance.client;
+              final actor = await client
+                  .from('users')
+                  .select('tenant_id')
+                  .eq('id', client.auth.currentUser!.id)
+                  .single();
+              return _resolveAutoWeight(
+                tenantId: actor['tenant_id'].toString(),
+                employeeId: employee,
+                taskType: type,
+              );
+            },
+          );
+        }
         return _ManagerDashboardBody(
           data: data,
           taskCatalog: taskCatalog,
@@ -91,10 +216,8 @@ class _ManagerDashboardState extends State<_ManagerDashboard> {
           onReviewDecision: _openTaskReviewDialog,
           onPickDueDate: _pickDueDate,
           onAssignTask: _assignTask,
-          onTemplateChanged: (value) => _handleTemplateChanged(
-            value: value,
-            templates: templates,
-          ),
+          onTemplateChanged: (value) =>
+              _handleTemplateChanged(value: value, templates: templates),
           onEmployeeChanged: (value) => setState(() {
             _employeeId = value;
           }),
@@ -163,9 +286,6 @@ class _ManagerDashboardState extends State<_ManagerDashboard> {
   }
 
   void _showMemberTimeline(String employeeId, String employeeName) {
-    _showMemberTaskTimeline(
-      employeeId: employeeId,
-      employeeName: employeeName,
-    );
+    _showMemberTaskTimeline(employeeId: employeeId, employeeName: employeeName);
   }
 }

@@ -1,6 +1,7 @@
 part of 'employee_repo_impl.dart';
 
-mixin _EmployeesRepoProfileFetchMixin on _EmployeesRepoProfileFetchQueriesMixin {
+mixin _EmployeesRepoProfileFetchMixin
+    on _EmployeesRepoProfileFetchQueriesMixin {
   Future<EmployeeProfileDetails> fetchEmployeeProfile({
     required String employeeId,
   }) async {
@@ -11,6 +12,16 @@ mixin _EmployeesRepoProfileFetchMixin on _EmployeesRepoProfileFetchQueriesMixin 
       employeeId: employeeId,
     );
     if (employee == null) throw Exception('Employee not found');
+    final managerId = employee['manager_id']?.toString();
+    if (managerId != null && managerId.isNotEmpty) {
+      final manager = await _client
+          .from('employees')
+          .select('full_name')
+          .eq('tenant_id', tenantId)
+          .eq('id', managerId)
+          .maybeSingle();
+      employee['manager_name'] = manager?['full_name'];
+    }
 
     final personal = await _fetchEmployeePersonal(tenantId, employeeId);
     final personalFallback = personal == null
@@ -19,7 +30,9 @@ mixin _EmployeesRepoProfileFetchMixin on _EmployeesRepoProfileFetchQueriesMixin 
 
     final compensation = await _client
         .from('employee_compensation')
-        .select('basic_salary, housing_allowance, transport_allowance, other_allowance')
+        .select(
+          'basic_salary, housing_allowance, transport_allowance, other_allowance',
+        )
         .eq('tenant_id', tenantId)
         .eq('employee_id', employeeId)
         .maybeSingle();
@@ -64,24 +77,28 @@ mixin _EmployeesRepoProfileFetchMixin on _EmployeesRepoProfileFetchQueriesMixin 
         ? await _fetchEmployeeFinancialFallback(employeeId)
         : null;
 
-    final contracts = await _client
-        .from('employee_contracts')
-        .select(
-          'id, contract_type, start_date, end_date, probation_months, file_url, created_at',
-        )
-        .eq('tenant_id', tenantId)
-        .eq('employee_id', employeeId)
-        .order('created_at', ascending: false)
-        .limit(1) as List;
-    final contractHistory = await _client
-        .from('employee_contracts')
-        .select(
-          'id, contract_type, start_date, end_date, probation_months, file_url, created_at',
-        )
-        .eq('tenant_id', tenantId)
-        .eq('employee_id', employeeId)
-        .order('created_at', ascending: false)
-        .limit(20) as List;
+    final contracts =
+        await _client
+                .from('employee_contracts')
+                .select(
+                  'id, contract_type, start_date, end_date, probation_months, file_url, created_at',
+                )
+                .eq('tenant_id', tenantId)
+                .eq('employee_id', employeeId)
+                .order('created_at', ascending: false)
+                .limit(1)
+            as List;
+    final contractHistory =
+        await _client
+                .from('employee_contracts')
+                .select(
+                  'id, contract_type, start_date, end_date, probation_months, file_url, created_at',
+                )
+                .eq('tenant_id', tenantId)
+                .eq('employee_id', employeeId)
+                .order('created_at', ascending: false)
+                .limit(20)
+            as List;
     final docsRes = await _client
         .from('employee_documents')
         .select('id, doc_type, file_url, issued_at, expires_at, created_at')
@@ -144,15 +161,22 @@ mixin _EmployeesRepoProfileFetchMixin on _EmployeesRepoProfileFetchQueriesMixin 
       personal: personal ?? personalFallback,
       compensation: compensation,
       compensationHistory: compensationHistory,
-      financial: financial ??
+      financial:
+          financial ??
           financialFallback ??
-          await _legacyFinancialFromEmployees(tenantId: tenantId, employeeId: employeeId),
+          await _legacyFinancialFromEmployees(
+            tenantId: tenantId,
+            employeeId: employeeId,
+          ),
       contract: contract,
-      contractHistory: (contracts.isNotEmpty ? contractHistory : contractHistoryFallback)
-          .map((e) => Map<String, dynamic>.from(e as Map))
-          .toList(),
+      contractHistory:
+          (contracts.isNotEmpty ? contractHistory : contractHistoryFallback)
+              .map((e) => Map<String, dynamic>.from(e as Map))
+              .toList(),
       settlements: settlements,
-      documents: (docsRes as List).map((e) => e as Map<String, dynamic>).toList(),
+      documents: (docsRes as List)
+          .map((e) => e as Map<String, dynamic>)
+          .toList(),
     );
   }
 }

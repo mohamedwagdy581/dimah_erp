@@ -25,7 +25,9 @@ class EmployeeProfileHeader extends StatelessWidget {
         CircleAvatar(
           radius: 28,
           backgroundImage: resolveEmployeePhotoProvider(profile.photoUrl),
-          child: (profile.photoUrl ?? '').trim().isEmpty ? const Icon(Icons.person) : null,
+          child: (profile.photoUrl ?? '').trim().isEmpty
+              ? const Icon(Icons.person)
+              : null,
         ),
         const SizedBox(width: 12),
         Text(

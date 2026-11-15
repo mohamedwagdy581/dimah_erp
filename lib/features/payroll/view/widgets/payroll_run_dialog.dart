@@ -15,6 +15,15 @@ class _PayrollRunDialogState extends State<PayrollRunDialog> {
   DateTime? _start;
   DateTime? _end;
   String? _error;
+  bool _busy = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final now = DateTime.now();
+    _start = DateTime(now.year, now.month, 1);
+    _end = DateTime(now.year, now.month + 1, 0);
+  }
 
   Future<void> _pickStart() async {
     final now = DateTime.now();
@@ -49,13 +58,31 @@ class _PayrollRunDialogState extends State<PayrollRunDialog> {
       return;
     }
 
-    await context.read<PayrollCubit>().createRun(
-      startDate: _start!,
-      endDate: _end!,
-    );
-
-    if (!mounted) return;
-    Navigator.pop(context, true);
+    if (_busy) return;
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    try {
+      final id = await context.read<PayrollCubit>().createRun(
+        startDate: _start!,
+        endDate: _end!,
+      );
+      if (!mounted) return;
+      Navigator.pop(context, id);
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _error = e.toString();
+        });
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _busy = false;
+        });
+      }
+    }
   }
 
   @override
@@ -69,7 +96,7 @@ class _PayrollRunDialogState extends State<PayrollRunDialog> {
           mainAxisSize: MainAxisSize.min,
           children: [
             OutlinedButton.icon(
-              onPressed: _pickStart,
+              onPressed: _busy ? null : _pickStart,
               icon: const Icon(Icons.event),
               label: Text(
                 _start == null
@@ -81,7 +108,7 @@ class _PayrollRunDialogState extends State<PayrollRunDialog> {
             ),
             const SizedBox(height: 12),
             OutlinedButton.icon(
-              onPressed: _pickEnd,
+              onPressed: _busy ? null : _pickEnd,
               icon: const Icon(Icons.event_available),
               label: Text(
                 _end == null
@@ -100,10 +127,13 @@ class _PayrollRunDialogState extends State<PayrollRunDialog> {
       ),
       actions: [
         TextButton(
-          onPressed: () => Navigator.pop(context, false),
+          onPressed: _busy ? null : () => Navigator.pop(context),
           child: Text(t.cancel),
         ),
-        ElevatedButton(onPressed: _submit, child: Text(t.create)),
+        ElevatedButton(
+          onPressed: _busy ? null : _submit,
+          child: Text(t.create),
+        ),
       ],
     );
   }

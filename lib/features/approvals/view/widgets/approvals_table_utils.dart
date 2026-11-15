@@ -16,7 +16,7 @@ String approvalPendingWithLabel(AppLocalizations t, ApprovalRequest request) {
     return '-';
   }
   if (role == 'hr') {
-    return 'HR';
+    return t.localeName.startsWith('ar') ? 'الموارد البشرية' : 'HR';
   }
   if (role == 'admin') {
     return t.roleAdmin;
@@ -24,5 +24,19 @@ String approvalPendingWithLabel(AppLocalizations t, ApprovalRequest request) {
   if (role == 'manager') {
     return t.directManager;
   }
+  if (role == 'finance_manager') {
+    return t.localeName.startsWith('ar') ? 'مدير المالية' : 'Finance manager';
+  }
   return role;
 }
+
+String approvalTypeLabel(AppLocalizations t, String type) => switch (type
+    .toLowerCase()) {
+  'leave' => t.leave,
+  'payroll_run' => t.menuPayroll,
+  'early_exit' =>
+    t.localeName.startsWith('ar') ? 'إذن خروج مبكر' : 'Early Exit Permission',
+  'attendance_correction' =>
+    t.localeName.startsWith('ar') ? 'تصحيح الحضور' : 'Attendance correction',
+  _ => type,
+};

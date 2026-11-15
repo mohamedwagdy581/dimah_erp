@@ -16,5 +16,9 @@ abstract class JournalRepo {
     required DateTime entryDate,
     required String memo,
     required List<JournalLine> lines,
+    String? requestId,
   });
+
+  /// Locks a balanced draft so it counts in the books. Retry-safe.
+  Future<void> postEntry(String id);
 }

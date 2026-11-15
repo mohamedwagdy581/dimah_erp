@@ -16,8 +16,8 @@ mixin _AttendanceRepoActionsMixin on _AttendanceRepoFetchMixin {
       'employee_id': employeeId,
       'date': _toDateOnly(date),
       'status': status,
-      'check_in': checkIn?.toIso8601String(),
-      'check_out': checkOut?.toIso8601String(),
+      'check_in': checkIn?.toUtc().toIso8601String(),
+      'check_out': checkOut?.toUtc().toIso8601String(),
       'notes': _normalizeOptionalText(notes),
     });
   }
@@ -40,14 +40,17 @@ mixin _AttendanceRepoActionsMixin on _AttendanceRepoFetchMixin {
       'payload': {
         'record_id': recordId,
         'date': _toDateOnly(date),
-        'proposed_check_in': proposedCheckIn?.toIso8601String(),
-        'proposed_check_out': proposedCheckOut?.toIso8601String(),
+        'proposed_check_in': proposedCheckIn?.toUtc().toIso8601String(),
+        'proposed_check_out': proposedCheckOut?.toUtc().toIso8601String(),
         'reason': _normalizeOptionalText(reason),
       },
     });
   }
 
-  Future<void> upsertAttendanceBatch(List<AttendanceImportRecord> records) async {
+  Future<void> upsertAttendanceBatch(
+    List<AttendanceImportRecord> records, {
+    bool repairTimezone = false,
+  }) async {
     if (records.isEmpty) return;
 
     final tenantId = await _tenantId();
@@ -82,17 +85,27 @@ mixin _AttendanceRepoActionsMixin on _AttendanceRepoFetchMixin {
         'employee_id': record.employeeId,
         'date': day,
         'status': record.status,
-        'check_in': record.checkIn?.toIso8601String(),
-        'check_out': record.checkOut?.toIso8601String(),
+        'check_in': record.checkIn?.toUtc().toIso8601String(),
+        'check_out': record.checkOut?.toUtc().toIso8601String(),
         'notes': _normalizeOptionalText(record.notes),
       };
 
       final existingId = existingByKey['${record.employeeId}|$day'];
       if (existingId == null) {
         await _client.from('attendance_records').insert(payload);
-      } else {
-        await _client.from('attendance_records').update(payload).eq('id', existingId);
+        existingByKey['${record.employeeId}|$day'] = 'inserted';
+      } else if (repairTimezone && existingId != 'inserted') {
+        await _client.rpc(
+          'repair_imported_attendance_timezone',
+          params: {
+            'p_record_id': existingId,
+            'p_check_in': record.checkIn?.toUtc().toIso8601String(),
+            'p_check_out': record.checkOut?.toUtc().toIso8601String(),
+            'p_source_notes': record.notes,
+          },
+        );
       }
+      // Existing days are preserved unless the protected RPC repairs the known shift.
     }
   }
 }

@@ -39,8 +39,9 @@ class DepartmentManagerField extends StatelessWidget {
           seen.add(manager.id);
           return true;
         }).toList();
-        final currentValue =
-            managers.any((manager) => manager.id == managerId) ? managerId : '';
+        final currentValue = managers.any((manager) => manager.id == managerId)
+            ? managerId
+            : '';
         return DropdownButtonFormField<String>(
           initialValue: currentValue,
           decoration: InputDecoration(labelText: t.departmentManager),
