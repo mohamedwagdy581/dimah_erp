@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'dart:ui' as ui;
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -12,6 +12,7 @@ import 'package:erp_sys/features/manager_team/domain/manager_team_data.dart';
 import 'package:erp_sys/features/manager_attendance/manager_attendance_repo.dart';
 import 'package:erp_sys/features/manager_attendance/manager_attendance_page.dart';
 import 'package:erp_sys/features/manager_attendance/manager_attendance_cubit.dart';
+import 'package:erp_sys/l10n/app_localization_delegates.dart';
 import 'package:erp_sys/l10n/app_localizations.dart';
 
 AttendanceRecord record(
@@ -70,7 +71,7 @@ void main() {
       MaterialApp(
         locale: Locale(lang),
         supportedLocales: AppLocalizations.supportedLocales,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        localizationsDelegates: appLocalizationDelegates,
         theme: EmployeeTheme.from(AppTheme.light()),
         home: RepaintBoundary(
           key: capture,

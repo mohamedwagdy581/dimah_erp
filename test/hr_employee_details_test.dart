@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'dart:ui' as ui;
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -10,6 +10,7 @@ import 'package:erp_sys/features/employees/domain/models/employee_profile_detail
 import 'package:erp_sys/features/employees/view/widgets/employee_profile/employee_profile_identity_header.dart';
 import 'package:erp_sys/features/employees/view/widgets/employee_profile/employee_profile_contracts.dart';
 import 'package:erp_sys/features/employees/view/widgets/employee_profile/employee_profile_sections.dart';
+import 'package:erp_sys/l10n/app_localization_delegates.dart';
 import 'package:erp_sys/l10n/app_localizations.dart';
 
 final profile = EmployeeProfileDetails(
@@ -45,7 +46,7 @@ final profile = EmployeeProfileDetails(
 Widget app(Widget child, String lang) => MaterialApp(
   locale: Locale(lang),
   supportedLocales: AppLocalizations.supportedLocales,
-  localizationsDelegates: AppLocalizations.localizationsDelegates,
+  localizationsDelegates: appLocalizationDelegates,
   theme: EmployeeTheme.from(AppTheme.light()),
   home: Scaffold(body: child),
 );

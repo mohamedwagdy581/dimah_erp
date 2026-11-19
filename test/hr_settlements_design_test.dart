@@ -1,13 +1,14 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:ui' as ui;
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:erp_sys/core/ui/app_theme.dart';
 import 'package:erp_sys/core/ui/employee_theme.dart';
+import 'package:erp_sys/l10n/app_localization_delegates.dart';
 import 'package:erp_sys/l10n/app_localizations.dart';
 import 'package:erp_sys/features/employees/data/repos/hr_settlements_repo.dart';
 import 'package:erp_sys/features/employees/domain/models/employee.dart';
@@ -90,7 +91,7 @@ Widget _app(
   debugShowCheckedModeBanner: false,
   locale: Locale(lang),
   theme: EmployeeTheme.from(AppTheme.light()),
-  localizationsDelegates: AppLocalizations.localizationsDelegates,
+  localizationsDelegates: appLocalizationDelegates,
   supportedLocales: AppLocalizations.supportedLocales,
   home: HrSettlementsPage(
     repo: repo,

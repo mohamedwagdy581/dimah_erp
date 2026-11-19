@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'dart:ui' as ui;
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:erp_sys/core/di/app_di.dart';
 import 'package:erp_sys/core/ui/app_theme.dart';
 import 'package:erp_sys/core/ui/employee_theme.dart';
+import 'package:erp_sys/l10n/app_localization_delegates.dart';
 import 'package:erp_sys/l10n/app_localizations.dart';
 import 'package:erp_sys/features/departments/domain/models/department.dart';
 import 'package:erp_sys/features/departments/domain/repos/departments_repo.dart';
@@ -98,7 +99,7 @@ Widget _app(EmployeeWizardCubit cubit, {String lang = 'ar'}) => MaterialApp(
   debugShowCheckedModeBanner: false,
   locale: Locale(lang),
   theme: EmployeeTheme.from(AppTheme.light()),
-  localizationsDelegates: AppLocalizations.localizationsDelegates,
+  localizationsDelegates: appLocalizationDelegates,
   supportedLocales: AppLocalizations.supportedLocales,
   home: BlocProvider.value(value: cubit, child: const EmployeeWizardPage()),
 );

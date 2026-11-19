@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../domain/models/approval_request.dart';
 import 'responsive_approvals_table.dart';

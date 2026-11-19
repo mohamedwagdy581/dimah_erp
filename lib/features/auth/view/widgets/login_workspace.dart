@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 import '../../../../core/ui/app_assets.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class LoginWorkspace extends StatelessWidget {
   const LoginWorkspace({super.key, required this.form});

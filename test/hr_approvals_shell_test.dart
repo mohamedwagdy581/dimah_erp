@@ -1,8 +1,9 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:erp_sys/core/ui/employee_theme.dart';
 import 'package:erp_sys/core/routing/app_routes.dart';
+import 'package:erp_sys/l10n/app_localization_delegates.dart';
 import 'package:erp_sys/l10n/app_localizations.dart';
 import 'package:erp_sys/features/shell/domain/nav_menu.dart';
 import 'package:erp_sys/features/shell/view/sections/sidebar_section.dart';
@@ -49,7 +50,7 @@ void main() {
             routerConfig: router,
             locale: Locale(language),
             supportedLocales: AppLocalizations.supportedLocales,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            localizationsDelegates: appLocalizationDelegates,
             theme: EmployeeTheme.from(ThemeData.light()),
           ),
         );

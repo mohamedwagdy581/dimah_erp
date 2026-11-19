@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:erp_sys/core/ui/app_theme.dart';
@@ -6,6 +6,7 @@ import 'package:erp_sys/core/ui/employee_theme.dart';
 import 'package:erp_sys/features/employees/data/repos/hr_employees_repo.dart';
 import 'package:erp_sys/features/employees/domain/models/employee.dart';
 import 'package:erp_sys/features/employees/view/pages/hr_employees_page.dart';
+import 'package:erp_sys/l10n/app_localization_delegates.dart';
 import 'package:erp_sys/l10n/app_localizations.dart';
 
 final fixture = HrEmployeesData(
@@ -64,7 +65,7 @@ void main() {
             routerConfig: router,
             locale: Locale(lang),
             supportedLocales: AppLocalizations.supportedLocales,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            localizationsDelegates: appLocalizationDelegates,
             theme: EmployeeTheme.from(AppTheme.light()),
           ),
         );
@@ -97,7 +98,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         supportedLocales: AppLocalizations.supportedLocales,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        localizationsDelegates: appLocalizationDelegates,
         home: Scaffold(
           body: HrEmployeesView(data: fixture, onRefresh: () {}),
         ),

@@ -1,7 +1,7 @@
 import 'package:erp_sys/core/ui/app_data_state.dart';
 import 'dart:typed_data';
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../../../l10n/app_localizations.dart';
 import '../../../../features/employees/domain/models/expiry_alert.dart';

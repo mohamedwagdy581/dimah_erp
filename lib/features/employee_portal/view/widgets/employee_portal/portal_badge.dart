@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class PortalBadge extends StatelessWidget {
   const PortalBadge({super.key, required this.label, required this.value});

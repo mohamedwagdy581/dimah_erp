@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 const wizardPurple = Color(0xFF8654BC);
 const wizardInk = Color(0xFF21194E);

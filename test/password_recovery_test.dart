@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:erp_sys/features/auth/data/repos/password_recovery_repo.dart';
 import 'package:erp_sys/features/auth/view/password_recovery_page.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:material_ui/material_ui.dart';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 

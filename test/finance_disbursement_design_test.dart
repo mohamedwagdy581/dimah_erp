@@ -1,10 +1,11 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:ui' as ui;
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:erp_sys/l10n/app_localization_delegates.dart';
 import 'package:erp_sys/l10n/app_localizations.dart';
 import 'package:erp_sys/core/ui/app_theme.dart';
 import 'package:erp_sys/core/ui/employee_theme.dart';
@@ -65,7 +66,7 @@ Widget app(FakeDisbursement repo, {String lang = 'ar', double scale = 1}) =>
       theme: EmployeeTheme.from(AppTheme.light()),
       locale: Locale(lang),
       supportedLocales: AppLocalizations.supportedLocales,
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      localizationsDelegates: appLocalizationDelegates,
       builder: (context, child) => MediaQuery(
         data: MediaQuery.of(
           context,

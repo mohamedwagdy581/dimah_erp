@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Keeps the visible search text in sync when a page clears its filters.
 class AppSearchField extends StatefulWidget {

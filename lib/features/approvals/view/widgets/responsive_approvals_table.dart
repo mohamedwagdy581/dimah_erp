@@ -1,5 +1,5 @@
 import 'dart:math' as math;
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/models/approval_request.dart';
 import 'approval_actions_cell.dart';

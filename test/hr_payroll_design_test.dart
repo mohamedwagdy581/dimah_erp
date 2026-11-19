@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:erp_sys/l10n/app_localization_delegates.dart';
 import 'package:erp_sys/l10n/app_localizations.dart';
 import 'package:erp_sys/features/payroll/domain/models/payroll_item.dart';
 import 'package:erp_sys/features/payroll/domain/models/payroll_run.dart';
@@ -93,7 +94,7 @@ void main() {
             await tester.pumpWidget(
               MaterialApp(
                 locale: Locale(language),
-                localizationsDelegates: AppLocalizations.localizationsDelegates,
+                localizationsDelegates: appLocalizationDelegates,
                 supportedLocales: AppLocalizations.supportedLocales,
                 home: Scaffold(
                   body: PayrollRunDesign(

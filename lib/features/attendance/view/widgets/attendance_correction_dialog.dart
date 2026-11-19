@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../domain/models/attendance_record.dart';
@@ -86,9 +86,7 @@ class _AttendanceCorrectionDialogState
                   child: OutlinedButton(
                     onPressed: () => _pickTime(true),
                     child: Text(
-                      _checkIn == null
-                          ? 'Check In'
-                          : _checkIn!.format(context),
+                      _checkIn == null ? 'Check In' : _checkIn!.format(context),
                     ),
                   ),
                 ),

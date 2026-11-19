@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:ui' as ui;
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -11,6 +11,7 @@ import 'package:erp_sys/core/ui/employee_theme.dart';
 import 'package:erp_sys/features/manager_requests/data/manager_requests_repo.dart';
 import 'package:erp_sys/features/manager_requests/view/manager_requests_cubit.dart';
 import 'package:erp_sys/features/manager_requests/view/manager_requests_page.dart';
+import 'package:erp_sys/l10n/app_localization_delegates.dart';
 import 'package:erp_sys/l10n/app_localizations.dart';
 
 Map<String, dynamic> request(
@@ -101,7 +102,7 @@ void main() {
       MaterialApp(
         locale: Locale(lang),
         supportedLocales: AppLocalizations.supportedLocales,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        localizationsDelegates: appLocalizationDelegates,
         theme: EmployeeTheme.from(AppTheme.light()),
         home: RepaintBoundary(
           key: capture,

@@ -8,8 +8,9 @@ import 'package:erp_sys/features/profile/domain/repos/profile_repo.dart';
 import 'package:erp_sys/features/profile/view/employee_profile_cubit.dart';
 import 'package:erp_sys/features/profile/view/employee_profile_view.dart';
 import 'package:erp_sys/features/shell/view/sections/sidebar_section.dart';
+import 'package:erp_sys/l10n/app_localization_delegates.dart';
 import 'package:erp_sys/l10n/app_localizations.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -55,7 +56,7 @@ Widget app(
 }) => MaterialApp(
   locale: Locale(language),
   supportedLocales: AppLocalizations.supportedLocales,
-  localizationsDelegates: AppLocalizations.localizationsDelegates,
+  localizationsDelegates: appLocalizationDelegates,
   theme: EmployeeTheme.from(AppTheme.light()),
   home: Scaffold(
     body: BlocProvider.value(
@@ -300,7 +301,7 @@ void main() {
         routerConfig: router,
         locale: const Locale('ar'),
         supportedLocales: AppLocalizations.supportedLocales,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        localizationsDelegates: appLocalizationDelegates,
         theme: EmployeeTheme.from(AppTheme.light()),
       ),
     );

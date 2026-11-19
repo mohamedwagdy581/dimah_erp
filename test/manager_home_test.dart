@@ -10,8 +10,9 @@ import 'package:erp_sys/features/manager_home/manager_home_page.dart';
 import 'package:erp_sys/features/manager_team/data/manager_team_repo.dart';
 import 'package:erp_sys/features/manager_team/domain/manager_team_data.dart';
 import 'package:erp_sys/features/manager_team/view/manager_team_cubit.dart';
+import 'package:erp_sys/l10n/app_localization_delegates.dart';
 import 'package:erp_sys/l10n/app_localizations.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -85,7 +86,7 @@ void main() {
       MaterialApp(
         locale: const Locale('ar'),
         supportedLocales: AppLocalizations.supportedLocales,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        localizationsDelegates: appLocalizationDelegates,
         theme: EmployeeTheme.from(AppTheme.light()),
         home: RepaintBoundary(
           key: key,
@@ -169,7 +170,7 @@ void main() {
             routerConfig: router,
             locale: Locale(lang),
             supportedLocales: AppLocalizations.supportedLocales,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            localizationsDelegates: appLocalizationDelegates,
             theme: EmployeeTheme.from(AppTheme.light()),
           ),
         );

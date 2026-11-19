@@ -18,5 +18,6 @@ class AttendanceRepoImpl
     implements AttendanceRepo {
   AttendanceRepoImpl(this._client);
 
+  @override
   final SupabaseClient _client;
 }

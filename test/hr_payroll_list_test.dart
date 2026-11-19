@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'dart:ui' as ui;
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -10,6 +10,7 @@ import 'package:erp_sys/core/session/session_repo.dart';
 import 'package:erp_sys/core/session/session_cubit.dart';
 import 'package:erp_sys/core/ui/app_theme.dart';
 import 'package:erp_sys/core/ui/employee_theme.dart';
+import 'package:erp_sys/l10n/app_localization_delegates.dart';
 import 'package:erp_sys/l10n/app_localizations.dart';
 import 'package:erp_sys/features/payroll/domain/models/payroll_run.dart';
 import 'package:erp_sys/features/payroll/domain/repos/payroll_repo.dart';
@@ -76,7 +77,7 @@ void main() {
                 debugShowCheckedModeBanner: false,
                 locale: Locale(lang),
                 theme: EmployeeTheme.from(AppTheme.light()),
-                localizationsDelegates: AppLocalizations.localizationsDelegates,
+                localizationsDelegates: appLocalizationDelegates,
                 supportedLocales: AppLocalizations.supportedLocales,
                 home: Scaffold(
                   body: PayrollListDesign(
@@ -155,7 +156,7 @@ void main() {
             debugShowCheckedModeBanner: false,
             locale: const Locale('ar'),
             theme: EmployeeTheme.from(AppTheme.light()),
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            localizationsDelegates: appLocalizationDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
             home: Scaffold(
               body: PayrollListDesign(

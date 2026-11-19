@@ -7,8 +7,9 @@ import 'package:erp_sys/core/ui/employee_theme.dart';
 import 'package:erp_sys/core/routing/app_routes.dart';
 import 'package:erp_sys/features/hr_home/hr_home_repo.dart';
 import 'package:erp_sys/features/hr_home/hr_home_page.dart';
+import 'package:erp_sys/l10n/app_localization_delegates.dart';
 import 'package:erp_sys/l10n/app_localizations.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
@@ -63,7 +64,7 @@ void main() {
       MaterialApp(
         locale: const Locale('ar'),
         supportedLocales: AppLocalizations.supportedLocales,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        localizationsDelegates: appLocalizationDelegates,
         theme: EmployeeTheme.from(AppTheme.light()),
         home: RepaintBoundary(
           key: key,
@@ -124,7 +125,7 @@ void main() {
             routerConfig: router,
             locale: Locale(lang),
             supportedLocales: AppLocalizations.supportedLocales,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            localizationsDelegates: appLocalizationDelegates,
             theme: EmployeeTheme.from(AppTheme.light()),
           ),
         );

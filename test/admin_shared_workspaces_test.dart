@@ -1,7 +1,8 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:erp_sys/core/ui/admin_theme.dart';
 import 'package:erp_sys/core/ui/app_theme.dart';
+import 'package:erp_sys/l10n/app_localization_delegates.dart';
 import 'package:erp_sys/l10n/app_localizations.dart';
 import 'package:erp_sys/features/departments/view/hr_organization_page.dart';
 import 'package:erp_sys/features/attendance/view/pages/hr_attendance_page.dart';
@@ -46,7 +47,7 @@ void main() {
                 theme: AdminTheme.from(AppTheme.light()),
                 locale: Locale(lang),
                 supportedLocales: AppLocalizations.supportedLocales,
-                localizationsDelegates: AppLocalizations.localizationsDelegates,
+                localizationsDelegates: appLocalizationDelegates,
                 home: Scaffold(body: workspace),
               ),
             );

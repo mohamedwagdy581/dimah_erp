@@ -5,8 +5,9 @@ import 'package:erp_sys/core/ui/app_theme.dart';
 import 'package:erp_sys/core/ui/employee_theme.dart';
 import 'package:erp_sys/features/dashboard/view/dashboard_page.dart';
 import 'package:erp_sys/features/manager_team/domain/manager_team_data.dart';
+import 'package:erp_sys/l10n/app_localization_delegates.dart';
 import 'package:erp_sys/l10n/app_localizations.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -86,7 +87,7 @@ void main() {
       MaterialApp(
         locale: Locale(lang),
         supportedLocales: AppLocalizations.supportedLocales,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        localizationsDelegates: appLocalizationDelegates,
         theme: EmployeeTheme.from(AppTheme.light()),
         home: RepaintBoundary(
           key: capture,

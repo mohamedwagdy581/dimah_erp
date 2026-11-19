@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../../../employees/domain/models/expiry_alert.dart';
 import '../../../data/repos/hr_alerts_repo.dart' show employeeAlertKey;

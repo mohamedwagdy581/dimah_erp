@@ -2,7 +2,7 @@ import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:erp_sys/core/session/session_cubit.dart';
@@ -15,6 +15,7 @@ import 'package:erp_sys/core/ui/app_theme.dart';
 import 'package:erp_sys/core/ui/employee_theme.dart';
 import 'package:erp_sys/features/approvals/domain/models/approval_request.dart';
 import 'package:erp_sys/features/approvals/view/widgets/approvals_table.dart';
+import 'package:erp_sys/l10n/app_localization_delegates.dart';
 import 'package:erp_sys/l10n/app_localizations.dart';
 
 final approvals = List.generate(
@@ -108,7 +109,7 @@ void main() {
       MaterialApp(
         locale: const Locale('ar'),
         supportedLocales: AppLocalizations.supportedLocales,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        localizationsDelegates: appLocalizationDelegates,
         theme: EmployeeTheme.from(AppTheme.light()),
         home: MultiBlocProvider(
           providers: [
@@ -155,7 +156,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           supportedLocales: AppLocalizations.supportedLocales,
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          localizationsDelegates: appLocalizationDelegates,
           home: MultiBlocProvider(
             providers: [
               BlocProvider.value(value: cubit),
@@ -194,7 +195,7 @@ void main() {
             MaterialApp(
               locale: Locale(lang),
               supportedLocales: AppLocalizations.supportedLocales,
-              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              localizationsDelegates: appLocalizationDelegates,
               theme: EmployeeTheme.from(AppTheme.light()),
               home: Builder(
                 builder: (context) => MediaQuery(
@@ -263,7 +264,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           supportedLocales: AppLocalizations.supportedLocales,
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          localizationsDelegates: appLocalizationDelegates,
           home: Scaffold(
             body: ApprovalsTable(
               items: approvals.take(1).toList(),

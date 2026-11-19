@@ -2,9 +2,12 @@ import 'dart:async';
 import 'package:erp_sys/core/auth/auth_link_callback.dart';
 import 'package:erp_sys/core/auth/auth_notifier.dart';
 import 'package:erp_sys/features/auth/view/auth_link_error_page.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:cupertino_ui/cupertino_ui.dart'
+    show GlobalCupertinoLocalizations;
+import 'package:flutter_localizations/flutter_localizations.dart'
+    show GlobalWidgetsLocalizations;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() {

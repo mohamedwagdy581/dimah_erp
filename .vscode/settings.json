@@ -662,5 +662,6 @@
         "يومًا",
         "يومية"
     ],
-    "cmake.sourceDirectory": "D:/Flutter Projects/ERP_SYS/erp_sys/windows"
+    "cmake.sourceDirectory": "D:/Flutter Projects/ERP_SYS/erp_sys/windows",
+    "python.terminal.useEnvFile": true
 }

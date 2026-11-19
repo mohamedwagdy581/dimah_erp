@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/ui/app_assets.dart';
@@ -74,7 +74,7 @@ class _SplashPageState extends State<SplashPage>
                     logoPath,
                     height: 160,
                     fit: BoxFit.contain,
-                    errorBuilder: (_, __, ___) => Image.asset(
+                    errorBuilder: (_, _, _) => Image.asset(
                       AppAssets.fullLogo,
                       height: 160,
                       fit: BoxFit.contain,

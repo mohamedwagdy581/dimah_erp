@@ -1,12 +1,11 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 
 import '../core/routing/app_router.dart';
 import '../core/settings/app_settings_cubit.dart';
 import '../core/settings/app_settings_state.dart';
 import '../core/ui/app_theme.dart';
-import '../l10n/app_localizations.dart';
+import '../l10n/app_localization_delegates.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -24,17 +23,15 @@ class MyApp extends StatelessWidget {
             darkTheme: AppTheme.dark(),
             themeMode: settings.themeMode,
             locale: settings.locale,
-            localizationsDelegates: const [
-              AppLocalizations.delegate,
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-            ],
-            supportedLocales: const [
-              Locale('en'),
-              Locale('ar'),
-            ],
+            localizationsDelegates: appLocalizationDelegates,
+            supportedLocales: const [Locale('en'), Locale('ar')],
             routerConfig: AppRouter.router,
+            // Keep legacy widgets in third-party packages supplied with theme
+            // and localization data while those packages migrate.
+            // ignore: deprecated_member_use
+            builder: (context, child) => MaterialUiCompatibilityBridge(
+              child: child ?? const SizedBox.shrink(),
+            ),
           );
         },
       ),

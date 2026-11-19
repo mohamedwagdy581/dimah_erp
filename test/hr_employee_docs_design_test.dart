@@ -1,11 +1,12 @@
 import 'dart:io';
 import 'dart:ui' as ui;
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:erp_sys/core/ui/app_theme.dart';
 import 'package:erp_sys/core/ui/employee_theme.dart';
+import 'package:erp_sys/l10n/app_localization_delegates.dart';
 import 'package:erp_sys/l10n/app_localizations.dart';
 import 'package:erp_sys/features/employee_docs/domain/models/employee_document.dart';
 import 'package:erp_sys/features/employee_docs/domain/repos/employee_docs_repo.dart';
@@ -106,7 +107,7 @@ Widget app(Documents repo, {String lang = 'ar', String? expiry}) => MaterialApp(
   debugShowCheckedModeBanner: false,
   theme: EmployeeTheme.from(AppTheme.light()),
   locale: Locale(lang),
-  localizationsDelegates: AppLocalizations.localizationsDelegates,
+  localizationsDelegates: appLocalizationDelegates,
   supportedLocales: AppLocalizations.supportedLocales,
   home: Scaffold(
     body: HrEmployeeDocsPage(

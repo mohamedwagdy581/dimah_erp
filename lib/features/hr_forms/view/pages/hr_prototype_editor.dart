@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 import 'dart:async';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/ui/app_data_state.dart';
@@ -350,16 +350,19 @@ class _HrPrototypeEditorState extends State<HrPrototypeEditor> {
               Padding(
                 padding: const EdgeInsets.only(bottom: 16),
                 child: f.type == HrPrototypeFieldType.check
-                    ? CheckboxListTile(
-                        contentPadding: EdgeInsets.zero,
-                        title: Text(f.label(ar)),
-                        value: checks[f.id] ?? false,
-                        onChanged: busy || widget.readOnly
-                            ? null
-                            : (v) {
-                                setState(() => checks[f.id] = v ?? false);
-                                refreshPreview();
-                              },
+                    ? Material(
+                        color: Colors.transparent,
+                        child: CheckboxListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: Text(f.label(ar)),
+                          value: checks[f.id] ?? false,
+                          onChanged: busy || widget.readOnly
+                              ? null
+                              : (v) {
+                                  setState(() => checks[f.id] = v ?? false);
+                                  refreshPreview();
+                                },
+                        ),
                       )
                     : TextFormField(
                         key: ValueKey('prototype-field-${f.id}'),

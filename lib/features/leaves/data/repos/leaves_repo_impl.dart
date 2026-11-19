@@ -22,5 +22,6 @@ class LeavesRepoImpl
     implements LeavesRepo {
   LeavesRepoImpl(this._client);
 
+  @override
   final SupabaseClient _client;
 }

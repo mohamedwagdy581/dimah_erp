@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/rendering.dart';
@@ -12,6 +12,7 @@ import 'package:erp_sys/features/departments/domain/models/department.dart';
 import 'package:erp_sys/features/job_titles/domain/repos/job_titles_repo.dart';
 import 'package:erp_sys/features/job_titles/domain/models/job_title.dart';
 import 'package:erp_sys/features/employees/domain/models/employee_lookup.dart';
+import 'package:erp_sys/l10n/app_localization_delegates.dart';
 import 'package:erp_sys/l10n/app_localizations.dart';
 
 class Departments implements DepartmentsRepo {
@@ -131,7 +132,7 @@ class Titles implements JobTitlesRepo {
 Widget app(Departments d, Titles j, {String lang = 'ar', int tab = 0}) =>
     MaterialApp(
       locale: Locale(lang),
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      localizationsDelegates: appLocalizationDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       theme: EmployeeTheme.from(AppTheme.light()),
       home: Scaffold(

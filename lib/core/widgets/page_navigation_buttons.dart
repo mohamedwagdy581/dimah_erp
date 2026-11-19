@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Physical navigation: previous is always on the left, next on the right.
 class PageNavigationButtons extends StatelessWidget {

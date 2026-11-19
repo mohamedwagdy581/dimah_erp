@@ -1,6 +1,7 @@
 import 'dart:async';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:erp_sys/l10n/app_localization_delegates.dart';
 import 'package:erp_sys/l10n/app_localizations.dart';
 import 'package:erp_sys/features/employees/domain/models/employee_login_result.dart';
 import 'package:erp_sys/features/employees/domain/repos/employee_repo.dart';
@@ -39,7 +40,7 @@ Widget app(LoginRepo repo, ValueChanged<EmployeeLoginResult?> result) =>
     MaterialApp(
       locale: const Locale('ar'),
       supportedLocales: AppLocalizations.supportedLocales,
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      localizationsDelegates: appLocalizationDelegates,
       home: Scaffold(
         body: Builder(
           builder: (context) => TextButton(

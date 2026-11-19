@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -24,7 +24,7 @@ Future<void> _bootstrap() async {
 
   await Supabase.initialize(
     url: Env.supabaseUrl,
-    anonKey: Env.supabaseAnonKey,
+    publishableKey: Env.supabaseAnonKey,
     authOptions: FlutterAuthClientOptions(
       detectSessionInUri: !kIsWeb,
       authFlowType: kIsWeb && callback.implicit
@@ -32,8 +32,6 @@ Future<void> _bootstrap() async {
           : AuthFlowType.pkce,
     ),
   );
-  // Process the browser callback once, before GoRouter can rewrite its fragment.
-  // Dashboard recovery emails contain implicit tokens; PKCE callbacks contain a code.
   if (kIsWeb && callback.isCallback && !callback.failed) {
     try {
       final response = await Supabase.instance.client.auth.getSessionFromUrl(
@@ -51,6 +49,7 @@ Future<void> _bootstrap() async {
         expired:
             error.code == 'otp_expired' || error.statusCode == 'otp_expired',
       );
+      // The Column is the main one i always use to show the Design
     } catch (_) {
       AuthLinkStartup.callback = const AuthLinkCallback(
         isCallback: true,

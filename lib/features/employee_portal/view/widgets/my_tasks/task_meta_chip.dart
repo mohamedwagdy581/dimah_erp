@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class TaskMetaChip extends StatelessWidget {
   const TaskMetaChip({super.key, required this.label});

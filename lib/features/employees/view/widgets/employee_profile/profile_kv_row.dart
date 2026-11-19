@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class ProfileKvRow extends StatelessWidget {
   const ProfileKvRow({super.key, required this.label, required this.value});

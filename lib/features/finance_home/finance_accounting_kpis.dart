@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../core/routing/app_routes.dart';
 import '../accounting/reports/domain/accounting_reports_models.dart';

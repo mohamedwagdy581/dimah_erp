@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Keeps the controls, table and pager together like the other HR pages.
 class PayrollListDesign extends StatelessWidget {

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:erp_sys/core/ui/app_data_state.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../../../employee_docs/view/widgets/employee_docs_table/document_type_utils.dart';

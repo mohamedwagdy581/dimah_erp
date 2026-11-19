@@ -7,8 +7,9 @@ import 'package:erp_sys/features/accounting/journal/domain/repos/journal_repo.da
 import 'package:erp_sys/features/accounting/journal/view/cubit/journal_cubit.dart';
 import 'package:erp_sys/features/accounting/journal/view/sections/journal_table_section.dart';
 import 'package:erp_sys/features/accounting/view/accounting_ui.dart';
+import 'package:erp_sys/l10n/app_localization_delegates.dart';
 import 'package:erp_sys/l10n/app_localizations.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -61,7 +62,7 @@ Widget localized(Widget child, {String lang = 'en'}) => MaterialApp(
   theme: EmployeeTheme.from(AppTheme.light()),
   locale: Locale(lang),
   supportedLocales: AppLocalizations.supportedLocales,
-  localizationsDelegates: AppLocalizations.localizationsDelegates,
+  localizationsDelegates: appLocalizationDelegates,
   home: Scaffold(body: child),
 );
 

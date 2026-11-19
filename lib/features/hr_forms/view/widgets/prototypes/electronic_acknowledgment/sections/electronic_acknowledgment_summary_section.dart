@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../shared/electronic_section_card.dart';
 import '../widgets/electronic_acknowledgment_info_chip.dart';

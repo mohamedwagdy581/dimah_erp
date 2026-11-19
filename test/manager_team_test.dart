@@ -6,8 +6,9 @@ import 'package:erp_sys/features/manager_team/data/manager_team_repo.dart';
 import 'package:erp_sys/features/manager_team/domain/manager_team_data.dart';
 import 'package:erp_sys/features/manager_team/view/manager_team_cubit.dart';
 import 'package:erp_sys/features/manager_team/view/manager_team_page.dart';
+import 'package:erp_sys/l10n/app_localization_delegates.dart';
 import 'package:erp_sys/l10n/app_localizations.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -99,7 +100,7 @@ void main() {
       MaterialApp(
         locale: Locale(lang),
         supportedLocales: AppLocalizations.supportedLocales,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        localizationsDelegates: appLocalizationDelegates,
         theme: EmployeeTheme.from(AppTheme.light()),
         home: Scaffold(
           body: BlocProvider.value(

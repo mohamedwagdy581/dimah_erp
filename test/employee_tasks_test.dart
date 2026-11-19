@@ -12,10 +12,13 @@ import 'package:erp_sys/features/employee_portal/view/widgets/my_tasks/task_filt
 import 'package:erp_sys/features/employee_portal/view/widgets/my_tasks/task_formatters.dart';
 import 'package:erp_sys/features/shell/view/sections/sidebar_section.dart';
 import 'package:erp_sys/l10n/app_localizations.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:cupertino_ui/cupertino_ui.dart'
+    show GlobalCupertinoLocalizations;
+import 'package:flutter_localizations/flutter_localizations.dart'
+    show GlobalWidgetsLocalizations;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';

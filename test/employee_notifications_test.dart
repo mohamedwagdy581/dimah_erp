@@ -2,8 +2,9 @@ import 'package:erp_sys/core/ui/app_theme.dart';
 import 'package:erp_sys/core/ui/employee_theme.dart';
 import 'package:erp_sys/features/notifications/domain/models/notification_item.dart';
 import 'package:erp_sys/features/notifications/view/widgets/employee_notifications_view.dart';
+import 'package:erp_sys/l10n/app_localization_delegates.dart';
 import 'package:erp_sys/l10n/app_localizations.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
@@ -59,7 +60,7 @@ void main() {
             routerConfig: router,
             locale: Locale(lang),
             supportedLocales: AppLocalizations.supportedLocales,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            localizationsDelegates: appLocalizationDelegates,
             theme: EmployeeTheme.from(AppTheme.light()),
           ),
         );

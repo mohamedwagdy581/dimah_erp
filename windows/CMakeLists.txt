@@ -46,6 +46,15 @@ function(APPLY_STANDARD_SETTINGS TARGET)
 endfunction()
 
 # Flutter library and tool build rules.
+# Direct Visual Studio/CMake builds do not pass Flutter's target argument.
+# Set it in the parent scope so plugin subdirectories also receive it.
+if(NOT FLUTTER_TARGET_PLATFORM)
+  if(CMAKE_VS_PLATFORM_NAME STREQUAL "ARM64")
+    set(FLUTTER_TARGET_PLATFORM "windows-arm64")
+  else()
+    set(FLUTTER_TARGET_PLATFORM "windows-x64")
+  endif()
+endif()
 set(FLUTTER_MANAGED_DIR "${CMAKE_CURRENT_SOURCE_DIR}/flutter")
 add_subdirectory(${FLUTTER_MANAGED_DIR})
 
@@ -55,6 +64,17 @@ add_subdirectory("runner")
 
 # Generated plugin build rules, which manage building the plugins and adding
 # them to the application.
+# The printing plugin caches an empty PDFIUM_ARCH when CMake is configured
+# directly by Visual Studio without Flutter's target-platform argument.
+if(NOT PDFIUM_ARCH)
+  if(CMAKE_VS_PLATFORM_NAME STREQUAL "ARM64")
+    set(PDFIUM_ARCH "arm64" CACHE STRING "Architecture of pdfium used" FORCE)
+  elseif(CMAKE_VS_PLATFORM_NAME STREQUAL "x64")
+    set(PDFIUM_ARCH "x64" CACHE STRING "Architecture of pdfium used" FORCE)
+  elseif(CMAKE_VS_PLATFORM_NAME STREQUAL "Win32")
+    set(PDFIUM_ARCH "x86" CACHE STRING "Architecture of pdfium used" FORCE)
+  endif()
+endif()
 include(flutter/generated_plugins.cmake)
 
 
